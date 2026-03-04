@@ -1,0 +1,4067 @@
+{
+  "metadata": {
+    "source": "Department of Agriculture, Nagaland",
+    "year": "2023-24",
+    "total_records": 450,
+    "districts": [
+      "Kohima",
+      "Tseminyu",
+      "Phek",
+      "Mokokchung",
+      "Tuensang",
+      "Noklak",
+      "Shamator",
+      "Mon",
+      "Dimapur",
+      "Nuiland",
+      "Chumuoukedima",
+      "Wokha",
+      "Zunheboto",
+      "Peren",
+      "Kiphire",
+      "Longleng"
+    ],
+    "crops": [
+      "Jhum Paddy",
+      "WTRC Paddy Kharif",
+      "WTRC Paddy Rabi",
+      "Maize Kharif",
+      "Maize Rabi",
+      "Jowar",
+      "Small Millet",
+      "Jobstear",
+      "Bajra",
+      "Wheat",
+      "Urd/Moong",
+      "Ricebean/Nagadal",
+      "Cowpea",
+      "Beans",
+      "Rajmash Kharif",
+      "Pea",
+      "Gram",
+      "Rajmash Rabi",
+      "Groundnut",
+      "Soyabean",
+      "Perilla",
+      "Sesamum",
+      "Mustard",
+      "Linseed",
+      "Sugarcane",
+      "Tea",
+      "Tapioca",
+      "Ginger",
+      "Sweet Potato",
+      "Potato"
+    ]
+  },
+  "district_summary": [
+    {
+      "district": "Longleng",
+      "total_area_ha": 371629.0,
+      "total_production_tonnes": 1087374.0,
+      "crops_grown": 30
+    },
+    {
+      "district": "Shamator",
+      "total_area_ha": 42309.0,
+      "total_production_tonnes": 109412.0,
+      "crops_grown": 30
+    },
+    {
+      "district": "Tseminyu",
+      "total_area_ha": 33577.0,
+      "total_production_tonnes": 104457.0,
+      "crops_grown": 29
+    },
+    {
+      "district": "Dimapur",
+      "total_area_ha": 27999.0,
+      "total_production_tonnes": 101588.0,
+      "crops_grown": 29
+    },
+    {
+      "district": "Chumuoukedima",
+      "total_area_ha": 31190.0,
+      "total_production_tonnes": 92697.0,
+      "crops_grown": 30
+    },
+    {
+      "district": "Zunheboto",
+      "total_area_ha": 24815.0,
+      "total_production_tonnes": 86308.0,
+      "crops_grown": 28
+    },
+    {
+      "district": "Nuiland",
+      "total_area_ha": 26300.0,
+      "total_production_tonnes": 85909.0,
+      "crops_grown": 30
+    },
+    {
+      "district": "Phek",
+      "total_area_ha": 28072.0,
+      "total_production_tonnes": 81174.0,
+      "crops_grown": 28
+    },
+    {
+      "district": "Wokha",
+      "total_area_ha": 29084.0,
+      "total_production_tonnes": 71300.0,
+      "crops_grown": 27
+    },
+    {
+      "district": "Mokokchung",
+      "total_area_ha": 20369.0,
+      "total_production_tonnes": 57551.0,
+      "crops_grown": 26
+    },
+    {
+      "district": "Peren",
+      "total_area_ha": 23715.0,
+      "total_production_tonnes": 54196.0,
+      "crops_grown": 28
+    },
+    {
+      "district": "Tuensang",
+      "total_area_ha": 15539.0,
+      "total_production_tonnes": 44555.0,
+      "crops_grown": 26
+    },
+    {
+      "district": "Kiphire",
+      "total_area_ha": 15195.0,
+      "total_production_tonnes": 40238.0,
+      "crops_grown": 26
+    },
+    {
+      "district": "Noklak",
+      "total_area_ha": 13800.0,
+      "total_production_tonnes": 34799.0,
+      "crops_grown": 26
+    },
+    {
+      "district": "Mon",
+      "total_area_ha": 9846.0,
+      "total_production_tonnes": 34561.0,
+      "crops_grown": 29
+    },
+    {
+      "district": "Kohima",
+      "total_area_ha": 9567.0,
+      "total_production_tonnes": 24135.0,
+      "crops_grown": 28
+    }
+  ],
+  "crop_summary": [
+    {
+      "crop": "WTRC Paddy Kharif",
+      "total_area_ha": 225612.0,
+      "total_production_tonnes": 703673.0,
+      "avg_yield_kg_per_ha": 3113.81,
+      "districts_growing": 16
+    },
+    {
+      "crop": "Jhum Paddy",
+      "total_area_ha": 178515.0,
+      "total_production_tonnes": 353996.0,
+      "avg_yield_kg_per_ha": 1981.62,
+      "districts_growing": 16
+    },
+    {
+      "crop": "Sugarcane",
+      "total_area_ha": 5246.0,
+      "total_production_tonnes": 228578.0,
+      "avg_yield_kg_per_ha": 43413.75,
+      "districts_growing": 16
+    },
+    {
+      "crop": "Maize Kharif",
+      "total_area_ha": 76298.0,
+      "total_production_tonnes": 152590.0,
+      "avg_yield_kg_per_ha": 1999.94,
+      "districts_growing": 16
+    },
+    {
+      "crop": "Tapioca",
+      "total_area_ha": 5871.0,
+      "total_production_tonnes": 118786.0,
+      "avg_yield_kg_per_ha": 20229.19,
+      "districts_growing": 16
+    },
+    {
+      "crop": "Potato",
+      "total_area_ha": 9986.0,
+      "total_production_tonnes": 111702.0,
+      "avg_yield_kg_per_ha": 11140.25,
+      "districts_growing": 16
+    },
+    {
+      "crop": "Ginger",
+      "total_area_ha": 9791.0,
+      "total_production_tonnes": 99814.0,
+      "avg_yield_kg_per_ha": 10191.5,
+      "districts_growing": 16
+    },
+    {
+      "crop": "Tea",
+      "total_area_ha": 15309.0,
+      "total_production_tonnes": 68448.0,
+      "avg_yield_kg_per_ha": 4431.88,
+      "districts_growing": 16
+    },
+    {
+      "crop": "Sweet Potato",
+      "total_area_ha": 3745.0,
+      "total_production_tonnes": 35578.0,
+      "avg_yield_kg_per_ha": 9475.88,
+      "districts_growing": 16
+    },
+    {
+      "crop": "Soyabean",
+      "total_area_ha": 27259.0,
+      "total_production_tonnes": 34346.0,
+      "avg_yield_kg_per_ha": 1261.94,
+      "districts_growing": 16
+    },
+    {
+      "crop": "Mustard",
+      "total_area_ha": 30590.0,
+      "total_production_tonnes": 33051.0,
+      "avg_yield_kg_per_ha": 1078.25,
+      "districts_growing": 16
+    },
+    {
+      "crop": "Small Millet",
+      "total_area_ha": 25798.0,
+      "total_production_tonnes": 29136.0,
+      "avg_yield_kg_per_ha": 1122.5,
+      "districts_growing": 16
+    },
+    {
+      "crop": "Maize Rabi",
+      "total_area_ha": 10920.0,
+      "total_production_tonnes": 21730.0,
+      "avg_yield_kg_per_ha": 1989.89,
+      "districts_growing": 9
+    },
+    {
+      "crop": "Rajmash Rabi",
+      "total_area_ha": 15320.0,
+      "total_production_tonnes": 19613.0,
+      "avg_yield_kg_per_ha": 1273.31,
+      "districts_growing": 16
+    },
+    {
+      "crop": "Rajmash Kharif",
+      "total_area_ha": 12855.0,
+      "total_production_tonnes": 16504.0,
+      "avg_yield_kg_per_ha": 1244.75,
+      "districts_growing": 16
+    },
+    {
+      "crop": "WTRC Paddy Rabi",
+      "total_area_ha": 4600.0,
+      "total_production_tonnes": 13790.0,
+      "avg_yield_kg_per_ha": 2998.57,
+      "districts_growing": 7
+    },
+    {
+      "crop": "Ricebean/Nagadal",
+      "total_area_ha": 11704.0,
+      "total_production_tonnes": 13215.0,
+      "avg_yield_kg_per_ha": 1134.31,
+      "districts_growing": 16
+    },
+    {
+      "crop": "Pea",
+      "total_area_ha": 11014.0,
+      "total_production_tonnes": 12224.0,
+      "avg_yield_kg_per_ha": 1108.31,
+      "districts_growing": 16
+    },
+    {
+      "crop": "Beans",
+      "total_area_ha": 7198.0,
+      "total_production_tonnes": 9535.0,
+      "avg_yield_kg_per_ha": 1326.06,
+      "districts_growing": 16
+    },
+    {
+      "crop": "Linseed",
+      "total_area_ha": 6818.0,
+      "total_production_tonnes": 5469.0,
+      "avg_yield_kg_per_ha": 796.75,
+      "districts_growing": 16
+    },
+    {
+      "crop": "Wheat",
+      "total_area_ha": 2770.0,
+      "total_production_tonnes": 5097.0,
+      "avg_yield_kg_per_ha": 1838.19,
+      "districts_growing": 16
+    },
+    {
+      "crop": "Groundnut",
+      "total_area_ha": 3989.0,
+      "total_production_tonnes": 4268.0,
+      "avg_yield_kg_per_ha": 1066.94,
+      "districts_growing": 16
+    },
+    {
+      "crop": "Perilla",
+      "total_area_ha": 6447.0,
+      "total_production_tonnes": 3945.0,
+      "avg_yield_kg_per_ha": 612.6,
+      "districts_growing": 15
+    },
+    {
+      "crop": "Bajra",
+      "total_area_ha": 3748.0,
+      "total_production_tonnes": 3861.0,
+      "avg_yield_kg_per_ha": 1028.06,
+      "districts_growing": 16
+    },
+    {
+      "crop": "Jobstear",
+      "total_area_ha": 2524.0,
+      "total_production_tonnes": 2649.0,
+      "avg_yield_kg_per_ha": 1043.5,
+      "districts_growing": 16
+    },
+    {
+      "crop": "Cowpea",
+      "total_area_ha": 1748.0,
+      "total_production_tonnes": 2551.0,
+      "avg_yield_kg_per_ha": 1435.45,
+      "districts_growing": 11
+    },
+    {
+      "crop": "Sesamum",
+      "total_area_ha": 3021.0,
+      "total_production_tonnes": 1871.0,
+      "avg_yield_kg_per_ha": 616.0,
+      "districts_growing": 15
+    },
+    {
+      "crop": "Jowar",
+      "total_area_ha": 1822.0,
+      "total_production_tonnes": 1761.0,
+      "avg_yield_kg_per_ha": 963.3,
+      "districts_growing": 10
+    },
+    {
+      "crop": "Urd/Moong",
+      "total_area_ha": 1315.0,
+      "total_production_tonnes": 1485.0,
+      "avg_yield_kg_per_ha": 1123.47,
+      "districts_growing": 15
+    },
+    {
+      "crop": "Gram",
+      "total_area_ha": 1173.0,
+      "total_production_tonnes": 988.0,
+      "avg_yield_kg_per_ha": 840.56,
+      "districts_growing": 16
+    }
+  ],
+  "top_crop_per_district": [
+    {
+      "district": "Longleng",
+      "crop": "WTRC Paddy Kharif",
+      "production_tonnes": 367481.0,
+      "yield_kg_per_ha": 3119.0
+    },
+    {
+      "district": "Dimapur",
+      "crop": "WTRC Paddy Kharif",
+      "production_tonnes": 52708.0,
+      "yield_kg_per_ha": 3122.0
+    },
+    {
+      "district": "Tseminyu",
+      "crop": "WTRC Paddy Kharif",
+      "production_tonnes": 48037.0,
+      "yield_kg_per_ha": 3122.0
+    },
+    {
+      "district": "Nuiland",
+      "crop": "WTRC Paddy Kharif",
+      "production_tonnes": 46854.0,
+      "yield_kg_per_ha": 3122.0
+    },
+    {
+      "district": "Zunheboto",
+      "crop": "WTRC Paddy Kharif",
+      "production_tonnes": 34808.0,
+      "yield_kg_per_ha": 3121.0
+    },
+    {
+      "district": "Shamator",
+      "crop": "Jhum Paddy",
+      "production_tonnes": 33189.0,
+      "yield_kg_per_ha": 1984.0
+    },
+    {
+      "district": "Chumuoukedima",
+      "crop": "WTRC Paddy Kharif",
+      "production_tonnes": 30921.0,
+      "yield_kg_per_ha": 3123.0
+    },
+    {
+      "district": "Phek",
+      "crop": "WTRC Paddy Kharif",
+      "production_tonnes": 23471.0,
+      "yield_kg_per_ha": 3116.0
+    },
+    {
+      "district": "Wokha",
+      "crop": "Jhum Paddy",
+      "production_tonnes": 18405.0,
+      "yield_kg_per_ha": 1983.0
+    },
+    {
+      "district": "Mon",
+      "crop": "WTRC Paddy Kharif",
+      "production_tonnes": 17567.0,
+      "yield_kg_per_ha": 3121.0
+    },
+    {
+      "district": "Peren",
+      "crop": "Jhum Paddy",
+      "production_tonnes": 14756.0,
+      "yield_kg_per_ha": 1984.0
+    },
+    {
+      "district": "Mokokchung",
+      "crop": "Jhum Paddy",
+      "production_tonnes": 12016.0,
+      "yield_kg_per_ha": 1984.0
+    },
+    {
+      "district": "Kiphire",
+      "crop": "Jhum Paddy",
+      "production_tonnes": 10823.0,
+      "yield_kg_per_ha": 1984.0
+    },
+    {
+      "district": "Tuensang",
+      "crop": "Jhum Paddy",
+      "production_tonnes": 7878.0,
+      "yield_kg_per_ha": 1984.0
+    },
+    {
+      "district": "Kohima",
+      "crop": "Jhum Paddy",
+      "production_tonnes": 7753.0,
+      "yield_kg_per_ha": 1984.0
+    },
+    {
+      "district": "Noklak",
+      "crop": "Jhum Paddy",
+      "production_tonnes": 6460.0,
+      "yield_kg_per_ha": 1986.0
+    }
+  ],
+  "full_data": [
+    {
+      "year": "2023-24",
+      "district": "Kohima",
+      "crop": "Jhum Paddy",
+      "area_ha": 3907.0,
+      "production_tonnes": 7753.0,
+      "yield_kg_per_ha": 1984.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tseminyu",
+      "crop": "Jhum Paddy",
+      "area_ha": 2168.0,
+      "production_tonnes": 4293.0,
+      "yield_kg_per_ha": 1980.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Phek",
+      "crop": "Jhum Paddy",
+      "area_ha": 10290.0,
+      "production_tonnes": 20422.0,
+      "yield_kg_per_ha": 1985.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mokokchung",
+      "crop": "Jhum Paddy",
+      "area_ha": 6055.0,
+      "production_tonnes": 12016.0,
+      "yield_kg_per_ha": 1984.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tuensang",
+      "crop": "Jhum Paddy",
+      "area_ha": 3971.0,
+      "production_tonnes": 7878.0,
+      "yield_kg_per_ha": 1984.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Noklak",
+      "crop": "Jhum Paddy",
+      "area_ha": 3252.0,
+      "production_tonnes": 6460.0,
+      "yield_kg_per_ha": 1986.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "Jhum Paddy",
+      "area_ha": 16732.0,
+      "production_tonnes": 33189.0,
+      "yield_kg_per_ha": 1984.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mon",
+      "crop": "Jhum Paddy",
+      "area_ha": 288.0,
+      "production_tonnes": 570.0,
+      "yield_kg_per_ha": 1979.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Dimapur",
+      "crop": "Jhum Paddy",
+      "area_ha": 1095.0,
+      "production_tonnes": 2156.0,
+      "yield_kg_per_ha": 1969.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "Jhum Paddy",
+      "area_ha": 4374.0,
+      "production_tonnes": 8634.0,
+      "yield_kg_per_ha": 1974.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "Jhum Paddy",
+      "area_ha": 9951.0,
+      "production_tonnes": 19744.0,
+      "yield_kg_per_ha": 1984.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Wokha",
+      "crop": "Jhum Paddy",
+      "area_ha": 9281.0,
+      "production_tonnes": 18405.0,
+      "yield_kg_per_ha": 1983.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Zunheboto",
+      "crop": "Jhum Paddy",
+      "area_ha": 3948.0,
+      "production_tonnes": 7812.0,
+      "yield_kg_per_ha": 1979.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Peren",
+      "crop": "Jhum Paddy",
+      "area_ha": 7437.0,
+      "production_tonnes": 14756.0,
+      "yield_kg_per_ha": 1984.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kiphire",
+      "crop": "Jhum Paddy",
+      "area_ha": 5456.0,
+      "production_tonnes": 10823.0,
+      "yield_kg_per_ha": 1984.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "Jhum Paddy",
+      "area_ha": 90310.0,
+      "production_tonnes": 179085.0,
+      "yield_kg_per_ha": 1983.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kohima",
+      "crop": "WTRC Paddy Kharif",
+      "area_ha": 1223.0,
+      "production_tonnes": 3811.0,
+      "yield_kg_per_ha": 3116.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tseminyu",
+      "crop": "WTRC Paddy Kharif",
+      "area_ha": 15385.0,
+      "production_tonnes": 48037.0,
+      "yield_kg_per_ha": 3122.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Phek",
+      "crop": "WTRC Paddy Kharif",
+      "area_ha": 7532.0,
+      "production_tonnes": 23471.0,
+      "yield_kg_per_ha": 3116.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mokokchung",
+      "crop": "WTRC Paddy Kharif",
+      "area_ha": 3672.0,
+      "production_tonnes": 11462.0,
+      "yield_kg_per_ha": 3121.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tuensang",
+      "crop": "WTRC Paddy Kharif",
+      "area_ha": 1749.0,
+      "production_tonnes": 5316.0,
+      "yield_kg_per_ha": 3039.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Noklak",
+      "crop": "WTRC Paddy Kharif",
+      "area_ha": 1977.0,
+      "production_tonnes": 6160.0,
+      "yield_kg_per_ha": 3116.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "WTRC Paddy Kharif",
+      "area_ha": 5507.0,
+      "production_tonnes": 17174.0,
+      "yield_kg_per_ha": 3119.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mon",
+      "crop": "WTRC Paddy Kharif",
+      "area_ha": 5629.0,
+      "production_tonnes": 17567.0,
+      "yield_kg_per_ha": 3121.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Dimapur",
+      "crop": "WTRC Paddy Kharif",
+      "area_ha": 16885.0,
+      "production_tonnes": 52708.0,
+      "yield_kg_per_ha": 3122.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "WTRC Paddy Kharif",
+      "area_ha": 15010.0,
+      "production_tonnes": 46854.0,
+      "yield_kg_per_ha": 3122.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "WTRC Paddy Kharif",
+      "area_ha": 9902.0,
+      "production_tonnes": 30921.0,
+      "yield_kg_per_ha": 3123.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Wokha",
+      "crop": "WTRC Paddy Kharif",
+      "area_ha": 5632.0,
+      "production_tonnes": 17566.0,
+      "yield_kg_per_ha": 3119.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Zunheboto",
+      "crop": "WTRC Paddy Kharif",
+      "area_ha": 11154.0,
+      "production_tonnes": 34808.0,
+      "yield_kg_per_ha": 3121.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Peren",
+      "crop": "WTRC Paddy Kharif",
+      "area_ha": 3638.0,
+      "production_tonnes": 11320.0,
+      "yield_kg_per_ha": 3112.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kiphire",
+      "crop": "WTRC Paddy Kharif",
+      "area_ha": 2897.0,
+      "production_tonnes": 9017.0,
+      "yield_kg_per_ha": 3113.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "WTRC Paddy Kharif",
+      "area_ha": 117820.0,
+      "production_tonnes": 367481.0,
+      "yield_kg_per_ha": 3119.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "WTRC Paddy Rabi",
+      "area_ha": 670.0,
+      "production_tonnes": 2008.0,
+      "yield_kg_per_ha": 2997.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mon",
+      "crop": "WTRC Paddy Rabi",
+      "area_ha": 180.0,
+      "production_tonnes": 539.0,
+      "yield_kg_per_ha": 2994.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Dimapur",
+      "crop": "WTRC Paddy Rabi",
+      "area_ha": 530.0,
+      "production_tonnes": 1588.0,
+      "yield_kg_per_ha": 2996.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "WTRC Paddy Rabi",
+      "area_ha": 478.0,
+      "production_tonnes": 1434.0,
+      "yield_kg_per_ha": 3000.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "WTRC Paddy Rabi",
+      "area_ha": 120.0,
+      "production_tonnes": 361.0,
+      "yield_kg_per_ha": 3008.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Zunheboto",
+      "crop": "WTRC Paddy Rabi",
+      "area_ha": 322.0,
+      "production_tonnes": 965.0,
+      "yield_kg_per_ha": 2997.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "WTRC Paddy Rabi",
+      "area_ha": 2300.0,
+      "production_tonnes": 6895.0,
+      "yield_kg_per_ha": 2998.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kohima",
+      "crop": "Maize Kharif",
+      "area_ha": 1004.0,
+      "production_tonnes": 2010.0,
+      "yield_kg_per_ha": 2002.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tseminyu",
+      "crop": "Maize Kharif",
+      "area_ha": 4971.0,
+      "production_tonnes": 9948.0,
+      "yield_kg_per_ha": 2001.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Phek",
+      "crop": "Maize Kharif",
+      "area_ha": 2385.0,
+      "production_tonnes": 4777.0,
+      "yield_kg_per_ha": 2003.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mokokchung",
+      "crop": "Maize Kharif",
+      "area_ha": 1906.0,
+      "production_tonnes": 3831.0,
+      "yield_kg_per_ha": 2010.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tuensang",
+      "crop": "Maize Kharif",
+      "area_ha": 2027.0,
+      "production_tonnes": 4054.0,
+      "yield_kg_per_ha": 2000.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Noklak",
+      "crop": "Maize Kharif",
+      "area_ha": 1810.0,
+      "production_tonnes": 3602.0,
+      "yield_kg_per_ha": 1990.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "Maize Kharif",
+      "area_ha": 2807.0,
+      "production_tonnes": 5605.0,
+      "yield_kg_per_ha": 1997.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mon",
+      "crop": "Maize Kharif",
+      "area_ha": 435.0,
+      "production_tonnes": 871.0,
+      "yield_kg_per_ha": 2002.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Dimapur",
+      "crop": "Maize Kharif",
+      "area_ha": 1959.0,
+      "production_tonnes": 3925.0,
+      "yield_kg_per_ha": 2004.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "Maize Kharif",
+      "area_ha": 891.0,
+      "production_tonnes": 1778.0,
+      "yield_kg_per_ha": 1996.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "Maize Kharif",
+      "area_ha": 2637.0,
+      "production_tonnes": 5273.0,
+      "yield_kg_per_ha": 2000.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Wokha",
+      "crop": "Maize Kharif",
+      "area_ha": 6185.0,
+      "production_tonnes": 12373.0,
+      "yield_kg_per_ha": 2000.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Zunheboto",
+      "crop": "Maize Kharif",
+      "area_ha": 1901.0,
+      "production_tonnes": 3799.0,
+      "yield_kg_per_ha": 1998.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Peren",
+      "crop": "Maize Kharif",
+      "area_ha": 4450.0,
+      "production_tonnes": 8886.0,
+      "yield_kg_per_ha": 1997.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kiphire",
+      "crop": "Maize Kharif",
+      "area_ha": 1870.0,
+      "production_tonnes": 3738.0,
+      "yield_kg_per_ha": 1999.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "Maize Kharif",
+      "area_ha": 39060.0,
+      "production_tonnes": 78120.0,
+      "yield_kg_per_ha": 2000.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tseminyu",
+      "crop": "Maize Rabi",
+      "area_ha": 754.0,
+      "production_tonnes": 1500.0,
+      "yield_kg_per_ha": 1989.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Phek",
+      "crop": "Maize Rabi",
+      "area_ha": 865.0,
+      "production_tonnes": 1722.0,
+      "yield_kg_per_ha": 1991.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "Maize Rabi",
+      "area_ha": 1069.0,
+      "production_tonnes": 2124.0,
+      "yield_kg_per_ha": 1987.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mon",
+      "crop": "Maize Rabi",
+      "area_ha": 189.0,
+      "production_tonnes": 376.0,
+      "yield_kg_per_ha": 1989.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Dimapur",
+      "crop": "Maize Rabi",
+      "area_ha": 856.0,
+      "production_tonnes": 1704.0,
+      "yield_kg_per_ha": 1991.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "Maize Rabi",
+      "area_ha": 382.0,
+      "production_tonnes": 761.0,
+      "yield_kg_per_ha": 1992.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "Maize Rabi",
+      "area_ha": 1007.0,
+      "production_tonnes": 2006.0,
+      "yield_kg_per_ha": 1992.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Peren",
+      "crop": "Maize Rabi",
+      "area_ha": 338.0,
+      "production_tonnes": 672.0,
+      "yield_kg_per_ha": 1988.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "Maize Rabi",
+      "area_ha": 5460.0,
+      "production_tonnes": 10865.0,
+      "yield_kg_per_ha": 1990.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kohima",
+      "crop": "Jowar",
+      "area_ha": 46.0,
+      "production_tonnes": 43.0,
+      "yield_kg_per_ha": 935.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tseminyu",
+      "crop": "Jowar",
+      "area_ha": 142.0,
+      "production_tonnes": 138.0,
+      "yield_kg_per_ha": 972.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tuensang",
+      "crop": "Jowar",
+      "area_ha": 130.0,
+      "production_tonnes": 128.0,
+      "yield_kg_per_ha": 985.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "Jowar",
+      "area_ha": 142.0,
+      "production_tonnes": 135.0,
+      "yield_kg_per_ha": 951.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mon",
+      "crop": "Jowar",
+      "area_ha": 31.0,
+      "production_tonnes": 30.0,
+      "yield_kg_per_ha": 968.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "Jowar",
+      "area_ha": 17.0,
+      "production_tonnes": 16.0,
+      "yield_kg_per_ha": 941.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "Jowar",
+      "area_ha": 142.0,
+      "production_tonnes": 137.0,
+      "yield_kg_per_ha": 965.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Wokha",
+      "crop": "Jowar",
+      "area_ha": 175.0,
+      "production_tonnes": 171.0,
+      "yield_kg_per_ha": 977.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Peren",
+      "crop": "Jowar",
+      "area_ha": 37.0,
+      "production_tonnes": 36.0,
+      "yield_kg_per_ha": 973.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "Jowar",
+      "area_ha": 960.0,
+      "production_tonnes": 927.0,
+      "yield_kg_per_ha": 966.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kohima",
+      "crop": "Small Millet",
+      "area_ha": 57.0,
+      "production_tonnes": 64.0,
+      "yield_kg_per_ha": 1123.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tseminyu",
+      "crop": "Small Millet",
+      "area_ha": 1335.0,
+      "production_tonnes": 1515.0,
+      "yield_kg_per_ha": 1135.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Phek",
+      "crop": "Small Millet",
+      "area_ha": 401.0,
+      "production_tonnes": 453.0,
+      "yield_kg_per_ha": 1130.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mokokchung",
+      "crop": "Small Millet",
+      "area_ha": 1321.0,
+      "production_tonnes": 1496.0,
+      "yield_kg_per_ha": 1132.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tuensang",
+      "crop": "Small Millet",
+      "area_ha": 1990.0,
+      "production_tonnes": 2257.0,
+      "yield_kg_per_ha": 1134.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Noklak",
+      "crop": "Small Millet",
+      "area_ha": 1116.0,
+      "production_tonnes": 1252.0,
+      "yield_kg_per_ha": 1122.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "Small Millet",
+      "area_ha": 3286.0,
+      "production_tonnes": 3684.0,
+      "yield_kg_per_ha": 1121.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mon",
+      "crop": "Small Millet",
+      "area_ha": 13.0,
+      "production_tonnes": 14.0,
+      "yield_kg_per_ha": 1077.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Dimapur",
+      "crop": "Small Millet",
+      "area_ha": 62.0,
+      "production_tonnes": 67.0,
+      "yield_kg_per_ha": 1081.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "Small Millet",
+      "area_ha": 93.0,
+      "production_tonnes": 104.0,
+      "yield_kg_per_ha": 1118.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "Small Millet",
+      "area_ha": 390.0,
+      "production_tonnes": 441.0,
+      "yield_kg_per_ha": 1131.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Wokha",
+      "crop": "Small Millet",
+      "area_ha": 332.0,
+      "production_tonnes": 379.0,
+      "yield_kg_per_ha": 1143.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Zunheboto",
+      "crop": "Small Millet",
+      "area_ha": 959.0,
+      "production_tonnes": 1100.0,
+      "yield_kg_per_ha": 1148.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Peren",
+      "crop": "Small Millet",
+      "area_ha": 540.0,
+      "production_tonnes": 607.0,
+      "yield_kg_per_ha": 1124.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kiphire",
+      "crop": "Small Millet",
+      "area_ha": 398.0,
+      "production_tonnes": 442.0,
+      "yield_kg_per_ha": 1111.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "Small Millet",
+      "area_ha": 13505.0,
+      "production_tonnes": 15261.0,
+      "yield_kg_per_ha": 1130.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kohima",
+      "crop": "Jobstear",
+      "area_ha": 195.0,
+      "production_tonnes": 204.0,
+      "yield_kg_per_ha": 1046.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tseminyu",
+      "crop": "Jobstear",
+      "area_ha": 181.0,
+      "production_tonnes": 192.0,
+      "yield_kg_per_ha": 1061.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Phek",
+      "crop": "Jobstear",
+      "area_ha": 29.0,
+      "production_tonnes": 31.0,
+      "yield_kg_per_ha": 1069.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mokokchung",
+      "crop": "Jobstear",
+      "area_ha": 134.0,
+      "production_tonnes": 141.0,
+      "yield_kg_per_ha": 1052.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tuensang",
+      "crop": "Jobstear",
+      "area_ha": 27.0,
+      "production_tonnes": 28.0,
+      "yield_kg_per_ha": 1037.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Noklak",
+      "crop": "Jobstear",
+      "area_ha": 46.0,
+      "production_tonnes": 48.0,
+      "yield_kg_per_ha": 1043.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "Jobstear",
+      "area_ha": 219.0,
+      "production_tonnes": 231.0,
+      "yield_kg_per_ha": 1055.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mon",
+      "crop": "Jobstear",
+      "area_ha": 7.0,
+      "production_tonnes": 7.0,
+      "yield_kg_per_ha": 1000.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Dimapur",
+      "crop": "Jobstear",
+      "area_ha": 8.0,
+      "production_tonnes": 8.0,
+      "yield_kg_per_ha": 1000.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "Jobstear",
+      "area_ha": 15.0,
+      "production_tonnes": 16.0,
+      "yield_kg_per_ha": 1067.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "Jobstear",
+      "area_ha": 23.0,
+      "production_tonnes": 24.0,
+      "yield_kg_per_ha": 1043.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Wokha",
+      "crop": "Jobstear",
+      "area_ha": 133.0,
+      "production_tonnes": 140.0,
+      "yield_kg_per_ha": 1053.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Zunheboto",
+      "crop": "Jobstear",
+      "area_ha": 61.0,
+      "production_tonnes": 62.0,
+      "yield_kg_per_ha": 1016.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Peren",
+      "crop": "Jobstear",
+      "area_ha": 127.0,
+      "production_tonnes": 132.0,
+      "yield_kg_per_ha": 1039.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kiphire",
+      "crop": "Jobstear",
+      "area_ha": 31.0,
+      "production_tonnes": 33.0,
+      "yield_kg_per_ha": 1065.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "Jobstear",
+      "area_ha": 1288.0,
+      "production_tonnes": 1352.0,
+      "yield_kg_per_ha": 1050.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kohima",
+      "crop": "Bajra",
+      "area_ha": 32.0,
+      "production_tonnes": 33.0,
+      "yield_kg_per_ha": 1031.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tseminyu",
+      "crop": "Bajra",
+      "area_ha": 178.0,
+      "production_tonnes": 184.0,
+      "yield_kg_per_ha": 1034.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Phek",
+      "crop": "Bajra",
+      "area_ha": 164.0,
+      "production_tonnes": 168.0,
+      "yield_kg_per_ha": 1024.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mokokchung",
+      "crop": "Bajra",
+      "area_ha": 159.0,
+      "production_tonnes": 164.0,
+      "yield_kg_per_ha": 1031.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tuensang",
+      "crop": "Bajra",
+      "area_ha": 162.0,
+      "production_tonnes": 166.0,
+      "yield_kg_per_ha": 1025.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Noklak",
+      "crop": "Bajra",
+      "area_ha": 103.0,
+      "production_tonnes": 108.0,
+      "yield_kg_per_ha": 1049.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "Bajra",
+      "area_ha": 234.0,
+      "production_tonnes": 246.0,
+      "yield_kg_per_ha": 1051.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mon",
+      "crop": "Bajra",
+      "area_ha": 39.0,
+      "production_tonnes": 40.0,
+      "yield_kg_per_ha": 1026.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Dimapur",
+      "crop": "Bajra",
+      "area_ha": 49.0,
+      "production_tonnes": 50.0,
+      "yield_kg_per_ha": 1020.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "Bajra",
+      "area_ha": 71.0,
+      "production_tonnes": 72.0,
+      "yield_kg_per_ha": 1014.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "Bajra",
+      "area_ha": 132.0,
+      "production_tonnes": 134.0,
+      "yield_kg_per_ha": 1015.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Wokha",
+      "crop": "Bajra",
+      "area_ha": 158.0,
+      "production_tonnes": 164.0,
+      "yield_kg_per_ha": 1038.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Zunheboto",
+      "crop": "Bajra",
+      "area_ha": 102.0,
+      "production_tonnes": 105.0,
+      "yield_kg_per_ha": 1029.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Peren",
+      "crop": "Bajra",
+      "area_ha": 108.0,
+      "production_tonnes": 109.0,
+      "yield_kg_per_ha": 1009.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kiphire",
+      "crop": "Bajra",
+      "area_ha": 132.0,
+      "production_tonnes": 135.0,
+      "yield_kg_per_ha": 1023.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "Bajra",
+      "area_ha": 1925.0,
+      "production_tonnes": 1983.0,
+      "yield_kg_per_ha": 1030.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kohima",
+      "crop": "Wheat",
+      "area_ha": 23.0,
+      "production_tonnes": 42.0,
+      "yield_kg_per_ha": 1826.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tseminyu",
+      "crop": "Wheat",
+      "area_ha": 76.0,
+      "production_tonnes": 136.0,
+      "yield_kg_per_ha": 1789.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Phek",
+      "crop": "Wheat",
+      "area_ha": 95.0,
+      "production_tonnes": 175.0,
+      "yield_kg_per_ha": 1842.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mokokchung",
+      "crop": "Wheat",
+      "area_ha": 54.0,
+      "production_tonnes": 98.0,
+      "yield_kg_per_ha": 1815.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tuensang",
+      "crop": "Wheat",
+      "area_ha": 35.0,
+      "production_tonnes": 64.0,
+      "yield_kg_per_ha": 1829.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Noklak",
+      "crop": "Wheat",
+      "area_ha": 82.0,
+      "production_tonnes": 149.0,
+      "yield_kg_per_ha": 1817.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "Wheat",
+      "area_ha": 110.0,
+      "production_tonnes": 204.0,
+      "yield_kg_per_ha": 1855.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mon",
+      "crop": "Wheat",
+      "area_ha": 125.0,
+      "production_tonnes": 236.0,
+      "yield_kg_per_ha": 1888.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Dimapur",
+      "crop": "Wheat",
+      "area_ha": 169.0,
+      "production_tonnes": 312.0,
+      "yield_kg_per_ha": 1846.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "Wheat",
+      "area_ha": 127.0,
+      "production_tonnes": 242.0,
+      "yield_kg_per_ha": 1906.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "Wheat",
+      "area_ha": 66.0,
+      "production_tonnes": 124.0,
+      "yield_kg_per_ha": 1879.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Wokha",
+      "crop": "Wheat",
+      "area_ha": 167.0,
+      "production_tonnes": 315.0,
+      "yield_kg_per_ha": 1886.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Zunheboto",
+      "crop": "Wheat",
+      "area_ha": 37.0,
+      "production_tonnes": 67.0,
+      "yield_kg_per_ha": 1811.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Peren",
+      "crop": "Wheat",
+      "area_ha": 34.0,
+      "production_tonnes": 63.0,
+      "yield_kg_per_ha": 1853.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kiphire",
+      "crop": "Wheat",
+      "area_ha": 170.0,
+      "production_tonnes": 294.0,
+      "yield_kg_per_ha": 1729.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "Wheat",
+      "area_ha": 1400.0,
+      "production_tonnes": 2576.0,
+      "yield_kg_per_ha": 1840.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kohima",
+      "crop": "Urd/Moong",
+      "area_ha": 18.0,
+      "production_tonnes": 20.0,
+      "yield_kg_per_ha": 1111.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tseminyu",
+      "crop": "Urd/Moong",
+      "area_ha": 24.0,
+      "production_tonnes": 27.0,
+      "yield_kg_per_ha": 1125.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Phek",
+      "crop": "Urd/Moong",
+      "area_ha": 64.0,
+      "production_tonnes": 68.0,
+      "yield_kg_per_ha": 1063.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mokokchung",
+      "crop": "Urd/Moong",
+      "area_ha": 24.0,
+      "production_tonnes": 26.0,
+      "yield_kg_per_ha": 1083.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tuensang",
+      "crop": "Urd/Moong",
+      "area_ha": 17.0,
+      "production_tonnes": 19.0,
+      "yield_kg_per_ha": 1118.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Noklak",
+      "crop": "Urd/Moong",
+      "area_ha": 9.0,
+      "production_tonnes": 10.0,
+      "yield_kg_per_ha": 1111.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "Urd/Moong",
+      "area_ha": 47.0,
+      "production_tonnes": 55.0,
+      "yield_kg_per_ha": 1170.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mon",
+      "crop": "Urd/Moong",
+      "area_ha": 62.0,
+      "production_tonnes": 72.0,
+      "yield_kg_per_ha": 1161.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Dimapur",
+      "crop": "Urd/Moong",
+      "area_ha": 77.0,
+      "production_tonnes": 89.0,
+      "yield_kg_per_ha": 1156.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "Urd/Moong",
+      "area_ha": 70.0,
+      "production_tonnes": 82.0,
+      "yield_kg_per_ha": 1171.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "Urd/Moong",
+      "area_ha": 63.0,
+      "production_tonnes": 74.0,
+      "yield_kg_per_ha": 1175.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Wokha",
+      "crop": "Urd/Moong",
+      "area_ha": 55.0,
+      "production_tonnes": 54.0,
+      "yield_kg_per_ha": 982.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Zunheboto",
+      "crop": "Urd/Moong",
+      "area_ha": 57.0,
+      "production_tonnes": 64.0,
+      "yield_kg_per_ha": 1123.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kiphire",
+      "crop": "Urd/Moong",
+      "area_ha": 63.0,
+      "production_tonnes": 74.0,
+      "yield_kg_per_ha": 1175.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "Urd/Moong",
+      "area_ha": 665.0,
+      "production_tonnes": 751.0,
+      "yield_kg_per_ha": 1128.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kohima",
+      "crop": "Ricebean/Nagadal",
+      "area_ha": 514.0,
+      "production_tonnes": 580.0,
+      "yield_kg_per_ha": 1128.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tseminyu",
+      "crop": "Ricebean/Nagadal",
+      "area_ha": 1101.0,
+      "production_tonnes": 1262.0,
+      "yield_kg_per_ha": 1146.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Phek",
+      "crop": "Ricebean/Nagadal",
+      "area_ha": 352.0,
+      "production_tonnes": 410.0,
+      "yield_kg_per_ha": 1165.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mokokchung",
+      "crop": "Ricebean/Nagadal",
+      "area_ha": 250.0,
+      "production_tonnes": 286.0,
+      "yield_kg_per_ha": 1144.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tuensang",
+      "crop": "Ricebean/Nagadal",
+      "area_ha": 429.0,
+      "production_tonnes": 478.0,
+      "yield_kg_per_ha": 1114.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Noklak",
+      "crop": "Ricebean/Nagadal",
+      "area_ha": 205.0,
+      "production_tonnes": 236.0,
+      "yield_kg_per_ha": 1151.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "Ricebean/Nagadal",
+      "area_ha": 144.0,
+      "production_tonnes": 161.0,
+      "yield_kg_per_ha": 1118.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mon",
+      "crop": "Ricebean/Nagadal",
+      "area_ha": 17.0,
+      "production_tonnes": 20.0,
+      "yield_kg_per_ha": 1176.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Dimapur",
+      "crop": "Ricebean/Nagadal",
+      "area_ha": 122.0,
+      "production_tonnes": 145.0,
+      "yield_kg_per_ha": 1189.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "Ricebean/Nagadal",
+      "area_ha": 209.0,
+      "production_tonnes": 245.0,
+      "yield_kg_per_ha": 1172.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "Ricebean/Nagadal",
+      "area_ha": 491.0,
+      "production_tonnes": 545.0,
+      "yield_kg_per_ha": 1110.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Wokha",
+      "crop": "Ricebean/Nagadal",
+      "area_ha": 631.0,
+      "production_tonnes": 734.0,
+      "yield_kg_per_ha": 1163.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Zunheboto",
+      "crop": "Ricebean/Nagadal",
+      "area_ha": 318.0,
+      "production_tonnes": 345.0,
+      "yield_kg_per_ha": 1085.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Peren",
+      "crop": "Ricebean/Nagadal",
+      "area_ha": 472.0,
+      "production_tonnes": 490.0,
+      "yield_kg_per_ha": 1038.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kiphire",
+      "crop": "Ricebean/Nagadal",
+      "area_ha": 387.0,
+      "production_tonnes": 434.0,
+      "yield_kg_per_ha": 1121.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "Ricebean/Nagadal",
+      "area_ha": 6062.0,
+      "production_tonnes": 6844.0,
+      "yield_kg_per_ha": 1129.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kohima",
+      "crop": "Cowpea",
+      "area_ha": 13.0,
+      "production_tonnes": 19.0,
+      "yield_kg_per_ha": 1462.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tseminyu",
+      "crop": "Cowpea",
+      "area_ha": 215.0,
+      "production_tonnes": 334.0,
+      "yield_kg_per_ha": 1553.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Phek",
+      "crop": "Cowpea",
+      "area_ha": 29.0,
+      "production_tonnes": 43.0,
+      "yield_kg_per_ha": 1483.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "Cowpea",
+      "area_ha": 238.0,
+      "production_tonnes": 344.0,
+      "yield_kg_per_ha": 1445.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mon",
+      "crop": "Cowpea",
+      "area_ha": 107.0,
+      "production_tonnes": 152.0,
+      "yield_kg_per_ha": 1421.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Dimapur",
+      "crop": "Cowpea",
+      "area_ha": 128.0,
+      "production_tonnes": 180.0,
+      "yield_kg_per_ha": 1406.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "Cowpea",
+      "area_ha": 85.0,
+      "production_tonnes": 119.0,
+      "yield_kg_per_ha": 1400.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "Cowpea",
+      "area_ha": 31.0,
+      "production_tonnes": 45.0,
+      "yield_kg_per_ha": 1452.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Zunheboto",
+      "crop": "Cowpea",
+      "area_ha": 9.0,
+      "production_tonnes": 12.0,
+      "yield_kg_per_ha": 1333.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Peren",
+      "crop": "Cowpea",
+      "area_ha": 8.0,
+      "production_tonnes": 11.0,
+      "yield_kg_per_ha": 1375.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "Cowpea",
+      "area_ha": 885.0,
+      "production_tonnes": 1292.0,
+      "yield_kg_per_ha": 1460.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kohima",
+      "crop": "Beans",
+      "area_ha": 112.0,
+      "production_tonnes": 148.0,
+      "yield_kg_per_ha": 1321.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tseminyu",
+      "crop": "Beans",
+      "area_ha": 442.0,
+      "production_tonnes": 592.0,
+      "yield_kg_per_ha": 1339.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Phek",
+      "crop": "Beans",
+      "area_ha": 199.0,
+      "production_tonnes": 262.0,
+      "yield_kg_per_ha": 1317.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mokokchung",
+      "crop": "Beans",
+      "area_ha": 137.0,
+      "production_tonnes": 181.0,
+      "yield_kg_per_ha": 1321.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tuensang",
+      "crop": "Beans",
+      "area_ha": 292.0,
+      "production_tonnes": 390.0,
+      "yield_kg_per_ha": 1336.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Noklak",
+      "crop": "Beans",
+      "area_ha": 134.0,
+      "production_tonnes": 180.0,
+      "yield_kg_per_ha": 1343.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "Beans",
+      "area_ha": 557.0,
+      "production_tonnes": 723.0,
+      "yield_kg_per_ha": 1298.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mon",
+      "crop": "Beans",
+      "area_ha": 136.0,
+      "production_tonnes": 183.0,
+      "yield_kg_per_ha": 1346.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Dimapur",
+      "crop": "Beans",
+      "area_ha": 87.0,
+      "production_tonnes": 114.0,
+      "yield_kg_per_ha": 1310.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "Beans",
+      "area_ha": 119.0,
+      "production_tonnes": 160.0,
+      "yield_kg_per_ha": 1345.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "Beans",
+      "area_ha": 285.0,
+      "production_tonnes": 380.0,
+      "yield_kg_per_ha": 1333.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Wokha",
+      "crop": "Beans",
+      "area_ha": 316.0,
+      "production_tonnes": 424.0,
+      "yield_kg_per_ha": 1342.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Zunheboto",
+      "crop": "Beans",
+      "area_ha": 251.0,
+      "production_tonnes": 324.0,
+      "yield_kg_per_ha": 1291.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Peren",
+      "crop": "Beans",
+      "area_ha": 191.0,
+      "production_tonnes": 256.0,
+      "yield_kg_per_ha": 1340.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kiphire",
+      "crop": "Beans",
+      "area_ha": 174.0,
+      "production_tonnes": 228.0,
+      "yield_kg_per_ha": 1310.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "Beans",
+      "area_ha": 3766.0,
+      "production_tonnes": 4990.0,
+      "yield_kg_per_ha": 1325.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kohima",
+      "crop": "Rajmash Kharif",
+      "area_ha": 55.0,
+      "production_tonnes": 64.0,
+      "yield_kg_per_ha": 1164.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tseminyu",
+      "crop": "Rajmash Kharif",
+      "area_ha": 188.0,
+      "production_tonnes": 206.0,
+      "yield_kg_per_ha": 1096.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Phek",
+      "crop": "Rajmash Kharif",
+      "area_ha": 351.0,
+      "production_tonnes": 449.0,
+      "yield_kg_per_ha": 1279.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mokokchung",
+      "crop": "Rajmash Kharif",
+      "area_ha": 1121.0,
+      "production_tonnes": 1443.0,
+      "yield_kg_per_ha": 1287.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tuensang",
+      "crop": "Rajmash Kharif",
+      "area_ha": 338.0,
+      "production_tonnes": 433.0,
+      "yield_kg_per_ha": 1281.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Noklak",
+      "crop": "Rajmash Kharif",
+      "area_ha": 1216.0,
+      "production_tonnes": 1594.0,
+      "yield_kg_per_ha": 1311.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "Rajmash Kharif",
+      "area_ha": 539.0,
+      "production_tonnes": 692.0,
+      "yield_kg_per_ha": 1284.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mon",
+      "crop": "Rajmash Kharif",
+      "area_ha": 22.0,
+      "production_tonnes": 26.0,
+      "yield_kg_per_ha": 1182.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Dimapur",
+      "crop": "Rajmash Kharif",
+      "area_ha": 82.0,
+      "production_tonnes": 100.0,
+      "yield_kg_per_ha": 1220.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "Rajmash Kharif",
+      "area_ha": 110.0,
+      "production_tonnes": 138.0,
+      "yield_kg_per_ha": 1255.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "Rajmash Kharif",
+      "area_ha": 266.0,
+      "production_tonnes": 340.0,
+      "yield_kg_per_ha": 1278.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Wokha",
+      "crop": "Rajmash Kharif",
+      "area_ha": 334.0,
+      "production_tonnes": 435.0,
+      "yield_kg_per_ha": 1302.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Zunheboto",
+      "crop": "Rajmash Kharif",
+      "area_ha": 151.0,
+      "production_tonnes": 162.0,
+      "yield_kg_per_ha": 1073.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Peren",
+      "crop": "Rajmash Kharif",
+      "area_ha": 1206.0,
+      "production_tonnes": 1594.0,
+      "yield_kg_per_ha": 1322.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kiphire",
+      "crop": "Rajmash Kharif",
+      "area_ha": 401.0,
+      "production_tonnes": 521.0,
+      "yield_kg_per_ha": 1299.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "Rajmash Kharif",
+      "area_ha": 6475.0,
+      "production_tonnes": 8307.0,
+      "yield_kg_per_ha": 1283.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kohima",
+      "crop": "Pea",
+      "area_ha": 252.0,
+      "production_tonnes": 280.0,
+      "yield_kg_per_ha": 1111.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tseminyu",
+      "crop": "Pea",
+      "area_ha": 483.0,
+      "production_tonnes": 536.0,
+      "yield_kg_per_ha": 1110.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Phek",
+      "crop": "Pea",
+      "area_ha": 258.0,
+      "production_tonnes": 279.0,
+      "yield_kg_per_ha": 1081.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mokokchung",
+      "crop": "Pea",
+      "area_ha": 284.0,
+      "production_tonnes": 314.0,
+      "yield_kg_per_ha": 1106.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tuensang",
+      "crop": "Pea",
+      "area_ha": 315.0,
+      "production_tonnes": 350.0,
+      "yield_kg_per_ha": 1111.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Noklak",
+      "crop": "Pea",
+      "area_ha": 175.0,
+      "production_tonnes": 195.0,
+      "yield_kg_per_ha": 1114.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "Pea",
+      "area_ha": 1184.0,
+      "production_tonnes": 1324.0,
+      "yield_kg_per_ha": 1118.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mon",
+      "crop": "Pea",
+      "area_ha": 101.0,
+      "production_tonnes": 113.0,
+      "yield_kg_per_ha": 1119.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Dimapur",
+      "crop": "Pea",
+      "area_ha": 299.0,
+      "production_tonnes": 330.0,
+      "yield_kg_per_ha": 1110.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "Pea",
+      "area_ha": 266.0,
+      "production_tonnes": 295.0,
+      "yield_kg_per_ha": 1109.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "Pea",
+      "area_ha": 325.0,
+      "production_tonnes": 358.0,
+      "yield_kg_per_ha": 1102.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Wokha",
+      "crop": "Pea",
+      "area_ha": 300.0,
+      "production_tonnes": 330.0,
+      "yield_kg_per_ha": 1100.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Zunheboto",
+      "crop": "Pea",
+      "area_ha": 379.0,
+      "production_tonnes": 423.0,
+      "yield_kg_per_ha": 1111.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Peren",
+      "crop": "Pea",
+      "area_ha": 215.0,
+      "production_tonnes": 238.0,
+      "yield_kg_per_ha": 1107.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kiphire",
+      "crop": "Pea",
+      "area_ha": 378.0,
+      "production_tonnes": 421.0,
+      "yield_kg_per_ha": 1114.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "Pea",
+      "area_ha": 5800.0,
+      "production_tonnes": 6438.0,
+      "yield_kg_per_ha": 1110.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kohima",
+      "crop": "Gram",
+      "area_ha": 21.0,
+      "production_tonnes": 17.0,
+      "yield_kg_per_ha": 810.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tseminyu",
+      "crop": "Gram",
+      "area_ha": 35.0,
+      "production_tonnes": 30.0,
+      "yield_kg_per_ha": 857.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Phek",
+      "crop": "Gram",
+      "area_ha": 41.0,
+      "production_tonnes": 34.0,
+      "yield_kg_per_ha": 829.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mokokchung",
+      "crop": "Gram",
+      "area_ha": 24.0,
+      "production_tonnes": 20.0,
+      "yield_kg_per_ha": 833.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tuensang",
+      "crop": "Gram",
+      "area_ha": 24.0,
+      "production_tonnes": 20.0,
+      "yield_kg_per_ha": 833.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Noklak",
+      "crop": "Gram",
+      "area_ha": 23.0,
+      "production_tonnes": 19.0,
+      "yield_kg_per_ha": 826.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "Gram",
+      "area_ha": 41.0,
+      "production_tonnes": 34.0,
+      "yield_kg_per_ha": 829.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mon",
+      "crop": "Gram",
+      "area_ha": 39.0,
+      "production_tonnes": 34.0,
+      "yield_kg_per_ha": 872.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Dimapur",
+      "crop": "Gram",
+      "area_ha": 52.0,
+      "production_tonnes": 46.0,
+      "yield_kg_per_ha": 885.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "Gram",
+      "area_ha": 40.0,
+      "production_tonnes": 35.0,
+      "yield_kg_per_ha": 875.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "Gram",
+      "area_ha": 48.0,
+      "production_tonnes": 40.0,
+      "yield_kg_per_ha": 833.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Wokha",
+      "crop": "Gram",
+      "area_ha": 85.0,
+      "production_tonnes": 70.0,
+      "yield_kg_per_ha": 824.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Zunheboto",
+      "crop": "Gram",
+      "area_ha": 49.0,
+      "production_tonnes": 42.0,
+      "yield_kg_per_ha": 857.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Peren",
+      "crop": "Gram",
+      "area_ha": 32.0,
+      "production_tonnes": 27.0,
+      "yield_kg_per_ha": 844.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kiphire",
+      "crop": "Gram",
+      "area_ha": 25.0,
+      "production_tonnes": 20.0,
+      "yield_kg_per_ha": 800.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "Gram",
+      "area_ha": 594.0,
+      "production_tonnes": 500.0,
+      "yield_kg_per_ha": 842.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kohima",
+      "crop": "Rajmash Rabi",
+      "area_ha": 102.0,
+      "production_tonnes": 127.0,
+      "yield_kg_per_ha": 1245.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tseminyu",
+      "crop": "Rajmash Rabi",
+      "area_ha": 175.0,
+      "production_tonnes": 223.0,
+      "yield_kg_per_ha": 1274.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Phek",
+      "crop": "Rajmash Rabi",
+      "area_ha": 236.0,
+      "production_tonnes": 302.0,
+      "yield_kg_per_ha": 1280.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mokokchung",
+      "crop": "Rajmash Rabi",
+      "area_ha": 1465.0,
+      "production_tonnes": 1887.0,
+      "yield_kg_per_ha": 1288.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tuensang",
+      "crop": "Rajmash Rabi",
+      "area_ha": 585.0,
+      "production_tonnes": 751.0,
+      "yield_kg_per_ha": 1284.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Noklak",
+      "crop": "Rajmash Rabi",
+      "area_ha": 1612.0,
+      "production_tonnes": 2060.0,
+      "yield_kg_per_ha": 1278.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "Rajmash Rabi",
+      "area_ha": 219.0,
+      "production_tonnes": 281.0,
+      "yield_kg_per_ha": 1283.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mon",
+      "crop": "Rajmash Rabi",
+      "area_ha": 11.0,
+      "production_tonnes": 14.0,
+      "yield_kg_per_ha": 1273.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Dimapur",
+      "crop": "Rajmash Rabi",
+      "area_ha": 84.0,
+      "production_tonnes": 105.0,
+      "yield_kg_per_ha": 1250.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "Rajmash Rabi",
+      "area_ha": 126.0,
+      "production_tonnes": 160.0,
+      "yield_kg_per_ha": 1270.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "Rajmash Rabi",
+      "area_ha": 380.0,
+      "production_tonnes": 485.0,
+      "yield_kg_per_ha": 1276.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Wokha",
+      "crop": "Rajmash Rabi",
+      "area_ha": 158.0,
+      "production_tonnes": 202.0,
+      "yield_kg_per_ha": 1278.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Zunheboto",
+      "crop": "Rajmash Rabi",
+      "area_ha": 28.0,
+      "production_tonnes": 35.0,
+      "yield_kg_per_ha": 1250.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Peren",
+      "crop": "Rajmash Rabi",
+      "area_ha": 1902.0,
+      "production_tonnes": 2436.0,
+      "yield_kg_per_ha": 1281.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kiphire",
+      "crop": "Rajmash Rabi",
+      "area_ha": 487.0,
+      "production_tonnes": 625.0,
+      "yield_kg_per_ha": 1283.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "Rajmash Rabi",
+      "area_ha": 7750.0,
+      "production_tonnes": 9920.0,
+      "yield_kg_per_ha": 1280.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kohima",
+      "crop": "Groundnut",
+      "area_ha": 46.0,
+      "production_tonnes": 48.0,
+      "yield_kg_per_ha": 1043.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tseminyu",
+      "crop": "Groundnut",
+      "area_ha": 183.0,
+      "production_tonnes": 197.0,
+      "yield_kg_per_ha": 1077.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Phek",
+      "crop": "Groundnut",
+      "area_ha": 262.0,
+      "production_tonnes": 284.0,
+      "yield_kg_per_ha": 1084.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mokokchung",
+      "crop": "Groundnut",
+      "area_ha": 125.0,
+      "production_tonnes": 134.0,
+      "yield_kg_per_ha": 1072.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tuensang",
+      "crop": "Groundnut",
+      "area_ha": 25.0,
+      "production_tonnes": 26.0,
+      "yield_kg_per_ha": 1040.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Noklak",
+      "crop": "Groundnut",
+      "area_ha": 27.0,
+      "production_tonnes": 29.0,
+      "yield_kg_per_ha": 1074.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "Groundnut",
+      "area_ha": 126.0,
+      "production_tonnes": 132.0,
+      "yield_kg_per_ha": 1048.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mon",
+      "crop": "Groundnut",
+      "area_ha": 101.0,
+      "production_tonnes": 109.0,
+      "yield_kg_per_ha": 1079.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Dimapur",
+      "crop": "Groundnut",
+      "area_ha": 108.0,
+      "production_tonnes": 116.0,
+      "yield_kg_per_ha": 1074.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "Groundnut",
+      "area_ha": 131.0,
+      "production_tonnes": 141.0,
+      "yield_kg_per_ha": 1076.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "Groundnut",
+      "area_ha": 131.0,
+      "production_tonnes": 138.0,
+      "yield_kg_per_ha": 1053.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Wokha",
+      "crop": "Groundnut",
+      "area_ha": 264.0,
+      "production_tonnes": 281.0,
+      "yield_kg_per_ha": 1064.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Zunheboto",
+      "crop": "Groundnut",
+      "area_ha": 156.0,
+      "production_tonnes": 166.0,
+      "yield_kg_per_ha": 1064.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Peren",
+      "crop": "Groundnut",
+      "area_ha": 108.0,
+      "production_tonnes": 114.0,
+      "yield_kg_per_ha": 1056.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kiphire",
+      "crop": "Groundnut",
+      "area_ha": 124.0,
+      "production_tonnes": 136.0,
+      "yield_kg_per_ha": 1097.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "Groundnut",
+      "area_ha": 2072.0,
+      "production_tonnes": 2217.0,
+      "yield_kg_per_ha": 1070.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kohima",
+      "crop": "Soyabean",
+      "area_ha": 495.0,
+      "production_tonnes": 630.0,
+      "yield_kg_per_ha": 1273.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tseminyu",
+      "crop": "Soyabean",
+      "area_ha": 726.0,
+      "production_tonnes": 912.0,
+      "yield_kg_per_ha": 1256.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Phek",
+      "crop": "Soyabean",
+      "area_ha": 456.0,
+      "production_tonnes": 568.0,
+      "yield_kg_per_ha": 1246.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mokokchung",
+      "crop": "Soyabean",
+      "area_ha": 562.0,
+      "production_tonnes": 707.0,
+      "yield_kg_per_ha": 1258.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tuensang",
+      "crop": "Soyabean",
+      "area_ha": 790.0,
+      "production_tonnes": 997.0,
+      "yield_kg_per_ha": 1262.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Noklak",
+      "crop": "Soyabean",
+      "area_ha": 347.0,
+      "production_tonnes": 435.0,
+      "yield_kg_per_ha": 1254.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "Soyabean",
+      "area_ha": 2248.0,
+      "production_tonnes": 2799.0,
+      "yield_kg_per_ha": 1245.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mon",
+      "crop": "Soyabean",
+      "area_ha": 240.0,
+      "production_tonnes": 304.0,
+      "yield_kg_per_ha": 1267.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Dimapur",
+      "crop": "Soyabean",
+      "area_ha": 1016.0,
+      "production_tonnes": 1292.0,
+      "yield_kg_per_ha": 1272.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "Soyabean",
+      "area_ha": 671.0,
+      "production_tonnes": 860.0,
+      "yield_kg_per_ha": 1282.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "Soyabean",
+      "area_ha": 1240.0,
+      "production_tonnes": 1566.0,
+      "yield_kg_per_ha": 1263.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Wokha",
+      "crop": "Soyabean",
+      "area_ha": 1931.0,
+      "production_tonnes": 2430.0,
+      "yield_kg_per_ha": 1258.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Zunheboto",
+      "crop": "Soyabean",
+      "area_ha": 1149.0,
+      "production_tonnes": 1449.0,
+      "yield_kg_per_ha": 1261.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Peren",
+      "crop": "Soyabean",
+      "area_ha": 1152.0,
+      "production_tonnes": 1454.0,
+      "yield_kg_per_ha": 1262.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kiphire",
+      "crop": "Soyabean",
+      "area_ha": 471.0,
+      "production_tonnes": 599.0,
+      "yield_kg_per_ha": 1272.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "Soyabean",
+      "area_ha": 13765.0,
+      "production_tonnes": 17344.0,
+      "yield_kg_per_ha": 1260.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kohima",
+      "crop": "Perilla",
+      "area_ha": 305.0,
+      "production_tonnes": 188.0,
+      "yield_kg_per_ha": 616.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tseminyu",
+      "crop": "Perilla",
+      "area_ha": 241.0,
+      "production_tonnes": 148.0,
+      "yield_kg_per_ha": 614.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Phek",
+      "crop": "Perilla",
+      "area_ha": 275.0,
+      "production_tonnes": 168.0,
+      "yield_kg_per_ha": 611.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mokokchung",
+      "crop": "Perilla",
+      "area_ha": 165.0,
+      "production_tonnes": 102.0,
+      "yield_kg_per_ha": 618.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tuensang",
+      "crop": "Perilla",
+      "area_ha": 219.0,
+      "production_tonnes": 135.0,
+      "yield_kg_per_ha": 616.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Noklak",
+      "crop": "Perilla",
+      "area_ha": 228.0,
+      "production_tonnes": 135.0,
+      "yield_kg_per_ha": 592.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "Perilla",
+      "area_ha": 331.0,
+      "production_tonnes": 201.0,
+      "yield_kg_per_ha": 607.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Dimapur",
+      "crop": "Perilla",
+      "area_ha": 171.0,
+      "production_tonnes": 106.0,
+      "yield_kg_per_ha": 620.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "Perilla",
+      "area_ha": 183.0,
+      "production_tonnes": 114.0,
+      "yield_kg_per_ha": 623.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "Perilla",
+      "area_ha": 210.0,
+      "production_tonnes": 128.0,
+      "yield_kg_per_ha": 610.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Wokha",
+      "crop": "Perilla",
+      "area_ha": 297.0,
+      "production_tonnes": 181.0,
+      "yield_kg_per_ha": 609.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Zunheboto",
+      "crop": "Perilla",
+      "area_ha": 65.0,
+      "production_tonnes": 40.0,
+      "yield_kg_per_ha": 615.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Peren",
+      "crop": "Perilla",
+      "area_ha": 267.0,
+      "production_tonnes": 162.0,
+      "yield_kg_per_ha": 607.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kiphire",
+      "crop": "Perilla",
+      "area_ha": 189.0,
+      "production_tonnes": 117.0,
+      "yield_kg_per_ha": 619.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "Perilla",
+      "area_ha": 3301.0,
+      "production_tonnes": 2020.0,
+      "yield_kg_per_ha": 612.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kohima",
+      "crop": "Sesamum",
+      "area_ha": 13.0,
+      "production_tonnes": 8.0,
+      "yield_kg_per_ha": 615.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tseminyu",
+      "crop": "Sesamum",
+      "area_ha": 21.0,
+      "production_tonnes": 13.0,
+      "yield_kg_per_ha": 619.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Phek",
+      "crop": "Sesamum",
+      "area_ha": 30.0,
+      "production_tonnes": 18.0,
+      "yield_kg_per_ha": 600.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mokokchung",
+      "crop": "Sesamum",
+      "area_ha": 175.0,
+      "production_tonnes": 110.0,
+      "yield_kg_per_ha": 629.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Noklak",
+      "crop": "Sesamum",
+      "area_ha": 18.0,
+      "production_tonnes": 11.0,
+      "yield_kg_per_ha": 611.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "Sesamum",
+      "area_ha": 107.0,
+      "production_tonnes": 67.0,
+      "yield_kg_per_ha": 626.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mon",
+      "crop": "Sesamum",
+      "area_ha": 201.0,
+      "production_tonnes": 124.0,
+      "yield_kg_per_ha": 617.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Dimapur",
+      "crop": "Sesamum",
+      "area_ha": 242.0,
+      "production_tonnes": 150.0,
+      "yield_kg_per_ha": 620.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "Sesamum",
+      "area_ha": 302.0,
+      "production_tonnes": 188.0,
+      "yield_kg_per_ha": 623.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "Sesamum",
+      "area_ha": 74.0,
+      "production_tonnes": 46.0,
+      "yield_kg_per_ha": 622.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Wokha",
+      "crop": "Sesamum",
+      "area_ha": 72.0,
+      "production_tonnes": 42.0,
+      "yield_kg_per_ha": 583.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Zunheboto",
+      "crop": "Sesamum",
+      "area_ha": 156.0,
+      "production_tonnes": 97.0,
+      "yield_kg_per_ha": 622.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Peren",
+      "crop": "Sesamum",
+      "area_ha": 23.0,
+      "production_tonnes": 14.0,
+      "yield_kg_per_ha": 609.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kiphire",
+      "crop": "Sesamum",
+      "area_ha": 72.0,
+      "production_tonnes": 45.0,
+      "yield_kg_per_ha": 625.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "Sesamum",
+      "area_ha": 1515.0,
+      "production_tonnes": 938.0,
+      "yield_kg_per_ha": 619.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kohima",
+      "crop": "Mustard",
+      "area_ha": 485.0,
+      "production_tonnes": 513.0,
+      "yield_kg_per_ha": 1058.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tseminyu",
+      "crop": "Mustard",
+      "area_ha": 1550.0,
+      "production_tonnes": 1679.0,
+      "yield_kg_per_ha": 1083.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Phek",
+      "crop": "Mustard",
+      "area_ha": 1688.0,
+      "production_tonnes": 1833.0,
+      "yield_kg_per_ha": 1086.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mokokchung",
+      "crop": "Mustard",
+      "area_ha": 701.0,
+      "production_tonnes": 755.0,
+      "yield_kg_per_ha": 1077.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tuensang",
+      "crop": "Mustard",
+      "area_ha": 854.0,
+      "production_tonnes": 924.0,
+      "yield_kg_per_ha": 1082.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Noklak",
+      "crop": "Mustard",
+      "area_ha": 439.0,
+      "production_tonnes": 467.0,
+      "yield_kg_per_ha": 1064.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "Mustard",
+      "area_ha": 1929.0,
+      "production_tonnes": 2095.0,
+      "yield_kg_per_ha": 1086.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mon",
+      "crop": "Mustard",
+      "area_ha": 328.0,
+      "production_tonnes": 354.0,
+      "yield_kg_per_ha": 1079.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Dimapur",
+      "crop": "Mustard",
+      "area_ha": 1542.0,
+      "production_tonnes": 1668.0,
+      "yield_kg_per_ha": 1082.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "Mustard",
+      "area_ha": 561.0,
+      "production_tonnes": 608.0,
+      "yield_kg_per_ha": 1084.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "Mustard",
+      "area_ha": 1397.0,
+      "production_tonnes": 1513.0,
+      "yield_kg_per_ha": 1083.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Wokha",
+      "crop": "Mustard",
+      "area_ha": 1129.0,
+      "production_tonnes": 1225.0,
+      "yield_kg_per_ha": 1085.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Zunheboto",
+      "crop": "Mustard",
+      "area_ha": 1233.0,
+      "production_tonnes": 1332.0,
+      "yield_kg_per_ha": 1080.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Peren",
+      "crop": "Mustard",
+      "area_ha": 636.0,
+      "production_tonnes": 680.0,
+      "yield_kg_per_ha": 1069.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kiphire",
+      "crop": "Mustard",
+      "area_ha": 498.0,
+      "production_tonnes": 535.0,
+      "yield_kg_per_ha": 1074.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "Mustard",
+      "area_ha": 15620.0,
+      "production_tonnes": 16870.0,
+      "yield_kg_per_ha": 1080.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kohima",
+      "crop": "Linseed",
+      "area_ha": 80.0,
+      "production_tonnes": 61.0,
+      "yield_kg_per_ha": 763.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tseminyu",
+      "crop": "Linseed",
+      "area_ha": 243.0,
+      "production_tonnes": 192.0,
+      "yield_kg_per_ha": 790.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Phek",
+      "crop": "Linseed",
+      "area_ha": 120.0,
+      "production_tonnes": 96.0,
+      "yield_kg_per_ha": 800.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mokokchung",
+      "crop": "Linseed",
+      "area_ha": 150.0,
+      "production_tonnes": 119.0,
+      "yield_kg_per_ha": 793.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tuensang",
+      "crop": "Linseed",
+      "area_ha": 135.0,
+      "production_tonnes": 103.0,
+      "yield_kg_per_ha": 763.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Noklak",
+      "crop": "Linseed",
+      "area_ha": 103.0,
+      "production_tonnes": 81.0,
+      "yield_kg_per_ha": 786.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "Linseed",
+      "area_ha": 332.0,
+      "production_tonnes": 272.0,
+      "yield_kg_per_ha": 819.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mon",
+      "crop": "Linseed",
+      "area_ha": 335.0,
+      "production_tonnes": 269.0,
+      "yield_kg_per_ha": 803.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Dimapur",
+      "crop": "Linseed",
+      "area_ha": 445.0,
+      "production_tonnes": 367.0,
+      "yield_kg_per_ha": 825.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "Linseed",
+      "area_ha": 339.0,
+      "production_tonnes": 285.0,
+      "yield_kg_per_ha": 841.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "Linseed",
+      "area_ha": 328.0,
+      "production_tonnes": 256.0,
+      "yield_kg_per_ha": 780.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Wokha",
+      "crop": "Linseed",
+      "area_ha": 226.0,
+      "production_tonnes": 174.0,
+      "yield_kg_per_ha": 770.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Zunheboto",
+      "crop": "Linseed",
+      "area_ha": 316.0,
+      "production_tonnes": 253.0,
+      "yield_kg_per_ha": 801.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Peren",
+      "crop": "Linseed",
+      "area_ha": 102.0,
+      "production_tonnes": 82.0,
+      "yield_kg_per_ha": 804.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kiphire",
+      "crop": "Linseed",
+      "area_ha": 104.0,
+      "production_tonnes": 84.0,
+      "yield_kg_per_ha": 808.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "Linseed",
+      "area_ha": 3460.0,
+      "production_tonnes": 2775.0,
+      "yield_kg_per_ha": 802.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kohima",
+      "crop": "Sugarcane",
+      "area_ha": 37.0,
+      "production_tonnes": 1594.0,
+      "yield_kg_per_ha": 43081.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tseminyu",
+      "crop": "Sugarcane",
+      "area_ha": 148.0,
+      "production_tonnes": 6438.0,
+      "yield_kg_per_ha": 43500.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Phek",
+      "crop": "Sugarcane",
+      "area_ha": 165.0,
+      "production_tonnes": 7226.0,
+      "yield_kg_per_ha": 43794.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mokokchung",
+      "crop": "Sugarcane",
+      "area_ha": 94.0,
+      "production_tonnes": 3997.0,
+      "yield_kg_per_ha": 42521.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tuensang",
+      "crop": "Sugarcane",
+      "area_ha": 101.0,
+      "production_tonnes": 4388.0,
+      "yield_kg_per_ha": 43446.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Noklak",
+      "crop": "Sugarcane",
+      "area_ha": 51.0,
+      "production_tonnes": 2220.0,
+      "yield_kg_per_ha": 43529.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "Sugarcane",
+      "area_ha": 221.0,
+      "production_tonnes": 9656.0,
+      "yield_kg_per_ha": 43692.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mon",
+      "crop": "Sugarcane",
+      "area_ha": 109.0,
+      "production_tonnes": 4751.0,
+      "yield_kg_per_ha": 43587.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Dimapur",
+      "crop": "Sugarcane",
+      "area_ha": 561.0,
+      "production_tonnes": 24595.0,
+      "yield_kg_per_ha": 43841.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "Sugarcane",
+      "area_ha": 292.0,
+      "production_tonnes": 12728.0,
+      "yield_kg_per_ha": 43589.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "Sugarcane",
+      "area_ha": 345.0,
+      "production_tonnes": 14995.0,
+      "yield_kg_per_ha": 43464.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Wokha",
+      "crop": "Sugarcane",
+      "area_ha": 105.0,
+      "production_tonnes": 4604.0,
+      "yield_kg_per_ha": 43848.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Zunheboto",
+      "crop": "Sugarcane",
+      "area_ha": 284.0,
+      "production_tonnes": 12371.0,
+      "yield_kg_per_ha": 43560.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Peren",
+      "crop": "Sugarcane",
+      "area_ha": 56.0,
+      "production_tonnes": 2411.0,
+      "yield_kg_per_ha": 43054.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kiphire",
+      "crop": "Sugarcane",
+      "area_ha": 35.0,
+      "production_tonnes": 1489.0,
+      "yield_kg_per_ha": 42543.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "Sugarcane",
+      "area_ha": 2642.0,
+      "production_tonnes": 115115.0,
+      "yield_kg_per_ha": 43571.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kohima",
+      "crop": "Tea",
+      "area_ha": 40.0,
+      "production_tonnes": 175.0,
+      "yield_kg_per_ha": 4375.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tseminyu",
+      "crop": "Tea",
+      "area_ha": 573.0,
+      "production_tonnes": 2491.0,
+      "yield_kg_per_ha": 4347.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Phek",
+      "crop": "Tea",
+      "area_ha": 685.0,
+      "production_tonnes": 3075.0,
+      "yield_kg_per_ha": 4489.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mokokchung",
+      "crop": "Tea",
+      "area_ha": 623.0,
+      "production_tonnes": 2802.0,
+      "yield_kg_per_ha": 4498.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tuensang",
+      "crop": "Tea",
+      "area_ha": 143.0,
+      "production_tonnes": 593.0,
+      "yield_kg_per_ha": 4147.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Noklak",
+      "crop": "Tea",
+      "area_ha": 172.0,
+      "production_tonnes": 765.0,
+      "yield_kg_per_ha": 4448.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "Tea",
+      "area_ha": 1902.0,
+      "production_tonnes": 8598.0,
+      "yield_kg_per_ha": 4521.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mon",
+      "crop": "Tea",
+      "area_ha": 740.0,
+      "production_tonnes": 3309.0,
+      "yield_kg_per_ha": 4472.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Dimapur",
+      "crop": "Tea",
+      "area_ha": 908.0,
+      "production_tonnes": 4062.0,
+      "yield_kg_per_ha": 4474.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "Tea",
+      "area_ha": 818.0,
+      "production_tonnes": 3667.0,
+      "yield_kg_per_ha": 4483.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "Tea",
+      "area_ha": 239.0,
+      "production_tonnes": 1075.0,
+      "yield_kg_per_ha": 4498.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Wokha",
+      "crop": "Tea",
+      "area_ha": 372.0,
+      "production_tonnes": 1667.0,
+      "yield_kg_per_ha": 4481.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Zunheboto",
+      "crop": "Tea",
+      "area_ha": 182.0,
+      "production_tonnes": 815.0,
+      "yield_kg_per_ha": 4478.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Peren",
+      "crop": "Tea",
+      "area_ha": 57.0,
+      "production_tonnes": 244.0,
+      "yield_kg_per_ha": 4281.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kiphire",
+      "crop": "Tea",
+      "area_ha": 67.0,
+      "production_tonnes": 298.0,
+      "yield_kg_per_ha": 4448.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "Tea",
+      "area_ha": 7788.0,
+      "production_tonnes": 34812.0,
+      "yield_kg_per_ha": 4470.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kohima",
+      "crop": "Tapioca",
+      "area_ha": 74.0,
+      "production_tonnes": 1487.0,
+      "yield_kg_per_ha": 20095.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tseminyu",
+      "crop": "Tapioca",
+      "area_ha": 164.0,
+      "production_tonnes": 3291.0,
+      "yield_kg_per_ha": 20067.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Phek",
+      "crop": "Tapioca",
+      "area_ha": 322.0,
+      "production_tonnes": 6618.0,
+      "yield_kg_per_ha": 20553.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mokokchung",
+      "crop": "Tapioca",
+      "area_ha": 319.0,
+      "production_tonnes": 6387.0,
+      "yield_kg_per_ha": 20022.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tuensang",
+      "crop": "Tapioca",
+      "area_ha": 275.0,
+      "production_tonnes": 5602.0,
+      "yield_kg_per_ha": 20371.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Noklak",
+      "crop": "Tapioca",
+      "area_ha": 184.0,
+      "production_tonnes": 3622.0,
+      "yield_kg_per_ha": 19685.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "Tapioca",
+      "area_ha": 337.0,
+      "production_tonnes": 6705.0,
+      "yield_kg_per_ha": 19896.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mon",
+      "crop": "Tapioca",
+      "area_ha": 66.0,
+      "production_tonnes": 1342.0,
+      "yield_kg_per_ha": 20333.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Dimapur",
+      "crop": "Tapioca",
+      "area_ha": 67.0,
+      "production_tonnes": 1356.0,
+      "yield_kg_per_ha": 20239.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "Tapioca",
+      "area_ha": 66.0,
+      "production_tonnes": 1335.0,
+      "yield_kg_per_ha": 20227.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "Tapioca",
+      "area_ha": 135.0,
+      "production_tonnes": 2778.0,
+      "yield_kg_per_ha": 20578.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Wokha",
+      "crop": "Tapioca",
+      "area_ha": 129.0,
+      "production_tonnes": 2594.0,
+      "yield_kg_per_ha": 20109.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Zunheboto",
+      "crop": "Tapioca",
+      "area_ha": 341.0,
+      "production_tonnes": 7059.0,
+      "yield_kg_per_ha": 20701.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Peren",
+      "crop": "Tapioca",
+      "area_ha": 144.0,
+      "production_tonnes": 2965.0,
+      "yield_kg_per_ha": 20590.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kiphire",
+      "crop": "Tapioca",
+      "area_ha": 240.0,
+      "production_tonnes": 4793.0,
+      "yield_kg_per_ha": 19971.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "Tapioca",
+      "area_ha": 3008.0,
+      "production_tonnes": 60852.0,
+      "yield_kg_per_ha": 20230.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kohima",
+      "crop": "Ginger",
+      "area_ha": 221.0,
+      "production_tonnes": 2254.0,
+      "yield_kg_per_ha": 10199.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tseminyu",
+      "crop": "Ginger",
+      "area_ha": 810.0,
+      "production_tonnes": 8328.0,
+      "yield_kg_per_ha": 10281.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Phek",
+      "crop": "Ginger",
+      "area_ha": 175.0,
+      "production_tonnes": 1784.0,
+      "yield_kg_per_ha": 10194.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mokokchung",
+      "crop": "Ginger",
+      "area_ha": 301.0,
+      "production_tonnes": 3105.0,
+      "yield_kg_per_ha": 10316.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tuensang",
+      "crop": "Ginger",
+      "area_ha": 555.0,
+      "production_tonnes": 5661.0,
+      "yield_kg_per_ha": 10200.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Noklak",
+      "crop": "Ginger",
+      "area_ha": 162.0,
+      "production_tonnes": 1664.0,
+      "yield_kg_per_ha": 10272.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "Ginger",
+      "area_ha": 516.0,
+      "production_tonnes": 5229.0,
+      "yield_kg_per_ha": 10134.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mon",
+      "crop": "Ginger",
+      "area_ha": 85.0,
+      "production_tonnes": 868.0,
+      "yield_kg_per_ha": 10212.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Dimapur",
+      "crop": "Ginger",
+      "area_ha": 96.0,
+      "production_tonnes": 982.0,
+      "yield_kg_per_ha": 10229.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "Ginger",
+      "area_ha": 178.0,
+      "production_tonnes": 1814.0,
+      "yield_kg_per_ha": 10191.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "Ginger",
+      "area_ha": 280.0,
+      "production_tonnes": 2864.0,
+      "yield_kg_per_ha": 10229.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Wokha",
+      "crop": "Ginger",
+      "area_ha": 255.0,
+      "production_tonnes": 2614.0,
+      "yield_kg_per_ha": 10243.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Zunheboto",
+      "crop": "Ginger",
+      "area_ha": 661.0,
+      "production_tonnes": 6692.0,
+      "yield_kg_per_ha": 10124.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Peren",
+      "crop": "Ginger",
+      "area_ha": 155.0,
+      "production_tonnes": 1573.0,
+      "yield_kg_per_ha": 10148.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kiphire",
+      "crop": "Ginger",
+      "area_ha": 233.0,
+      "production_tonnes": 2306.0,
+      "yield_kg_per_ha": 9897.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "Ginger",
+      "area_ha": 5108.0,
+      "production_tonnes": 52076.0,
+      "yield_kg_per_ha": 10195.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kohima",
+      "crop": "Sweet Potato",
+      "area_ha": 75.0,
+      "production_tonnes": 712.0,
+      "yield_kg_per_ha": 9493.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tseminyu",
+      "crop": "Sweet Potato",
+      "area_ha": 190.0,
+      "production_tonnes": 1810.0,
+      "yield_kg_per_ha": 9474.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Phek",
+      "crop": "Sweet Potato",
+      "area_ha": 179.0,
+      "production_tonnes": 1693.0,
+      "yield_kg_per_ha": 9458.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mokokchung",
+      "crop": "Sweet Potato",
+      "area_ha": 88.0,
+      "production_tonnes": 840.0,
+      "yield_kg_per_ha": 9545.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tuensang",
+      "crop": "Sweet Potato",
+      "area_ha": 85.0,
+      "production_tonnes": 797.0,
+      "yield_kg_per_ha": 9376.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Noklak",
+      "crop": "Sweet Potato",
+      "area_ha": 101.0,
+      "production_tonnes": 961.0,
+      "yield_kg_per_ha": 9515.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "Sweet Potato",
+      "area_ha": 165.0,
+      "production_tonnes": 1582.0,
+      "yield_kg_per_ha": 9588.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mon",
+      "crop": "Sweet Potato",
+      "area_ha": 47.0,
+      "production_tonnes": 431.0,
+      "yield_kg_per_ha": 9170.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Dimapur",
+      "crop": "Sweet Potato",
+      "area_ha": 48.0,
+      "production_tonnes": 452.0,
+      "yield_kg_per_ha": 9417.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "Sweet Potato",
+      "area_ha": 52.0,
+      "production_tonnes": 499.0,
+      "yield_kg_per_ha": 9534.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "Sweet Potato",
+      "area_ha": 156.0,
+      "production_tonnes": 1474.0,
+      "yield_kg_per_ha": 9503.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Wokha",
+      "crop": "Sweet Potato",
+      "area_ha": 197.0,
+      "production_tonnes": 1879.0,
+      "yield_kg_per_ha": 9538.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Zunheboto",
+      "crop": "Sweet Potato",
+      "area_ha": 135.0,
+      "production_tonnes": 1296.0,
+      "yield_kg_per_ha": 9516.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Peren",
+      "crop": "Sweet Potato",
+      "area_ha": 155.0,
+      "production_tonnes": 1474.0,
+      "yield_kg_per_ha": 9510.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kiphire",
+      "crop": "Sweet Potato",
+      "area_ha": 147.0,
+      "production_tonnes": 1390.0,
+      "yield_kg_per_ha": 9477.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "Sweet Potato",
+      "area_ha": 1925.0,
+      "production_tonnes": 18288.0,
+      "yield_kg_per_ha": 9500.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kohima",
+      "crop": "Potato",
+      "area_ha": 122.0,
+      "production_tonnes": 1250.0,
+      "yield_kg_per_ha": 10246.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tseminyu",
+      "crop": "Potato",
+      "area_ha": 875.0,
+      "production_tonnes": 9805.0,
+      "yield_kg_per_ha": 11206.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Phek",
+      "crop": "Potato",
+      "area_ha": 424.0,
+      "production_tonnes": 4745.0,
+      "yield_kg_per_ha": 11191.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mokokchung",
+      "crop": "Potato",
+      "area_ha": 460.0,
+      "production_tonnes": 5128.0,
+      "yield_kg_per_ha": 11148.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Tuensang",
+      "crop": "Potato",
+      "area_ha": 266.0,
+      "production_tonnes": 2997.0,
+      "yield_kg_per_ha": 11267.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Noklak",
+      "crop": "Potato",
+      "area_ha": 208.0,
+      "production_tonnes": 2336.0,
+      "yield_kg_per_ha": 11231.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Shamator",
+      "crop": "Potato",
+      "area_ha": 350.0,
+      "production_tonnes": 3862.0,
+      "yield_kg_per_ha": 11034.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Mon",
+      "crop": "Potato",
+      "area_ha": 163.0,
+      "production_tonnes": 1836.0,
+      "yield_kg_per_ha": 11264.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Dimapur",
+      "crop": "Potato",
+      "area_ha": 251.0,
+      "production_tonnes": 2815.0,
+      "yield_kg_per_ha": 11215.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Nuiland",
+      "crop": "Potato",
+      "area_ha": 224.0,
+      "production_tonnes": 2525.0,
+      "yield_kg_per_ha": 11272.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Chumuoukedima",
+      "crop": "Potato",
+      "area_ha": 396.0,
+      "production_tonnes": 4432.0,
+      "yield_kg_per_ha": 11192.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Wokha",
+      "crop": "Potato",
+      "area_ha": 165.0,
+      "production_tonnes": 1847.0,
+      "yield_kg_per_ha": 11194.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Zunheboto",
+      "crop": "Potato",
+      "area_ha": 411.0,
+      "production_tonnes": 4613.0,
+      "yield_kg_per_ha": 11224.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Peren",
+      "crop": "Potato",
+      "area_ha": 125.0,
+      "production_tonnes": 1390.0,
+      "yield_kg_per_ha": 11120.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Kiphire",
+      "crop": "Potato",
+      "area_ha": 146.0,
+      "production_tonnes": 1641.0,
+      "yield_kg_per_ha": 11240.0
+    },
+    {
+      "year": "2023-24",
+      "district": "Longleng",
+      "crop": "Potato",
+      "area_ha": 5400.0,
+      "production_tonnes": 60480.0,
+      "yield_kg_per_ha": 11200.0
+    }
+  ]
+}
