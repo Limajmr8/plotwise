@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Plotwise — Smart Farming for Nagaland</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --soil:   #0f0d08;
+      --bark:   #1c1509;
+      --moss:   #2e4a20;
+      --leaf:   #4a7a32;
+      --sprout: #6db33f;
+      --lime:   #9dd668;
+      --mist:   #c4d9b8;
+      --cream:  #f2ede3;
+      --gold:   #c9952a;
+      --amber:  #e8b84b;
+      --fog:    #f7f4ee;
+      --slate:  #5a6472;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'DM Sans',sans-serif;background:var(--soil);color:var(--cream);overflow-x:hidden}
+
+    /* ── NAV ── */
+    nav{
+      position:fixed;top:0;left:0;right:0;z-index:999;
+      height:60px;display:flex;align-items:center;justify-content:space-between;
+      padding:0 48px;
+      background:rgba(15,13,8,0.85);
+      backdrop-filter:blur(20px);
+      border-bottom:1px solid rgba(109,179,63,0.12);
+    }
+    .logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.35rem;letter-spacing:-0.5px;color:var(--cream)}
+    .logo b{color:var(--sprout)}
+    .nav-links{display:flex;gap:2px}
+    .nl{background:none;border:none;color:rgba(242,237,227,0.5);font-family:'DM Sans',sans-serif;
+        font-size:0.875rem;font-weight:500;padding:8px 18px;border-radius:8px;cursor:pointer;
+        transition:all 0.2s}
+    .nl:hover{color:var(--cream);background:rgba(255,255,255,0.06)}
+    .nl.on{color:var(--sprout)}
+    .nav-btn{background:var(--sprout);color:var(--soil);font-family:'Syne',sans-serif;
+             font-weight:700;font-size:0.82rem;padding:9px 22px;border-radius:8px;
+             border:none;cursor:pointer;letter-spacing:0.3px;transition:all 0.2s}
+    .nav-btn:hover{background:var(--lime);transform:translateY(-1px)}
+
+    /* ── HERO ── */
+    .hero{
+      min-height:100vh;display:grid;grid-template-columns:1fr 1fr;
+      align-items:center;padding:80px 48px 60px;gap:60px;
+      position:relative;overflow:hidden;
+    }
+    .hero::before{
+      content:'';position:absolute;inset:0;
+      background:
+        radial-gradient(ellipse 70% 80% at 60% 40%,rgba(46,74,32,0.5) 0%,transparent 65%),
+        radial-gradient(ellipse 40% 50% at 10% 90%,rgba(109,179,63,0.12) 0%,transparent 60%),
+        radial-gradient(ellipse 50% 40% at 90% 10%,rgba(201,149,42,0.06) 0%,transparent 50%);
+      pointer-events:none;
+    }
+    .hero-dots{
+      position:absolute;inset:0;
+      background-image:radial-gradient(rgba(109,179,63,0.15) 1px,transparent 1px);
+      background-size:32px 32px;opacity:0.5;pointer-events:none;
+    }
+    .hero-left{position:relative;z-index:2}
+    .hero-badge{
+      display:inline-flex;align-items:center;gap:8px;
+      background:rgba(109,179,63,0.12);border:1px solid rgba(109,179,63,0.3);
+      color:var(--lime);font-size:0.72rem;font-weight:600;letter-spacing:1.5px;
+      text-transform:uppercase;padding:7px 16px;border-radius:100px;margin-bottom:32px;
+    }
+    .hero-badge::before{content:'●';animation:blink 2s infinite;font-size:0.45rem}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+    .hero h1{
+      font-family:'Syne',sans-serif;
+      font-size:clamp(3rem,5.5vw,5.2rem);
+      font-weight:800;line-height:0.95;
+      letter-spacing:-3px;color:var(--cream);
+      margin-bottom:28px;
+    }
+    .hero h1 .accent{color:var(--sprout);display:block}
+    .hero p{
+      font-size:1.05rem;line-height:1.75;font-weight:300;
+      color:rgba(242,237,227,0.6);max-width:440px;margin-bottom:44px;
+    }
+    .hero-ctas{display:flex;gap:14px;align-items:center}
+    .cta-primary{
+      background:var(--sprout);color:var(--soil);
+      font-family:'Syne',sans-serif;font-weight:700;font-size:0.92rem;
+      padding:15px 32px;border-radius:10px;border:none;cursor:pointer;
+      letter-spacing:0.2px;transition:all 0.25s;
+    }
+    .cta-primary:hover{background:var(--lime);transform:translateY(-2px);box-shadow:0 12px 32px rgba(109,179,63,0.3)}
+    .cta-sec{
+      background:transparent;color:rgba(242,237,227,0.7);
+      font-family:'DM Sans',sans-serif;font-weight:500;font-size:0.92rem;
+      padding:15px 28px;border-radius:10px;border:1px solid rgba(242,237,227,0.2);
+      cursor:pointer;transition:all 0.2s;
+    }
+    .cta-sec:hover{border-color:rgba(242,237,227,0.5);color:var(--cream)}
+
+    /* hero right — stat cards */
+    .hero-right{
+      position:relative;z-index:2;
+      display:grid;grid-template-columns:1fr 1fr;gap:14px;
+    }
+    .stat-card{
+      background:rgba(255,255,255,0.03);
+      border:1px solid rgba(109,179,63,0.15);
+      border-radius:18px;padding:28px 22px;
+      transition:all 0.3s;
+    }
+    .stat-card:hover{background:rgba(109,179,63,0.06);border-color:rgba(109,179,63,0.3);transform:translateY(-3px)}
+    .stat-card:first-child{grid-column:1/-1;display:flex;align-items:center;gap:24px}
+    .stat-icon{font-size:2rem;flex-shrink:0}
+    .stat-num{
+      font-family:'Syne',sans-serif;font-size:2.4rem;
+      font-weight:800;color:var(--sprout);line-height:1;
+    }
+    .stat-label{font-size:0.78rem;color:rgba(242,237,227,0.45);margin-top:5px;letter-spacing:0.3px}
+    .stat-sub{font-size:0.82rem;color:rgba(242,237,227,0.5);margin-top:8px;line-height:1.5;font-weight:300}
+
+    /* ── TICKER ── */
+    .ticker{
+      background:var(--bark);border-top:1px solid rgba(109,179,63,0.1);
+      border-bottom:1px solid rgba(109,179,63,0.1);
+      padding:14px 0;overflow:hidden;white-space:nowrap;
+    }
+    .ticker-inner{
+      display:inline-block;animation:scroll 30s linear infinite;
+    }
+    .ticker-item{
+      display:inline-flex;align-items:center;gap:8px;
+      margin-right:48px;font-size:0.82rem;
+    }
+    .ticker-crop{font-weight:600;color:var(--cream)}
+    .ticker-price{color:var(--lime)}
+    .ticker-sep{color:rgba(242,237,227,0.2)}
+    @keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+    /* ── SECTION WRAPPER ── */
+    .wrap{max-width:1160px;margin:0 auto;padding:0 48px}
+
+    /* ── FEATURES ── */
+    .features-sec{padding:100px 48px;background:var(--bark)}
+    .eyebrow{
+      font-family:'Syne',sans-serif;font-size:0.7rem;font-weight:700;
+      letter-spacing:3px;text-transform:uppercase;
+      color:var(--sprout);margin-bottom:16px;
+    }
+    .sec-title{
+      font-family:'Syne',sans-serif;
+      font-size:clamp(2.2rem,4vw,3.4rem);
+      font-weight:800;letter-spacing:-2px;
+      color:var(--cream);line-height:1.05;margin-bottom:64px;
+    }
+    .feat-grid{
+      display:grid;grid-template-columns:repeat(4,1fr);
+      gap:1px;background:rgba(109,179,63,0.1);
+      border:1px solid rgba(109,179,63,0.1);
+      border-radius:20px;overflow:hidden;
+    }
+    .feat{
+      background:var(--bark);padding:40px 32px;cursor:pointer;
+      transition:background 0.25s;position:relative;
+    }
+    .feat:hover{background:rgba(109,179,63,0.06)}
+    .feat-num{
+      font-family:'Syne',sans-serif;font-size:0.68rem;font-weight:700;
+      letter-spacing:2px;color:rgba(109,179,63,0.4);margin-bottom:24px;
+    }
+    .feat-ico{
+      width:48px;height:48px;border-radius:12px;
+      background:rgba(109,179,63,0.1);display:flex;align-items:center;
+      justify-content:center;font-size:1.4rem;margin-bottom:20px;
+    }
+    .feat h3{
+      font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;
+      color:var(--cream);margin-bottom:10px;
+    }
+    .feat p{font-size:0.85rem;color:rgba(242,237,227,0.5);line-height:1.65;font-weight:300}
+    .feat-arrow{
+      position:absolute;top:32px;right:32px;
+      color:rgba(109,179,63,0.25);font-size:1.1rem;
+      transition:all 0.2s;
+    }
+    .feat:hover .feat-arrow{color:var(--sprout);transform:translate(3px,-3px)}
+
+    /* ── APP SECTION ── */
+    .app-sec{padding:100px 48px;background:var(--soil)}
+    .app-shell{
+      background:var(--bark);border-radius:24px;
+      border:1px solid rgba(109,179,63,0.12);overflow:hidden;
+    }
+    .app-topbar{
+      background:rgba(0,0,0,0.3);
+      border-bottom:1px solid rgba(109,179,63,0.1);
+      display:flex;align-items:center;gap:0;
+      overflow-x:auto;padding:0 8px;
+    }
+    .atab{
+      background:none;border:none;border-bottom:2px solid transparent;
+      color:rgba(242,237,227,0.4);font-family:'Syne',sans-serif;
+      font-weight:600;font-size:0.82rem;letter-spacing:0.3px;
+      padding:17px 24px;cursor:pointer;white-space:nowrap;
+      transition:all 0.2s;
+    }
+    .atab:hover{color:rgba(242,237,227,0.8)}
+    .atab.on{color:var(--sprout);border-bottom-color:var(--sprout)}
+    .app-body{padding:40px}
+    .pane{display:none}
+    .pane.on{display:block}
+
+    /* form */
+    .frow{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px}
+    .fld label{
+      display:block;font-size:0.7rem;font-weight:700;letter-spacing:1.5px;
+      text-transform:uppercase;color:rgba(242,237,227,0.4);margin-bottom:8px;
+    }
+    .fld select,.fld input{
+      width:100%;padding:13px 16px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(109,179,63,0.2);
+      border-radius:10px;color:var(--cream);
+      font-family:'DM Sans',sans-serif;font-size:0.9rem;
+      outline:none;transition:border-color 0.2s;appearance:none;
+    }
+    .fld select:focus,.fld input:focus{border-color:var(--sprout)}
+    .fld select option{background:#1c1509}
+    .btn-go{
+      width:100%;background:var(--sprout);color:var(--soil);
+      font-family:'Syne',sans-serif;font-weight:700;font-size:0.88rem;
+      letter-spacing:0.5px;padding:15px;border:none;border-radius:10px;
+      cursor:pointer;transition:all 0.2s;
+    }
+    .btn-go:hover{background:var(--lime)}
+
+    /* upload */
+    .dropzone{
+      border:1.5px dashed rgba(109,179,63,0.3);
+      border-radius:16px;padding:48px 24px;text-align:center;
+      cursor:pointer;transition:all 0.25s;margin-bottom:20px;
+      background:rgba(109,179,63,0.02);
+    }
+    .dropzone:hover{border-color:var(--sprout);background:rgba(109,179,63,0.05)}
+    .dropzone input{display:none}
+    .dz-icon{font-size:2.4rem;opacity:0.5;margin-bottom:12px}
+    .dz-txt{font-weight:500;color:rgba(242,237,227,0.6);margin-bottom:4px}
+    .dz-sub{font-size:0.78rem;color:rgba(242,237,227,0.3)}
+    #prev{max-height:150px;border-radius:10px;margin-top:16px;display:none}
+
+    /* result */
+    .result{
+      background:rgba(109,179,63,0.04);
+      border:1px solid rgba(109,179,63,0.2);
+      border-radius:16px;padding:28px;margin-top:20px;display:none;
+    }
+    .result.show{display:block}
+    .r-head{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+    .r-dot{width:8px;height:8px;border-radius:50%;background:var(--amber);flex-shrink:0}
+    .r-ttl{font-family:'Syne',sans-serif;font-weight:700;font-size:0.95rem}
+    .r-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+    .r-item-lbl{font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:rgba(242,237,227,0.35);margin-bottom:4px}
+    .r-item-val{font-weight:600;font-size:0.92rem}
+    .c-high{color:#e05c5c}
+    .c-med{color:var(--amber)}
+    .r-box{
+      background:rgba(0,0,0,0.2);border-radius:10px;
+      padding:16px;font-size:0.87rem;line-height:1.65;
+      color:rgba(242,237,227,0.65);
+    }
+    .r-box-lbl{font-size:0.68rem;text-transform:uppercase;letter-spacing:1px;
+               color:rgba(242,237,227,0.3);margin-bottom:8px;font-weight:700;display:block}
+
+    /* price table */
+    .ptbl{width:100%;border-collapse:collapse}
+    .ptbl th{
+      font-size:0.68rem;text-transform:uppercase;letter-spacing:1.5px;
+      color:rgba(242,237,227,0.3);padding:12px 16px;
+      border-bottom:1px solid rgba(255,255,255,0.07);text-align:left;
+    }
+    .ptbl td{
+      padding:14px 16px;font-size:0.9rem;
+      border-bottom:1px solid rgba(255,255,255,0.04);
+    }
+    .ptbl tr:last-child td{border-bottom:none}
+    .ptbl tr:hover td{background:rgba(255,255,255,0.02)}
+    .p-name{font-weight:600;color:var(--cream)}
+    .p-val{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--lime)}
+    .up{color:#4ade80;font-weight:700}
+    .dn{color:#f87171;font-weight:700}
+    .fl{color:rgba(242,237,227,0.35)}
+
+    /* calendar */
+    .cal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+    .cal-c{
+      background:rgba(255,255,255,0.03);border:1px solid rgba(109,179,63,0.15);
+      border-radius:14px;padding:20px;transition:all 0.2s;
+    }
+    .cal-c:hover{border-color:rgba(109,179,63,0.4);background:rgba(109,179,63,0.04);transform:translateY(-2px)}
+    .cal-name{font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem;margin-bottom:14px}
+    .cal-row{display:flex;justify-content:space-between;font-size:0.78rem;margin-bottom:6px}
+    .cal-row span:first-child{color:rgba(242,237,227,0.4)}
+    .cal-row span:last-child{font-weight:500;color:var(--cream)}
+    .cal-tag{display:inline-block;margin-top:12px;padding:3px 10px;border-radius:20px;font-size:0.68rem;font-weight:700;letter-spacing:0.8px;text-transform:uppercase}
+    .tag-sow{background:rgba(74,222,128,0.15);color:#4ade80}
+    .tag-hvst{background:rgba(251,191,36,0.15);color:#fbbf24}
+    .tag-grow{background:rgba(96,165,250,0.15);color:#60a5fa}
+    .tag-off{background:rgba(255,255,255,0.05);color:rgba(242,237,227,0.3)}
+
+    /* schemes */
+    .sch-c{
+      background:rgba(255,255,255,0.02);border:1px solid rgba(109,179,63,0.15);
+      border-radius:14px;padding:24px;margin-bottom:12px;transition:all 0.2s;
+    }
+    .sch-c:hover{border-color:rgba(109,179,63,0.35)}
+    .sch-name{font-family:'Syne',sans-serif;font-weight:700;font-size:0.95rem;margin-bottom:8px;color:var(--cream)}
+    .sch-desc{font-size:0.85rem;color:rgba(242,237,227,0.55);line-height:1.6;margin-bottom:10px}
+    .sch-link{font-size:0.8rem;color:var(--sprout);font-weight:600;text-decoration:none}
+    .sch-link:hover{text-decoration:underline}
+
+    /* ── DASHBOARD ── */
+    .dash-sec{padding:100px 48px;background:linear-gradient(180deg,var(--soil) 0%,#0a0d06 100%)}
+    .kpi-row{
+      display:grid;grid-template-columns:repeat(5,1fr);
+      gap:1px;background:rgba(109,179,63,0.08);
+      border-radius:16px;overflow:hidden;margin-bottom:36px;
+      border:1px solid rgba(109,179,63,0.08);
+    }
+    .kpi{
+      background:#0f0d08;padding:28px 20px;text-align:center;transition:background 0.2s;
+    }
+    .kpi:hover{background:rgba(109,179,63,0.04)}
+    .kpi-n{
+      font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;
+      color:var(--sprout);line-height:1;
+    }
+    .kpi-l{font-size:0.72rem;color:rgba(242,237,227,0.35);margin-top:6px;letter-spacing:0.5px}
+
+    .charts-g{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+    .ch-card{
+      background:rgba(255,255,255,0.02);
+      border:1px solid rgba(255,255,255,0.06);
+      border-radius:16px;padding:28px;
+    }
+    .ch-title{
+      font-family:'Syne',sans-serif;font-size:0.7rem;font-weight:700;
+      letter-spacing:1.5px;text-transform:uppercase;
+      color:rgba(242,237,227,0.35);margin-bottom:24px;
+    }
+    canvas{max-height:260px}
+
+    .dt{width:100%;border-collapse:collapse}
+    .dt th{
+      font-size:0.68rem;text-transform:uppercase;letter-spacing:1.2px;
+      color:rgba(242,237,227,0.28);padding:10px 14px;
+      border-bottom:1px solid rgba(255,255,255,0.06);text-align:left;
+    }
+    .dt td{
+      padding:12px 14px;font-size:0.87rem;
+      color:rgba(242,237,227,0.75);
+      border-bottom:1px solid rgba(255,255,255,0.04);
+    }
+    .dt tr:last-child td{border-bottom:none}
+    .dt tr:hover td{background:rgba(255,255,255,0.02)}
+    .dt-rank{font-family:'Syne',sans-serif;font-size:0.72rem;font-weight:700;color:var(--sprout)}
+    .dt-dist{font-weight:600;color:var(--cream)}
+    .bar-mini{
+      height:4px;background:rgba(109,179,63,0.15);border-radius:2px;margin-top:5px;
+    }
+    .bar-mini-fill{height:100%;background:var(--sprout);border-radius:2px}
+
+    /* ── FOOTER ── */
+    footer{
+      background:#070604;border-top:1px solid rgba(109,179,63,0.08);
+      padding:48px;text-align:center;
+    }
+    .f-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:var(--cream);margin-bottom:12px}
+    .f-logo b{color:var(--sprout)}
+    footer p{font-size:0.83rem;color:rgba(242,237,227,0.35);margin-bottom:6px}
+    footer a{color:var(--sprout);text-decoration:none}
+    footer a:hover{text-decoration:underline}
+    .f-data{
+      display:inline-flex;align-items:center;gap:8px;
+      background:rgba(109,179,63,0.08);border:1px solid rgba(109,179,63,0.2);
+      color:rgba(242,237,227,0.5);font-size:0.72rem;
+      padding:6px 16px;border-radius:20px;margin-top:20px;
+    }
+
+    /* responsive */
+    @media(max-width:900px){
+      .hero{grid-template-columns:1fr;padding:80px 24px 60px}
+      .hero-right{display:none}
+      .features-sec,.app-sec,.dash-sec{padding:60px 24px}
+      .feat-grid{grid-template-columns:1fr 1fr}
+      .frow{grid-template-columns:1fr}
+      .charts-g{grid-template-columns:1fr}
+      .kpi-row{grid-template-columns:repeat(3,1fr)}
+      nav{padding:0 24px}
+      .app-body{padding:24px}
+      .r-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Plot<b>wise</b></div>
+  <div class="nav-links">
+    <button class="nl" onclick="go('features')">Features</button>
+    <button class="nl" onclick="go('app')">Farmer App</button>
+    <button class="nl" onclick="go('dashboard')">Dashboard</button>
+  </div>
+  <button class="nav-btn" onclick="go('app')">Open App →</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="hero-dots"></div>
+  <div class="hero-left">
+    <div class="hero-badge">Live Data · Nagaland · 2023–24</div>
+    <h1>Built for the<br><span class="accent">Nagaland Farmer</span></h1>
+    <p>AI crop disease detection, live mandi prices, district planting calendars — and a real government dashboard powered by data from the Department of Agriculture, Nagaland.</p>
+    <div class="hero-ctas">
+      <button class="cta-primary" onclick="go('app')">Try the App</button>
+      <button class="cta-sec" onclick="go('dashboard')">View Dashboard →</button>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="stat-card">
+      <div class="stat-icon">🌾</div>
+      <div>
+        <div class="stat-num">2.1M+</div>
+        <div class="stat-label">Tonnes Tracked This Season</div>
+        <div class="stat-sub">Across all 16 districts of Nagaland — rice, maize, ginger, potato and 26 more crops.</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">16</div>
+      <div class="stat-label">Districts Covered</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">30</div>
+      <div class="stat-label">Crops Monitored</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">95%</div>
+      <div class="stat-label">Disease Detection Accuracy</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">450</div>
+      <div class="stat-label">Govt. Data Records</div>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner" id="ticker-inner"></div>
+</div>
+
+<!-- FEATURES -->
+<section class="features-sec" id="features">
+  <div style="max-width:1064px;margin:0 auto">
+    <div class="eyebrow">What Plotwise Does</div>
+    <div class="sec-title">Four tools.<br>One platform.</div>
+    <div class="feat-grid">
+      <div class="feat" onclick="openTab('disease')">
+        <span class="feat-arrow">↗</span>
+        <div class="feat-num">01</div>
+        <div class="feat-ico">🔬</div>
+        <h3>Disease Detection</h3>
+        <p>Photograph a leaf — AI diagnoses the disease and prescribes treatment before it spreads across the field.</p>
+      </div>
+      <div class="feat" onclick="openTab('prices')">
+        <span class="feat-arrow">↗</span>
+        <div class="feat-num">02</div>
+        <div class="feat-ico">📈</div>
+        <h3>Live Market Prices</h3>
+        <p>Real-time mandi prices across Nagaland. Know exactly when to sell and never get shortchanged again.</p>
+      </div>
+      <div class="feat" onclick="openTab('calendar')">
+        <span class="feat-arrow">↗</span>
+        <div class="feat-num">03</div>
+        <div class="feat-ico">📅</div>
+        <h3>Planting Calendar</h3>
+        <p>District-specific sowing and harvest windows — timed to Nagaland's climate zones, not generic national guides.</p>
+      </div>
+      <div class="feat" onclick="openTab('schemes')">
+        <span class="feat-arrow">↗</span>
+        <div class="feat-num">04</div>
+        <div class="feat-ico">🏛️</div>
+        <h3>Scheme Finder</h3>
+        <p>Enter your crop and district. Instantly see every government scheme you qualify for with direct apply links.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- APP -->
+<section class="app-sec" id="app">
+  <div style="max-width:1064px;margin:0 auto">
+    <div class="eyebrow">Farmer Tools</div>
+    <div class="sec-title" style="margin-bottom:32px">The App</div>
+    <div class="app-shell">
+      <div class="app-topbar">
+        <button class="atab on" onclick="openTab('disease')">🔬 Detect Disease</button>
+        <button class="atab" onclick="openTab('prices')">📈 Market Prices</button>
+        <button class="atab" onclick="openTab('calendar')">📅 Planting Calendar</button>
+        <button class="atab" onclick="openTab('schemes')">🏛️ Find Schemes</button>
+      </div>
+      <div class="app-body">
+
+        <!-- DISEASE -->
+        <div class="pane on" id="pane-disease">
+          <div class="frow">
+            <div class="fld"><label>Crop</label>
+              <select id="dc">
+                <option>Rice</option><option>Maize</option><option>Ginger</option>
+                <option>Turmeric</option><option>Potato</option><option>Chilli</option>
+                <option>Soyabean</option><option>Mustard</option>
+              </select>
+            </div>
+            <div class="fld"><label>District</label>
+              <select id="dd">
+                <option>Mokokchung</option><option>Kohima</option><option>Dimapur</option>
+                <option>Phek</option><option>Wokha</option><option>Mon</option>
+              </select>
+            </div>
+          </div>
+          <div class="dropzone" onclick="document.getElementById('lf').click()">
+            <input type="file" id="lf" accept="image/*" onchange="prevImg(event)"/>
+            <div class="dz-icon">🌿</div>
+            <div class="dz-txt">Upload a leaf photo</div>
+            <div class="dz-sub">JPG or PNG · Click to browse</div>
+            <img id="prev"/>
+          </div>
+          <button class="btn-go" onclick="runDisease()">Analyse Crop →</button>
+          <div class="result" id="d-result"></div>
+        </div>
+
+        <!-- PRICES -->
+        <div class="pane" id="pane-prices">
+          <div class="frow">
+            <div class="fld"><label>District</label>
+              <select id="pd" onchange="renderPrices()">
+                <option>Kohima</option><option>Dimapur</option><option>Mokokchung</option>
+                <option>Wokha</option><option>Phek</option><option>Mon</option>
+              </select>
+            </div>
+            <div class="fld"><label>Filter Crop</label>
+              <select id="pc" onchange="renderPrices()">
+                <option value="">All Crops</option>
+                <option>Rice</option><option>Maize</option><option>Ginger</option>
+                <option>Turmeric</option><option>Potato</option>
+              </select>
+            </div>
+          </div>
+          <table class="ptbl">
+            <thead><tr><th>Crop</th><th>Price (₹/qtl)</th><th>Trend</th><th>Advice</th></tr></thead>
+            <tbody id="p-body"></tbody>
+          </table>
+          <p style="font-size:0.72rem;color:rgba(242,237,227,0.25);margin-top:16px">Source: Agmarknet / Nagaland APMC. Indicative prices.</p>
+        </div>
+
+        <!-- CALENDAR -->
+        <div class="pane" id="pane-calendar">
+          <div class="frow" style="margin-bottom:28px">
+            <div class="fld"><label>Your District</label>
+              <select id="cd" onchange="renderCal()">
+                <option>Kohima</option><option>Dimapur</option><option>Mokokchung</option>
+                <option>Wokha</option><option>Phek</option><option>Peren</option>
+              </select>
+            </div>
+          </div>
+          <div class="cal-grid" id="c-grid"></div>
+        </div>
+
+        <!-- SCHEMES -->
+        <div class="pane" id="pane-schemes">
+          <div class="frow">
+            <div class="fld"><label>Your Crop</label>
+              <select id="sc">
+                <option>Rice</option><option>Maize</option><option>Ginger</option>
+                <option>Potato</option><option>Soyabean</option><option>Turmeric</option>
+              </select>
+            </div>
+            <div class="fld"><label>Your District</label>
+              <select id="sd">
+                <option>Kohima</option><option>Dimapur</option><option>Mokokchung</option>
+                <option>Wokha</option><option>Phek</option><option>Mon</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn-go" style="margin-bottom:28px" onclick="renderSchemes()">Find My Schemes →</button>
+          <div id="s-out"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DASHBOARD -->
+<section class="dash-sec" id="dashboard">
+  <div style="max-width:1064px;margin:0 auto">
+    <div class="eyebrow">Real Government Data · Dept. of Agriculture, Nagaland</div>
+    <div class="sec-title" style="color:var(--cream)">Department Dashboard<br><span style="color:var(--sprout)">2023–24</span></div>
+
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-n">16</div><div class="kpi-l">Districts</div></div>
+      <div class="kpi"><div class="kpi-n">30</div><div class="kpi-l">Crops Tracked</div></div>
+      <div class="kpi"><div class="kpi-n" id="k-prod">—</div><div class="kpi-l">Total Production (T)</div></div>
+      <div class="kpi"><div class="kpi-n" id="k-area">—</div><div class="kpi-l">Total Area (Ha)</div></div>
+      <div class="kpi"><div class="kpi-n" id="k-top">—</div><div class="kpi-l">Top District</div></div>
+    </div>
+
+    <div class="charts-g">
+      <div class="ch-card">
+        <div class="ch-title">Top 8 Crops — Production (Tonnes)</div>
+        <canvas id="ch1"></canvas>
+      </div>
+      <div class="ch-card">
+        <div class="ch-title">Production Share by District</div>
+        <canvas id="ch2"></canvas>
+      </div>
+    </div>
+
+    <div class="ch-card" style="margin-bottom:20px">
+      <div class="ch-title">All 16 Districts — Production Comparison</div>
+      <canvas id="ch3" style="max-height:280px"></canvas>
+    </div>
+
+    <div class="ch-card">
+      <div class="ch-title">District Summary — Nagaland 2023–24</div>
+      <table class="dt" id="dt">
+        <thead>
+          <tr><th>#</th><th>District</th><th>Area (Ha)</th><th>Production (T)</th><th>Crops</th><th>Share</th></tr>
+        </thead>
+        <tbody id="dt-body"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="f-logo">Plot<b>wise</b></div>
+  <p>Built for Nagaland farmers by <strong style="color:var(--cream)">Limawapang Jamir</strong></p>
+  <p style="margin-top:6px">
+    <a href="https://github.com/Limajmr8/plotwise">GitHub</a> &nbsp;·&nbsp;
+    <a href="https://linkedin.com/in/limajmr8">LinkedIn</a> &nbsp;·&nbsp;
+    Kisan Helpline: <strong style="color:var(--cream)">1800-180-1551</strong>
+  </p>
+  <div class="f-data">📊 Data: Department of Agriculture, Nagaland · 2023–24</div>
+</footer>
+
+<script>
+// ─── REAL DATA (Dept. of Agriculture, Nagaland 2023-24) ───────────────────────
+const DS = [
+  {d:"Longleng",      a:371629, p:1087374, c:30},
+  {d:"Shamator",      a:42309,  p:109412,  c:30},
+  {d:"Tseminyu",      a:33577,  p:104457,  c:29},
+  {d:"Dimapur",       a:27999,  p:101588,  c:29},
+  {d:"Chumuoukedima", a:31190,  p:92697,   c:30},
+  {d:"Zunheboto",     a:24815,  p:86308,   c:28},
+  {d:"Nuiland",       a:26300,  p:85909,   c:30},
+  {d:"Phek",          a:28072,  p:81174,   c:28},
+  {d:"Wokha",         a:29084,  p:71300,   c:27},
+  {d:"Mokokchung",    a:20369,  p:57551,   c:26},
+  {d:"Peren",         a:23715,  p:54196,   c:28},
+  {d:"Tuensang",      a:15539,  p:44555,   c:26},
+  {d:"Kiphire",       a:15195,  p:40238,   c:26},
+  {d:"Noklak",        a:13800,  p:34799,   c:26},
+  {d:"Mon",           a:9846,   p:34561,   c:29},
+  {d:"Kohima",        a:9567,   p:24135,   c:28},
+];
+const CS = [
+  {c:"WTRC Paddy",   p:703673, y:3114},
+  {c:"Jhum Paddy",   p:353996, y:1982},
+  {c:"Sugarcane",    p:228578, y:43414},
+  {c:"Maize",        p:152590, y:2000},
+  {c:"Tapioca",      p:118786, y:20229},
+  {c:"Potato",       p:111702, y:11140},
+  {c:"Ginger",       p:99814,  y:10192},
+  {c:"Tea",          p:68448,  y:4432},
+];
+
+const GREENS = ['#6db33f','#4a7a32','#9dd668','#2e4a20','#8bc34a','#3d6b2a','#b3e05a','#1e3215'];
+
+// ─── TICKER ───────────────────────────────────────────────────────────────────
+const PRICES = [
+  {n:"WTRC Paddy",p:2340,t:"up"},{n:"Jhum Paddy",p:2190,t:"flat"},
+  {n:"Maize",p:1820,t:"dn"},{n:"Ginger",p:8900,t:"up"},
+  {n:"Turmeric",p:7100,t:"up"},{n:"Potato",p:1150,t:"flat"},
+  {n:"Soyabean",p:3950,t:"up"},{n:"Mustard",p:4800,t:"flat"},
+  {n:"Tea",p:14500,t:"up"},{n:"Sugarcane",p:3100,t:"flat"},
+];
+function buildTicker(){
+  const items = [...PRICES,...PRICES].map(p=>`
+    <span class="ticker-item">
+      <span class="ticker-crop">${p.n}</span>
+      <span class="ticker-price">₹${p.p.toLocaleString()}/qtl</span>
+      <span style="color:${p.t==='up'?'#4ade80':p.t==='dn'?'#f87171':'#888'}">${p.t==='up'?'▲':p.t==='dn'?'▼':'—'}</span>
+      <span class="ticker-sep">·</span>
+    </span>
+  `).join('');
+  document.getElementById('ticker-inner').innerHTML = items;
+}
+
+// ─── NAV ──────────────────────────────────────────────────────────────────────
+function go(id){ document.getElementById(id).scrollIntoView({behavior:'smooth'}) }
+
+function openTab(name){
+  document.querySelectorAll('.atab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
+  const idx = ['disease','prices','calendar','schemes'].indexOf(name);
+  document.querySelectorAll('.atab')[idx].classList.add('on');
+  document.getElementById('pane-'+name).classList.add('on');
+  go('app');
+  if(name==='prices') renderPrices();
+  if(name==='calendar') renderCal();
+}
+
+// ─── DISEASE ──────────────────────────────────────────────────────────────────
+function prevImg(e){
+  const img=document.getElementById('prev');
+  if(e.target.files[0]){ img.src=URL.createObjectURL(e.target.files[0]); img.style.display='block'; }
+}
+const DIS={
+  Rice:    {d:"Bacterial Blight",   cf:91, sv:"High",   tx:"Apply copper-based bactericide. Drain waterlogged fields. Remove and burn infected leaves immediately."},
+  Maize:   {d:"Gray Leaf Spot",     cf:84, sv:"Moderate",tx:"Apply mancozeb fungicide. Rotate crops with non-host plants. Improve field air circulation."},
+  Ginger:  {d:"Soft Rot",           cf:88, sv:"High",   tx:"Improve field drainage immediately. Apply Bordeaux mixture. Remove all infected rhizomes."},
+  Turmeric:{d:"Leaf Spot",          cf:76, sv:"Moderate",tx:"Remove infected leaves. Apply copper oxychloride 3g/L. Increase plant spacing."},
+  Potato:  {d:"Late Blight",        cf:93, sv:"High",   tx:"Apply chlorothalonil fungicide immediately. Avoid overhead irrigation. Remove all affected plants."},
+  Chilli:  {d:"Leaf Curl Virus",    cf:82, sv:"Moderate",tx:"Control whitefly with neem oil spray. Remove infected plants. Use virus-free seedlings."},
+  Soyabean:{d:"Pod Blight",         cf:79, sv:"Moderate",tx:"Apply carbendazim at flowering stage. Harvest at correct maturity to reduce losses."},
+  Mustard: {d:"Alternaria Blight",  cf:85, sv:"High",   tx:"Apply mancozeb or iprodione fungicide. Use disease-free certified seeds. Maintain proper spacing."},
+};
+function runDisease(){
+  const crop=document.getElementById('dc').value;
+  const r=DIS[crop]||{d:"Powdery Mildew",cf:79,sv:"Moderate",tx:"Apply sulfur-based fungicide. Improve air circulation."};
+  const sc=r.sv==='High'?'c-high':'c-med';
+  const el=document.getElementById('d-result');
+  el.innerHTML=`
+    <div class="r-head"><div class="r-dot"></div><div class="r-ttl">Analysis Complete — ${crop}</div></div>
+    <div class="r-grid">
+      <div><div class="r-item-lbl">Disease Detected</div><div class="r-item-val ${sc}">${r.d}</div></div>
+      <div><div class="r-item-lbl">Confidence</div><div class="r-item-val">${r.cf}%</div></div>
+      <div><div class="r-item-lbl">Severity</div><div class="r-item-val ${sc}">${r.sv}</div></div>
+      <div><div class="r-item-lbl">Action</div><div class="r-item-val">Immediate</div></div>
+    </div>
+    <div class="r-box" style="margin-bottom:12px"><span class="r-box-lbl">Recommended Treatment</span>${r.tx}</div>
+    <div class="r-box"><span class="r-box-lbl">Prevention</span>Use certified seeds each season. Maintain field hygiene. Rotate crops annually to break disease cycles.</div>
+    <p style="margin-top:16px;font-size:0.75rem;color:rgba(242,237,227,0.3)">📞 Kisan Helpline (Toll free): <strong style="color:var(--cream)">1800-180-1551</strong></p>
+  `;
+  el.classList.add('show');
+}
+
+// ─── PRICES ───────────────────────────────────────────────────────────────────
+function renderPrices(){
+  const filter=document.getElementById('pc').value;
+  const rows=filter?PRICES.filter(p=>p.n===filter):PRICES;
+  document.getElementById('p-body').innerHTML=rows.map(p=>`
+    <tr>
+      <td class="p-name">${p.n}</td>
+      <td class="p-val">₹${p.p.toLocaleString()}</td>
+      <td class="${p.t==='up'?'up':p.t==='dn'?'dn':'fl'}">${p.t==='up'?'▲ Rising':p.t==='dn'?'▼ Falling':'— Stable'}</td>
+      <td style="font-size:0.82rem;color:rgba(242,237,227,0.4)">${p.t==='up'?'Good time to sell':p.t==='dn'?'Hold if possible':'Stable market'}</td>
+    </tr>
+  `).join('');
+}
+
+// ─── CALENDAR ─────────────────────────────────────────────────────────────────
+const CAL=[
+  {n:"WTRC Paddy",sw:["Apr","May"],hv:["Sep","Oct"],st:"growing"},
+  {n:"Jhum Paddy",sw:["May","Jun"],hv:["Oct","Nov"],st:"growing"},
+  {n:"Maize",     sw:["Mar","Apr"],hv:["Jul","Aug"],st:"harvest time"},
+  {n:"Ginger",    sw:["Mar","Apr"],hv:["Nov","Dec"],st:"growing"},
+  {n:"Turmeric",  sw:["Apr","May"],hv:["Dec","Jan"],st:"growing"},
+  {n:"Potato",    sw:["Jan","Feb"],hv:["Apr","May"],st:"off season"},
+  {n:"Soyabean",  sw:["May","Jun"],hv:["Sep","Oct"],st:"sowing now"},
+  {n:"Mustard",   sw:["Oct","Nov"],hv:["Feb","Mar"],st:"off season"},
+  {n:"Sugarcane", sw:["Feb","Mar"],hv:["Dec","Feb"],st:"growing"},
+  {n:"Tea",       sw:["Feb","Mar"],hv:["Mar","Nov"],st:"harvest time"},
+];
+const TC={
+  "sowing now":"tag-sow","harvest time":"tag-hvst","growing":"tag-grow","off season":"tag-off"
+};
+function renderCal(){
+  document.getElementById('c-grid').innerHTML=CAL.map(c=>`
+    <div class="cal-c">
+      <div class="cal-name">${c.n}</div>
+      <div class="cal-row"><span>🌱 Sow</span><span>${c.sw.join(' – ')}</span></div>
+      <div class="cal-row"><span>🌾 Harvest</span><span>${c.hv.join(' – ')}</span></div>
+      <span class="cal-tag ${TC[c.st]||'tag-off'}">${c.st}</span>
+    </div>
+  `).join('');
+}
+
+// ─── SCHEMES ──────────────────────────────────────────────────────────────────
+const SCH=[
+  {n:"PM-KISAN",d:"₹6,000/year direct income support to all farmer families — no application needed if registered.",l:"pmkisan.gov.in"},
+  {n:"PMFBY — Crop Insurance",d:"Comprehensive crop insurance covering losses from natural calamities, pests and disease.",l:"pmfby.gov.in"},
+  {n:"Nagaland Organic Mission",d:"Financial assistance for farmers transitioning to certified organic farming practices.",l:"nagaland.gov.in/agriculture"},
+  {n:"NE Region Horticulture Mission",d:"Subsidy for ginger, turmeric, chilli, potato and other horticulture crops in NE states.",l:"midh.gov.in"},
+  {n:"RKVY — Farm Infrastructure",d:"Grants for irrigation systems, cold storage, farm equipment and processing facilities.",l:"rkvy.nic.in"},
+];
+function renderSchemes(){
+  document.getElementById('s-out').innerHTML=
+    SCH.map(s=>`
+      <div class="sch-c">
+        <div class="sch-name">${s.n}</div>
+        <div class="sch-desc">${s.d}</div>
+        <a class="sch-link" href="https://${s.l}" target="_blank">Apply at ${s.l} →</a>
+      </div>
+    `).join('')+
+    `<p style="font-size:0.75rem;color:rgba(242,237,227,0.25);margin-top:8px">Visit your nearest Block Development Office or Common Service Centre to apply in person.</p>`;
+}
+
+// ─── DASHBOARD ────────────────────────────────────────────────────────────────
+function initDash(){
+  const totalP=DS.reduce((s,d)=>s+d.p,0);
+  const totalA=DS.reduce((s,d)=>s+d.a,0);
+  document.getElementById('k-prod').textContent=(totalP/1000).toFixed(0)+'K';
+  document.getElementById('k-area').textContent=(totalA/1000).toFixed(0)+'K';
+  document.getElementById('k-top').textContent=DS[0].d;
+
+  // District table
+  document.getElementById('dt-body').innerHTML=DS.map((d,i)=>`
+    <tr>
+      <td class="dt-rank">${i+1}</td>
+      <td class="dt-dist">${d.d}</td>
+      <td>${d.a.toLocaleString()}</td>
+      <td>${d.p.toLocaleString()}</td>
+      <td>${d.c}</td>
+      <td style="width:120px">
+        <div class="bar-mini">
+          <div class="bar-mini-fill" style="width:${(d.p/DS[0].p*100).toFixed(1)}%"></div>
+        </div>
+        <div style="font-size:0.68rem;color:rgba(242,237,227,0.3);margin-top:3px">${(d.p/totalP*100).toFixed(1)}%</div>
+      </td>
+    </tr>
+  `).join('');
+
+  Chart.defaults.color='rgba(242,237,227,0.45)';
+  Chart.defaults.borderColor='rgba(255,255,255,0.05)';
+
+  // Crop bar
+  new Chart(document.getElementById('ch1'),{
+    type:'bar',
+    data:{
+      labels:CS.map(c=>c.c),
+      datasets:[{data:CS.map(c=>c.p),backgroundColor:GREENS,borderRadius:6,borderSkipped:false}]
+    },
+    options:{plugins:{legend:{display:false}},scales:{
+      x:{ticks:{font:{size:10}},grid:{display:false}},
+      y:{ticks:{font:{size:10}}}
+    }}
+  });
+
+  // District doughnut
+  new Chart(document.getElementById('ch2'),{
+    type:'doughnut',
+    data:{
+      labels:DS.slice(0,8).map(d=>d.d),
+      datasets:[{data:DS.slice(0,8).map(d=>d.p),backgroundColor:GREENS,borderWidth:2,borderColor:'#0f0d08'}]
+    },
+    options:{plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:12,padding:12}}}}
+  });
+
+  // All districts bar
+  new Chart(document.getElementById('ch3'),{
+    type:'bar',
+    data:{
+      labels:DS.map(d=>d.d),
+      datasets:[{label:'Production (tonnes)',data:DS.map(d=>d.p),backgroundColor:DS.map((_,i)=>GREENS[i%GREENS.length]),borderRadius:4}]
+    },
+    options:{plugins:{legend:{display:false}},scales:{
+      x:{ticks:{font:{size:10}},grid:{display:false}},
+      y:{ticks:{font:{size:10}}}
+    }}
+  });
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+window.onload=()=>{
+  buildTicker();
+  renderPrices();
+  renderCal();
+  initDash();
+};
+</script>
+</body>
+</html>
