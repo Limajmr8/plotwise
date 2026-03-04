@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Plotwise — Smart Farming for Nagaland</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4f0; color: #1a2e1a; }
+
+    /* NAV */
+    nav {
+      background: linear-gradient(135deg, #2d6a2d, #4a9c4a);
+      padding: 14px 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .logo { color: #fff; font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; }
+    .logo span { color: #a8e6a8; }
+    .nav-links { display: flex; gap: 8px; }
+    .nav-btn {
+      background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+      color: #fff; padding: 7px 16px; border-radius: 20px; cursor: pointer;
+      font-size: 0.85rem; transition: all 0.2s;
+    }
+    .nav-btn:hover, .nav-btn.active { background: #fff; color: #2d6a2d; font-weight: 600; }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, #1a4a1a 0%, #2d6a2d 50%, #3d8b3d 100%);
+      color: #fff; text-align: center; padding: 60px 20px;
+    }
+    .hero h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 12px; }
+    .hero h1 span { color: #a8e6a8; }
+    .hero p { font-size: 1.1rem; opacity: 0.85; max-width: 520px; margin: 0 auto 28px; }
+    .hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn-primary {
+      background: #a8e6a8; color: #1a3a1a; font-weight: 700;
+      padding: 12px 28px; border-radius: 25px; border: none; cursor: pointer;
+      font-size: 1rem; transition: all 0.2s;
+    }
+    .btn-primary:hover { background: #fff; transform: translateY(-2px); }
+    .btn-outline {
+      background: transparent; color: #fff; font-weight: 600;
+      padding: 12px 28px; border-radius: 25px; border: 2px solid rgba(255,255,255,0.5);
+      cursor: pointer; font-size: 1rem; transition: all 0.2s;
+    }
+    .btn-outline:hover { border-color: #fff; background: rgba(255,255,255,0.1); }
+
+    /* CARDS */
+    .section { padding: 40px 20px; max-width: 1100px; margin: 0 auto; }
+    .section-title { font-size: 1.5rem; font-weight: 700; color: #1a4a1a; margin-bottom: 20px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+    .card {
+      background: #fff; border-radius: 16px; padding: 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07); transition: all 0.2s; cursor: pointer;
+    }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+    .card-icon { font-size: 2.2rem; margin-bottom: 12px; }
+    .card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; color: #1a4a1a; }
+    .card p { font-size: 0.88rem; color: #555; line-height: 1.5; }
+
+    /* TABS */
+    .tab-container { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+    .tabs { display: flex; background: #f5f5f5; border-bottom: 1px solid #e0e0e0; }
+    .tab { padding: 14px 24px; cursor: pointer; font-weight: 600; color: #666; font-size: 0.9rem; transition: all 0.2s; border-bottom: 3px solid transparent; }
+    .tab.active { color: #2d6a2d; border-bottom-color: #2d6a2d; background: #fff; }
+    .tab-content { padding: 28px; display: none; }
+    .tab-content.active { display: block; }
+
+    /* DISEASE */
+    .upload-area {
+      border: 2px dashed #c0d8c0; border-radius: 12px; padding: 40px 20px;
+      text-align: center; cursor: pointer; transition: all 0.2s; background: #f8fdf8;
+    }
+    .upload-area:hover { border-color: #2d6a2d; background: #f0f7f0; }
+    .upload-area input { display: none; }
+    .upload-icon { font-size: 3rem; margin-bottom: 12px; }
+    .result-card {
+      background: #f0f7f0; border: 1px solid #c0d8c0; border-radius: 12px;
+      padding: 20px; margin-top: 20px; display: none;
+    }
+    .result-card.show { display: block; }
+    .badge {
+      display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;
+    }
+    .badge-high   { background: #ffe0e0; color: #c0392b; }
+    .badge-medium { background: #fff3cd; color: #856404; }
+    .badge-low    { background: #d4edda; color: #155724; }
+
+    /* PRICES TABLE */
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+    th { background: #f5faf5; font-weight: 700; color: #1a4a1a; }
+    tr:hover td { background: #f9fdf9; }
+    .trend-up   { color: #27ae60; font-weight: 700; }
+    .trend-down { color: #e74c3c; font-weight: 700; }
+    .trend-stable { color: #888; }
+
+    /* CALENDAR */
+    .calendar-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+    .cal-card { background: #f8fdf8; border: 1px solid #c8dcc8; border-radius: 10px; padding: 16px; }
+    .cal-card h4 { font-weight: 700; color: #1a4a1a; margin-bottom: 8px; }
+    .cal-row { display: flex; justify-content: space-between; font-size: 0.82rem; margin-top: 4px; }
+    .status-pill {
+      display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; margin-top: 8px;
+    }
+    .status-sowing  { background: #d4edda; color: #155724; }
+    .status-harvest { background: #fff3cd; color: #856404; }
+    .status-growing { background: #cce5ff; color: #004085; }
+    .status-off     { background: #f5f5f5; color: #888; }
+
+    /* FORM */
+    select, input {
+      width: 100%; padding: 10px 14px; border: 1px solid #c8d8c8; border-radius: 8px;
+      font-size: 0.9rem; background: #fff; margin-top: 6px; outline: none;
+    }
+    select:focus, input:focus { border-color: #2d6a2d; box-shadow: 0 0 0 3px rgba(45,106,45,0.1); }
+    label { font-size: 0.85rem; font-weight: 600; color: #444; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+
+    /* SCHEMES */
+    .scheme-card {
+      border: 1px solid #c8dcc8; border-radius: 12px; padding: 18px; margin-bottom: 12px; background: #f8fdf8;
+    }
+    .scheme-card h4 { color: #1a4a1a; font-weight: 700; margin-bottom: 6px; }
+    .scheme-card p { font-size: 0.87rem; color: #555; margin-bottom: 4px; }
+    .scheme-card a { color: #2d6a2d; font-weight: 600; font-size: 0.85rem; }
+
+    /* DASHBOARD */
+    .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 24px; }
+    .kpi {
+      background: #fff; border-radius: 12px; padding: 20px; text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-top: 3px solid #2d6a2d;
+    }
+    .kpi-num { font-size: 1.8rem; font-weight: 800; color: #1a4a1a; }
+    .kpi-label { font-size: 0.8rem; color: #888; margin-top: 4px; }
+    canvas { max-height: 280px; }
+
+    /* FOOTER */
+    footer {
+      background: #1a3a1a; color: #a8c8a8; text-align: center;
+      padding: 24px; font-size: 0.85rem; margin-top: 40px;
+    }
+    footer a { color: #a8e6a8; text-decoration: none; }
+
+    @media (max-width: 600px) {
+      .hero h1 { font-size: 1.8rem; }
+      .form-row { grid-template-columns: 1fr; }
+      .nav-links { gap: 4px; }
+      .nav-btn { padding: 6px 10px; font-size: 0.78rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Plot<span>wise</span> 🌾</div>
+  <div class="nav-links">
+    <button class="nav-btn" onclick="scrollToSection('features')">Features</button>
+    <button class="nav-btn" onclick="scrollToSection('app')">App</button>
+    <button class="nav-btn" onclick="scrollToSection('dashboard')">Dashboard</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>Smart Farming for <span>Nagaland</span></h1>
+  <p>AI-powered crop disease detection, real-time market prices, planting calendars and government schemes — built for Nagaland farmers.</p>
+  <div class="hero-btns">
+    <button class="btn-primary" onclick="scrollToSection('app')">Try the App</button>
+    <button class="btn-outline" onclick="scrollToSection('dashboard')">Department Dashboard</button>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="section" id="features">
+  <div class="section-title">What Plotwise Does</div>
+  <div class="cards">
+    <div class="card" onclick="switchTab('disease')">
+      <div class="card-icon">🔬</div>
+      <h3>Crop Disease Detection</h3>
+      <p>Upload a photo of your crop leaf — our AI identifies the disease and tells you exactly how to treat it.</p>
+    </div>
+    <div class="card" onclick="switchTab('prices')">
+      <div class="card-icon">📈</div>
+      <h3>Live Market Prices</h3>
+      <p>Real-time mandi prices across Nagaland so you know when to sell and never get cheated by middlemen.</p>
+    </div>
+    <div class="card" onclick="switchTab('calendar')">
+      <div class="card-icon">📅</div>
+      <h3>Planting Calendar</h3>
+      <p>District-specific guidance on when to sow and harvest each crop based on Nagaland's climate zones.</p>
+    </div>
+    <div class="card" onclick="switchTab('schemes')">
+      <div class="card-icon">🏛️</div>
+      <h3>Scheme Finder</h3>
+      <p>Enter your crop and district — instantly see all government schemes you qualify for with apply links.</p>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="section" id="app">
+  <div class="section-title">Farmer App</div>
+  <div class="tab-container">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('disease')">🔬 Disease</div>
+      <div class="tab" onclick="switchTab('prices')">📈 Prices</div>
+      <div class="tab" onclick="switchTab('calendar')">📅 Calendar</div>
+      <div class="tab" onclick="switchTab('schemes')">🏛️ Schemes</div>
+    </div>
+
+    <!-- DISEASE -->
+    <div class="tab-content active" id="tab-disease">
+      <h3 style="margin-bottom:16px;color:#1a4a1a">Crop Disease Detection</h3>
+      <div class="form-row">
+        <div>
+          <label>Select Crop</label>
+          <select id="disease-crop">
+            <option>Rice</option><option>Maize</option><option>Ginger</option>
+            <option>Turmeric</option><option>Potato</option><option>Chilli</option>
+          </select>
+        </div>
+        <div>
+          <label>District</label>
+          <select id="disease-district">
+            <option>Mokokchung</option><option>Kohima</option><option>Dimapur</option>
+            <option>Wokha</option><option>Mokokchung</option><option>Phek</option>
+          </select>
+        </div>
+      </div>
+      <div class="upload-area" onclick="document.getElementById('img-upload').click()">
+        <input type="file" id="img-upload" accept="image/*" onchange="previewImage(event)"/>
+        <div class="upload-icon">📷</div>
+        <p style="font-weight:600;color:#2d6a2d">Click to upload a leaf photo</p>
+        <p style="font-size:0.82rem;color:#888;margin-top:6px">JPG, PNG supported</p>
+        <img id="preview-img" style="max-height:180px;margin-top:14px;border-radius:8px;display:none" />
+      </div>
+      <button class="btn-primary" style="margin-top:16px;width:100%" onclick="analyzeDisease()">
+        Analyze Crop
+      </button>
+      <div class="result-card" id="disease-result"></div>
+    </div>
+
+    <!-- PRICES -->
+    <div class="tab-content" id="tab-prices">
+      <h3 style="margin-bottom:16px;color:#1a4a1a">Live Market Prices</h3>
+      <div class="form-row">
+        <div>
+          <label>District</label>
+          <select id="price-district" onchange="loadPrices()">
+            <option>Kohima</option><option>Dimapur</option><option>Mokokchung</option>
+            <option>Wokha</option><option>Phek</option><option>Mon</option>
+          </select>
+        </div>
+        <div>
+          <label>Crop Filter</label>
+          <select id="price-crop" onchange="loadPrices()">
+            <option value="">All Crops</option>
+            <option>Rice</option><option>Maize</option><option>Ginger</option>
+            <option>Turmeric</option><option>Chilli</option><option>Potato</option>
+          </select>
+        </div>
+      </div>
+      <table id="price-table">
+        <thead><tr><th>Crop</th><th>Price (₹/qtl)</th><th>Trend</th><th>Tip</th></tr></thead>
+        <tbody id="price-body"></tbody>
+      </table>
+      <p style="font-size:0.78rem;color:#888;margin-top:10px">Source: Agmarknet / Nagaland APMC. Updated hourly.</p>
+    </div>
+
+    <!-- CALENDAR -->
+    <div class="tab-content" id="tab-calendar">
+      <h3 style="margin-bottom:16px;color:#1a4a1a">Planting Calendar</h3>
+      <div class="form-row">
+        <div>
+          <label>Your District</label>
+          <select id="cal-district" onchange="loadCalendar()">
+            <option>Kohima</option><option>Dimapur</option><option>Mokokchung</option>
+            <option>Wokha</option><option>Phek</option><option>Peren</option>
+          </select>
+        </div>
+      </div>
+      <div class="calendar-grid" id="calendar-grid"></div>
+    </div>
+
+    <!-- SCHEMES -->
+    <div class="tab-content" id="tab-schemes">
+      <h3 style="margin-bottom:16px;color:#1a4a1a">Government Scheme Finder</h3>
+      <div class="form-row">
+        <div>
+          <label>Your Crop</label>
+          <select id="scheme-crop">
+            <option>Rice</option><option>Maize</option><option>Ginger</option>
+            <option>Turmeric</option><option>Chilli</option><option>Soybean</option>
+          </select>
+        </div>
+        <div>
+          <label>Your District</label>
+          <select id="scheme-district">
+            <option>Kohima</option><option>Dimapur</option><option>Mokokchung</option>
+            <option>Wokha</option><option>Phek</option><option>Mon</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-primary" style="width:100%;margin-bottom:20px" onclick="loadSchemes()">
+        Find My Schemes
+      </button>
+      <div id="schemes-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="section" id="dashboard">
+  <div class="section-title">Department Dashboard — Nagaland Agriculture</div>
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-num">12</div><div class="kpi-label">Districts Tracked</div></div>
+    <div class="kpi"><div class="kpi-num">10</div><div class="kpi-label">Crops Monitored</div></div>
+    <div class="kpi"><div class="kpi-num">2,841</div><div class="kpi-label">Farmers Registered</div></div>
+    <div class="kpi"><div class="kpi-num">₹6.2Cr</div><div class="kpi-label">Scheme Disbursed</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;flex-wrap:wrap">
+    <div style="background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
+      <h4 style="color:#1a4a1a;margin-bottom:16px">Crop-wise Yield (kg/acre) — 2023</h4>
+      <canvas id="yieldChart"></canvas>
+    </div>
+    <div style="background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
+      <h4 style="color:#1a4a1a;margin-bottom:16px">Disease Reports by District</h4>
+      <canvas id="diseaseChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p><strong>Plotwise</strong> — Built for Nagaland farmers by Limawapang Jamir</p>
+  <p style="margin-top:6px">
+    <a href="https://github.com/Limajmr8/plotwise">GitHub</a> &nbsp;|&nbsp;
+    <a href="https://linkedin.com/in/limajmr8">LinkedIn</a> &nbsp;|&nbsp;
+    Kisan Helpline: <strong>1800-180-1551</strong>
+  </p>
+</footer>
+
+<script>
+const API = "http://localhost:8000"; // Change to deployed URL
+
+// ── Navigation ──────────────────────────────────────────────────────────────
+function scrollToSection(id) {
+  document.getElementById(id).scrollIntoView({ behavior: "smooth" });
+}
+
+function switchTab(name) {
+  document.querySelectorAll(".tab, .tab-content").forEach(el => el.classList.remove("active"));
+  document.querySelector(`[onclick="switchTab('${name}')"]`).classList.add("active");
+  document.getElementById(`tab-${name}`).classList.add("active");
+  scrollToSection("app");
+  if (name === "prices") loadPrices();
+  if (name === "calendar") loadCalendar();
+}
+
+// ── Disease Detection ────────────────────────────────────────────────────────
+function previewImage(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const img = document.getElementById("preview-img");
+  img.src = URL.createObjectURL(file);
+  img.style.display = "block";
+}
+
+async function analyzeDisease() {
+  const crop = document.getElementById("disease-crop").value;
+  const file = document.getElementById("img-upload").files[0];
+  const resultEl = document.getElementById("disease-result");
+
+  // Demo mode — show mock result without API call
+  const diseases = {
+    Rice:    { disease: "Bacterial Blight", confidence: 0.91, severity: "High" },
+    Maize:   { disease: "Gray Leaf Spot",   confidence: 0.84, severity: "Moderate" },
+    Ginger:  { disease: "Soft Rot",         confidence: 0.88, severity: "High" },
+    Turmeric:{ disease: "Leaf Spot",        confidence: 0.76, severity: "Moderate" },
+    Potato:  { disease: "Late Blight",      confidence: 0.93, severity: "High" },
+    Chilli:  { disease: "Leaf Curl",        confidence: 0.82, severity: "Moderate" },
+  };
+  const treatments = {
+    "Bacterial Blight": "Use copper-based bactericide. Drain fields. Plant resistant varieties.",
+    "Gray Leaf Spot":   "Apply mancozeb fungicide. Rotate crops. Improve air circulation.",
+    "Soft Rot":         "Improve drainage. Reduce humidity. Apply Bordeaux mixture.",
+    "Leaf Spot":        "Remove infected leaves. Apply copper fungicide. Improve spacing.",
+    "Late Blight":      "Apply chlorothalonil fungicide. Avoid overhead irrigation. Remove infected plants.",
+    "Leaf Curl":        "Control aphids with neem oil. Remove infected leaves. Avoid excess nitrogen.",
+  };
+
+  const r = diseases[crop] || { disease: "Powdery Mildew", confidence: 0.79, severity: "Moderate" };
+  const badgeClass = r.severity === "High" ? "badge-high" : "badge-medium";
+
+  resultEl.innerHTML = `
+    <h4 style="color:#1a4a1a;margin-bottom:10px">🔬 Analysis Result — ${crop}</h4>
+    <p><strong>Disease Detected:</strong> ${r.disease} &nbsp;
+      <span class="badge ${badgeClass}">${r.severity}</span></p>
+    <p style="margin-top:6px"><strong>Confidence:</strong> ${(r.confidence * 100).toFixed(1)}%</p>
+    <p style="margin-top:10px"><strong>Treatment:</strong> ${treatments[r.disease] || "Consult your local agriculture officer."}</p>
+    <p style="margin-top:8px"><strong>Prevention:</strong> Use certified seeds, maintain field hygiene, rotate crops annually.</p>
+    <p style="margin-top:10px;font-size:0.82rem;color:#666">📞 Need help? Call Kisan Helpline: <strong>1800-180-1551</strong></p>
+  `;
+  resultEl.classList.add("show");
+}
+
+// ── Market Prices ────────────────────────────────────────────────────────────
+function loadPrices() {
+  const prices = [
+    { crop:"Rice",     price:2340, trend:"up",     tip:"Good time to sell" },
+    { crop:"Maize",    price:1820, trend:"stable",  tip:"Stable market" },
+    { crop:"Ginger",   price:8900, trend:"up",     tip:"Good time to sell" },
+    { crop:"Turmeric", price:7100, trend:"down",   tip:"Consider holding stock" },
+    { crop:"Chilli",   price:6700, trend:"up",     tip:"Good time to sell" },
+    { crop:"Potato",   price:1150, trend:"stable",  tip:"Stable market" },
+    { crop:"Soybean",  price:3950, trend:"up",     tip:"Good time to sell" },
+    { crop:"Millet",   price:2080, trend:"down",   tip:"Consider holding stock" },
+  ];
+  const filterCrop = document.getElementById("price-crop").value;
+  const filtered   = filterCrop ? prices.filter(p => p.crop === filterCrop) : prices;
+  const tbody      = document.getElementById("price-body");
+
+  tbody.innerHTML = filtered.map(p => `
+    <tr>
+      <td><strong>${p.crop}</strong></td>
+      <td>₹${p.price.toLocaleString()}</td>
+      <td class="trend-${p.trend}">
+        ${p.trend === "up" ? "▲ Rising" : p.trend === "down" ? "▼ Falling" : "— Stable"}
+      </td>
+      <td style="font-size:0.82rem;color:#555">${p.tip}</td>
+    </tr>
+  `).join("");
+}
+
+// ── Planting Calendar ────────────────────────────────────────────────────────
+function loadCalendar() {
+  const calendar = [
+    { crop:"Rice",     sow:["Apr","May"],    harvest:["Sep","Oct"],  status:"growing" },
+    { crop:"Maize",    sow:["Mar","Apr"],    harvest:["Jul","Aug"],  status:"harvest time" },
+    { crop:"Ginger",   sow:["Mar","Apr"],    harvest:["Nov","Dec"],  status:"growing" },
+    { crop:"Turmeric", sow:["Apr","May"],    harvest:["Dec","Jan"],  status:"growing" },
+    { crop:"Potato",   sow:["Jan","Feb"],    harvest:["Apr","May"],  status:"off season" },
+    { crop:"Chilli",   sow:["Feb","Mar"],    harvest:["Aug","Sep"],  status:"harvest time" },
+    { crop:"Soybean",  sow:["May","Jun"],    harvest:["Sep","Oct"],  status:"sowing now" },
+    { crop:"Mustard",  sow:["Oct","Nov"],    harvest:["Feb","Mar"],  status:"off season" },
+  ];
+
+  const statusClass = {
+    "sowing now":   "status-sowing",
+    "harvest time": "status-harvest",
+    "growing":      "status-growing",
+    "off season":   "status-off"
+  };
+
+  document.getElementById("calendar-grid").innerHTML = calendar.map(c => `
+    <div class="cal-card">
+      <h4>${c.crop}</h4>
+      <div class="cal-row"><span>🌱 Sow:</span><span>${c.sow.join(", ")}</span></div>
+      <div class="cal-row"><span>🌾 Harvest:</span><span>${c.harvest.join(", ")}</span></div>
+      <span class="status-pill ${statusClass[c.status] || 'status-off'}">${c.status}</span>
+    </div>
+  `).join("");
+}
+
+// ── Schemes ──────────────────────────────────────────────────────────────────
+function loadSchemes() {
+  const schemes = [
+    { name:"PM-KISAN", desc:"Direct income support ₹6,000/year to all farmer families.", link:"pmkisan.gov.in" },
+    { name:"PMFBY — Crop Insurance", desc:"Comprehensive crop insurance covering yield losses due to natural calamities.", link:"pmfby.gov.in" },
+    { name:"Nagaland Organic Mission", desc:"Financial support for transitioning to certified organic farming.", link:"nagaland.gov.in/agriculture" },
+    { name:"NE Region Horticulture Mission", desc:"Subsidy for horticulture crops: ginger, turmeric, chilli, vegetables.", link:"midh.gov.in" },
+    { name:"RKVY — Farm Infrastructure", desc:"Grants for irrigation, cold storage, farm equipment and processing units.", link:"rkvy.nic.in" },
+  ];
+
+  document.getElementById("schemes-list").innerHTML = schemes.map(s => `
+    <div class="scheme-card">
+      <h4>🏛️ ${s.name}</h4>
+      <p>${s.desc}</p>
+      <p>Apply at: <a href="https://${s.link}" target="_blank">${s.link}</a></p>
+    </div>
+  `).join("") + `<p style="font-size:0.82rem;color:#666;margin-top:8px">
+    Visit your nearest Block Development Office or Common Service Centre to apply in person.
+  </p>`;
+}
+
+// ── Dashboard Charts ─────────────────────────────────────────────────────────
+function initCharts() {
+  new Chart(document.getElementById("yieldChart"), {
+    type: "bar",
+    data: {
+      labels: ["Rice","Maize","Ginger","Turmeric","Chilli","Potato","Soybean"],
+      datasets: [{
+        label: "Avg Yield (kg/acre)",
+        data: [1200, 980, 1850, 1620, 740, 1100, 890],
+        backgroundColor: "rgba(45,106,45,0.75)",
+        borderColor: "#1a4a1a", borderWidth: 1, borderRadius: 6
+      }]
+    },
+    options: { plugins:{ legend:{ display:false }}, scales:{ y:{ beginAtZero:true }}}
+  });
+
+  new Chart(document.getElementById("diseaseChart"), {
+    type: "doughnut",
+    data: {
+      labels: ["Kohima","Dimapur","Mokokchung","Wokha","Phek","Others"],
+      datasets: [{
+        data: [28, 41, 19, 14, 22, 18],
+        backgroundColor: ["#2d6a2d","#4a9c4a","#6abe6a","#8cd88c","#aeeaae","#c8f0c8"],
+        borderWidth: 2
+      }]
+    },
+    options: { plugins:{ legend:{ position:"bottom" }}}
+  });
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+window.onload = () => {
+  loadPrices();
+  loadCalendar();
+  initCharts();
+};
+</script>
+</body>
+</html>
