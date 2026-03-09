@@ -11,6 +11,7 @@ Usage:
 """
 
 import argparse
+import json
 import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
@@ -142,9 +143,13 @@ def train(args):
 
     train_gen, val_gen, test_gen = get_generators(args.data_dir, args.batch)
 
+    n_classes     = train_gen.num_classes
+    active_classes = list(train_gen.class_indices.keys())
+    print(f"Classes found ({n_classes}): {active_classes}")
+
     # Phase 1 — Train head only
     print("\n--- Phase 1: Training classification head ---")
-    model = build_model(N_CLASSES, fine_tune=False)
+    model = build_model(n_classes, fine_tune=False)
     model.compile(
         optimizer=tf.keras.optimizers.Adam(1e-3),
         loss="categorical_crossentropy",
@@ -165,7 +170,7 @@ def train(args):
 
     # Phase 2 — Fine-tune
     print("\n--- Phase 2: Fine-tuning EfficientNet top layers ---")
-    model = build_model(N_CLASSES, fine_tune=True)
+    model = build_model(n_classes, fine_tune=True)
     model.compile(
         optimizer=tf.keras.optimizers.Adam(1e-4),
         loss="categorical_crossentropy",
@@ -181,7 +186,13 @@ def train(args):
 
     y_pred = np.argmax(model.predict(test_gen), axis=1)
     y_true = test_gen.classes
-    print(classification_report(y_true, y_pred, target_names=CLASSES))
+    print(classification_report(y_true, y_pred, target_names=active_classes))
+
+    # Save class index map so backend loads correct labels
+    idx_to_class = {v: k for k, v in train_gen.class_indices.items()}
+    with open("ml/saved_models/class_indices.json", "w") as f:
+        json.dump(idx_to_class, f, indent=2)
+    print("Saved: ml/saved_models/class_indices.json")
 
     plot_history(h2, "ml/results/training_history.png")
     print("\nDone. Model saved to ml/saved_models/disease_model.h5")

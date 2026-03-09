@@ -40,7 +40,8 @@ BASE_DIR   = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__f
 DATA_DIR   = os.path.join(BASE_DIR, "data", "sample")
 JSON_FILE  = os.path.join(DATA_DIR, "nagaland_agriculture_2023_24.json")
 CSV_FILE   = os.path.join(DATA_DIR, "nagaland_crop_data_2023_24.csv")
-MODEL_PATH = os.path.join(BASE_DIR, "ml", "saved_models", "disease_model.h5")
+MODEL_PATH   = os.path.join(BASE_DIR, "ml", "saved_models", "disease_model.h5")
+CLASSES_PATH = os.path.join(BASE_DIR, "ml", "saved_models", "class_indices.json")
 DB_PATH    = os.path.join(BASE_DIR, "data", "plotwise.db")
 
 # ── Load real agriculture data at startup ──────────────────────────────────────
@@ -111,15 +112,10 @@ def _log_disease(district: str, crop: str, disease: str, confidence: float, seve
 # ── ML model (optional — loaded only when trained model exists) ────────────────
 
 DISEASE_MODEL   = None
-DISEASE_CLASSES = [
-    "Rice_Blast", "Rice_BacterialBlight", "Rice_BrownSpot",
-    "Maize_GrayLeafSpot", "Maize_NorthernLeafBlight", "Maize_CommonRust",
-    "Potato_EarlyBlight", "Potato_LateBlight",
-    "Chilli_LeafCurl", "Healthy"
-]
+DISEASE_CLASSES = {}   # idx (str) → class label, loaded from class_indices.json
 
 def _load_model():
-    global DISEASE_MODEL
+    global DISEASE_MODEL, DISEASE_CLASSES
     if not os.path.exists(MODEL_PATH):
         print(f"⚠️  No trained model at {MODEL_PATH}. Run: python ml/train_disease_model.py")
         return
@@ -127,6 +123,12 @@ def _load_model():
         import tensorflow as tf
         DISEASE_MODEL = tf.keras.models.load_model(MODEL_PATH)
         print(f"✅  Disease model loaded ({MODEL_PATH})")
+        if os.path.exists(CLASSES_PATH):
+            with open(CLASSES_PATH) as f:
+                DISEASE_CLASSES = json.load(f)
+            print(f"✅  Class labels loaded: {list(DISEASE_CLASSES.values())}")
+        else:
+            print("⚠️  class_indices.json not found — re-run train_disease_model.py")
     except Exception as e:
         print(f"⚠️  Could not load disease model: {e}")
 
@@ -322,7 +324,7 @@ async def detect_disease(
         preds      = DISEASE_MODEL.predict(arr, verbose=0)[0]
         class_idx  = int(preds.argmax())
         confidence = float(preds[class_idx])
-        raw_label  = DISEASE_CLASSES[class_idx]
+        raw_label  = DISEASE_CLASSES.get(str(class_idx), f"class_{class_idx}")
 
         # Map model class → human-readable disease name
         label_map = {
