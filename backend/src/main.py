@@ -935,14 +935,14 @@ def chat(msg: ChatMessage):
 @app.get("/api/export/prices")
 def export_prices(district: str = "Kohima"):
     """Export market prices as CSV download."""
-    price_data = get_prices(district)
+    price_data = get_market_prices(district=district)
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(["Crop", "Price (Rs/qtl)", "MSP (Rs/qtl)", "Trend", "Advice", "Market", "Source"])
+    writer.writerow(["Crop", "Price (Rs/qtl)", "MSP (Rs/qtl)", "Trend", "Tip", "Market", "Source"])
     for p in price_data.get("prices", []):
         writer.writerow([
-            p["crop"], p["price_per_quintal"], p.get("msp", "N/A"),
-            p.get("trend", ""), p.get("advice", ""),
+            p["crop"], p["price_per_qtl"], p.get("msp", "N/A"),
+            p.get("trend", ""), p.get("tip", ""),
             p.get("market", district), price_data.get("source", "")
         ])
     output.seek(0)
