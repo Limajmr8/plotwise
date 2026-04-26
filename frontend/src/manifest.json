@@ -1,0 +1,22 @@
+{
+  "name": "Plotwise — Smart Farming for Nagaland",
+  "short_name": "Plotwise",
+  "description": "Crop disease detection & agriculture dashboard for Nagaland farmers",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#060905",
+  "theme_color": "#3a6828",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/static/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

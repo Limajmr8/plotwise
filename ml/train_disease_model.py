@@ -168,9 +168,12 @@ def train(args):
     h1 = model.fit(train_gen, validation_data=val_gen,
                    epochs=args.epochs // 2, callbacks=cb, verbose=1)
 
-    # Phase 2 — Fine-tune
+    # Phase 2 — Fine-tune top layers only (load Phase 1 weights)
     print("\n--- Phase 2: Fine-tuning EfficientNet top layers ---")
-    model = build_model(n_classes, fine_tune=True)
+    model.layers[0].trainable = True
+    # Freeze all but the top 20 layers of EfficientNet
+    for layer in model.layers[0].layers[:-20]:
+        layer.trainable = False
     model.compile(
         optimizer=tf.keras.optimizers.Adam(1e-4),
         loss="categorical_crossentropy",

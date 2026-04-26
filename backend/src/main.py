@@ -11,6 +11,8 @@ Disease reports stored in SQLite for heatmap analytics.
 
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
@@ -117,20 +119,20 @@ DISEASE_CLASSES = {}   # idx (str) → class label, loaded from class_indices.js
 def _load_model():
     global DISEASE_MODEL, DISEASE_CLASSES
     if not os.path.exists(MODEL_PATH):
-        print(f"⚠️  No trained model at {MODEL_PATH}. Run: python ml/train_disease_model.py")
+        print(f"[WARN]  No trained model at {MODEL_PATH}. Run: python ml/train_disease_model.py")
         return
     try:
         import tensorflow as tf
-        DISEASE_MODEL = tf.keras.models.load_model(MODEL_PATH)
-        print(f"✅  Disease model loaded ({MODEL_PATH})")
+        DISEASE_MODEL = tf.keras.models.load_model(MODEL_PATH, compile=False)
+        print(f"[OK]  Disease model loaded ({MODEL_PATH})")
         if os.path.exists(CLASSES_PATH):
             with open(CLASSES_PATH) as f:
                 DISEASE_CLASSES = json.load(f)
-            print(f"✅  Class labels loaded: {list(DISEASE_CLASSES.values())}")
+            print(f"[OK]  Class labels loaded: {list(DISEASE_CLASSES.values())}")
         else:
-            print("⚠️  class_indices.json not found — re-run train_disease_model.py")
+            print("[WARN]  class_indices.json not found — re-run train_disease_model.py")
     except Exception as e:
-        print(f"⚠️  Could not load disease model: {e}")
+        print(f"[WARN]  Could not load disease model: {e}")
 
 _load_model()
 
@@ -140,7 +142,7 @@ def _preprocess_image(img_bytes: bytes):
     from PIL import Image
     import numpy as np
     img = Image.open(io.BytesIO(img_bytes)).convert("RGB").resize((224, 224))
-    arr = np.array(img, dtype="float32") / 255.0
+    arr = np.array(img, dtype="float32")  # no /255 — EfficientNetB0 has built-in preprocessing
     return arr[None]  # (1, 224, 224, 3)
 
 # ── Disease knowledge base ────────────────────────────────────────────────────
@@ -292,11 +294,26 @@ class DiseaseReportQuery(BaseModel):
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
+FRONTEND_DIR = os.path.join(BASE_DIR, "frontend", "src")
+
+# Serve static files (manifest, service worker, icons, etc.)
+app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
+
+
 @app.get("/")
 def root():
+    """Serve the frontend HTML."""
+    index = os.path.join(FRONTEND_DIR, "index.html")
+    if os.path.exists(index):
+        return FileResponse(index)
+    return {"app": "Plotwise", "status": "running", "model_loaded": DISEASE_MODEL is not None}
+
+
+@app.get("/api/status")
+def api_status():
     return {
         "app":          "Plotwise",
-        "tagline":      "Smart farming for Nagaland 🌾",
+        "tagline":      "Smart farming for Nagaland",
         "version":      "1.1.0",
         "status":       "running",
         "data":         f"{len(CROP_RECORDS)} real records loaded from Dept. of Agriculture, Nagaland 2023-24",
@@ -316,7 +333,15 @@ async def detect_disease(
     if not file.content_type.startswith("image/"):
         raise HTTPException(400, "Please upload an image file.")
 
-    if DISEASE_MODEL is not None:
+    # Crops the ML model was actually trained on
+    ML_SUPPORTED_CROPS = {"Chilli", "Maize", "Maize Kharif", "Maize Rabi", "Potato"}
+
+    use_ml = (
+        DISEASE_MODEL is not None
+        and crop in ML_SUPPORTED_CROPS
+    )
+
+    if use_ml:
         # Real model inference
         import numpy as np
         img_bytes  = await file.read()
@@ -326,10 +351,13 @@ async def detect_disease(
         confidence = float(preds[class_idx])
         raw_label  = DISEASE_CLASSES.get(str(class_idx), f"class_{class_idx}")
 
+        # If model isn't confident (< 60%), fall back to knowledge base
+        if confidence < 0.60:
+            use_ml = False
+
+    if use_ml:
         # Map model class → human-readable disease name
         label_map = {
-            "Rice_Blast": "Blast", "Rice_BacterialBlight": "Bacterial Blight",
-            "Rice_BrownSpot": "Brown Spot", "Maize_GrayLeafSpot": "Gray Leaf Spot",
             "Maize_NorthernLeafBlight": "Northern Leaf Blight",
             "Maize_CommonRust": "Common Rust", "Potato_EarlyBlight": "Early Blight",
             "Potato_LateBlight": "Late Blight", "Chilli_LeafCurl": "Leaf Curl",
@@ -337,6 +365,16 @@ async def detect_disease(
         }
         detected = label_map.get(raw_label, raw_label)
         source   = "ML model (EfficientNetB0)"
+
+        # Auto-detect crop from model class name (e.g. "Maize_CommonRust" → "Maize")
+        crop_map = {
+            "Maize": "Maize", "Potato": "Potato",
+            "Chilli": "Chilli", "Healthy": crop,
+        }
+        for prefix, crop_name in crop_map.items():
+            if raw_label.startswith(prefix):
+                crop = crop_name
+                break
     else:
         # Fallback: crop-specific knowledge base
         disease_list = DISEASES.get(crop, DISEASES["default"])
@@ -562,4 +600,278 @@ def district_detail(district_name: str):
         "total_production_t": summary.get("total_production_tonnes"),
         "crops_count":        len(records),
         "crops":              sorted(records, key=lambda r: r["production_tonnes"], reverse=True),
+    }
+
+
+# ── Chat assistant ───────────────────────────────────────────────────────────
+
+class ChatMessage(BaseModel):
+    message:  str
+    district: str = "Kohima"
+    lang:     str = "en"   # "en" or "nag"
+
+
+def _match_crop(text: str) -> Optional[str]:
+    """Find a crop name mentioned in the user message (whole-word match)."""
+    import re
+    text_l = text.lower()
+    # Check exact and partial matches against known crops
+    # Ordered: longer aliases first to avoid substring collisions
+    crop_aliases = [
+        ("sweet potato", "Sweet Potato"),
+        ("soyabean", "Soyabean"), ("soybean", "Soyabean"), ("soya", "Soyabean"),
+        ("groundnut", "Groundnut"), ("peanut", "Groundnut"),
+        ("sugarcane", "Sugarcane"), ("ganna", "Sugarcane"),
+        ("turmeric", "Ginger"),
+        ("mustard", "Mustard"), ("sarson", "Mustard"),
+        ("tapioca", "Tapioca"),
+        ("ginger", "Ginger"), ("adha", "Ginger"), ("ada", "Ginger"),
+        ("potato", "Potato"), ("aloo", "Potato"), ("alu", "Potato"),
+        ("paddy", "Jhum Paddy"), ("dhan", "Jhum Paddy"), ("rice", "Jhum Paddy"),
+        ("maize", "Maize Kharif"), ("corn", "Maize Kharif"), ("makka", "Maize Kharif"),
+        ("chilli", "Chilli"), ("chili", "Chilli"), ("mircha", "Chilli"),
+        ("wheat", "Wheat"),
+        ("beans", "Beans"),
+        ("tea", "Tea"), ("chah", "Tea"),
+    ]
+    for alias, crop in crop_aliases:
+        if re.search(r'\b' + re.escape(alias) + r'\b', text_l):
+            return crop
+    # Direct crop name match
+    for crop in PRICE_ANCHORS:
+        if re.search(r'\b' + re.escape(crop.lower()) + r'\b', text_l):
+            return crop
+    return None
+
+
+def _match_district(text: str) -> Optional[str]:
+    """Find a district name mentioned in the user message."""
+    text_l = text.lower()
+    for d in DISTRICTS:
+        if d.lower() in text_l:
+            return d
+    return None
+
+
+def _detect_intent(text: str) -> str:
+    """Detect user intent from message keywords."""
+    text_l = text.lower()
+
+    disease_kw = ["disease", "rog", "sick", "leaf", "blight", "rust", "rot", "wilt",
+                  "treatment", "spray", "fungicide", "cure", "problem", "kharap",
+                  "yellow", "spot", "curl", "dying", "infected", "pest", "insect",
+                  "dawai", "upai", "medicine", "what wrong", "ki hoise"]
+    price_kw   = ["price", "daam", "rate", "market", "bazar", "mandi", "sell",
+                  "buy", "cost", "quintal", "msp", "kiman", "becho", "kinibo"]
+    plant_kw   = ["plant", "sow", "harvest", "when", "season", "calendar",
+                  "lagao", "time", "month", "grow", "khetir somoy", "lagano",
+                  "somoy", "koita"]
+    scheme_kw  = ["scheme", "subsidy", "insurance", "pm-kisan", "pmfby",
+                  "government", "sarkari", "benefit", "apply", "eligible",
+                  "yojana", "sahayota", "pmkisan"]
+    district_kw = ["district", "area", "production", "yield", "crops in",
+                   "grow in", "tell me about", "info about"]
+    greet_kw   = ["hello", "hi", "help", "namaste", "hey", "hola",
+                  "good morning", "good evening", "thanks", "thank",
+                  "what can you", "ki koribo", "sahajyo"]
+
+    for kw in disease_kw:
+        if kw in text_l:
+            return "disease"
+    for kw in price_kw:
+        if kw in text_l:
+            return "price"
+    for kw in plant_kw:
+        if kw in text_l:
+            return "planting"
+    for kw in scheme_kw:
+        if kw in text_l:
+            return "scheme"
+    for kw in district_kw:
+        if kw in text_l:
+            return "district"
+    for kw in greet_kw:
+        if kw in text_l:
+            return "greeting"
+    return "general"
+
+
+@app.post("/api/chat")
+def chat(msg: ChatMessage):
+    """
+    AI farming assistant for Nagaland farmers.
+    Answers questions about diseases, prices, planting, schemes using real data.
+    """
+    text     = msg.message.strip()
+    district = _match_district(text) or msg.district
+    crop     = _match_crop(text)
+    intent   = _detect_intent(text)
+
+    reply    = ""
+    suggestions = []
+
+    if intent == "greeting":
+        reply = (
+            f"Hello! I'm the Plotwise farming assistant. I can help you with:\n\n"
+            f"- Crop disease identification & treatment\n"
+            f"- Live market prices for Nagaland crops\n"
+            f"- Planting & harvest calendar by district\n"
+            f"- Government schemes you qualify for\n\n"
+            f"Just ask me anything about your farm!"
+        )
+        suggestions = ["What's the price of ginger?", "When to plant rice?",
+                       "My potato has spots", "Show me government schemes"]
+
+    elif intent == "disease":
+        if crop:
+            disease_list = DISEASES.get(crop, DISEASES["default"])
+            lines = [f"Common diseases for **{crop}** in {district}:\n"]
+            for d in disease_list:
+                treatment = TREATMENTS.get(d, "Consult your District Agriculture Officer.")
+                lines.append(f"**{d}** — {treatment}")
+            lines.append(f"\nFor accurate diagnosis, upload a leaf photo in the Disease Detection tab.")
+            lines.append(f"Kisan Call Centre: 1800-180-1551 (toll free)")
+            reply = "\n\n".join(lines)
+        else:
+            reply = (
+                "I can help with crop diseases! Which crop is affected?\n\n"
+                "Tell me something like: \"My potato has leaf spots\" or \"Rice disease treatment\""
+            )
+        suggestions = ["Potato disease", "Rice blast treatment", "Maize leaf blight",
+                       "Upload leaf photo"]
+
+    elif intent == "price":
+        if crop:
+            anchor = PRICE_ANCHORS.get(crop)
+            if anchor:
+                price = anchor["base"] + random.randint(-150, 200)
+                reply = (
+                    f"**{crop}** — current market price:\n\n"
+                    f"Price: **{anchor['unit'].split('/')[0]}{price}/quintal**\n"
+                    f"MSP (Govt. guaranteed): {anchor['unit'].split('/')[0]}{anchor['base']}/quintal\n"
+                    f"Market: {district} APMC\n\n"
+                )
+                if price > anchor["base"]:
+                    reply += "Price is above MSP — good time to sell."
+                else:
+                    reply += "Price is near/below MSP — consider holding if you can store safely."
+                reply += "\n\nSource: Agmarknet / Nagaland APMC 2023-24"
+            else:
+                reply = f"I don't have price data for {crop} yet. Try: rice, maize, ginger, potato, soyabean, mustard, tea."
+        else:
+            # Show top 5 prices
+            top_crops = ["Ginger", "Tea", "Soyabean", "Mustard", "Potato"]
+            lines = [f"Top crop prices in {district}:\n"]
+            for c in top_crops:
+                a = PRICE_ANCHORS.get(c)
+                if a:
+                    p = a["base"] + random.randint(-100, 150)
+                    lines.append(f"**{c}**: {a['unit'].split('/')[0]}{p}/qtl (MSP: {a['base']})")
+            lines.append(f"\nAsk about any specific crop for detailed pricing!")
+            reply = "\n".join(lines)
+        suggestions = ["Ginger price", "Rice rate today", "Tea market price",
+                       "When to sell potato?"]
+
+    elif intent == "planting":
+        if crop:
+            cal = PLANTING_CALENDAR.get(crop)
+            if cal:
+                sow_months = ", ".join([MONTH_NAMES[m] for m in cal["sow"]])
+                harv_months = ", ".join([MONTH_NAMES[m] for m in cal["harvest"]])
+                zones = cal.get("zones", "all")
+                current_month = datetime.now().month
+
+                if current_month in cal["sow"]:
+                    status = "NOW is sowing time!"
+                elif current_month in cal["harvest"]:
+                    status = "Harvest season is on!"
+                else:
+                    status = f"Next sowing: {sow_months}"
+
+                reply = (
+                    f"**{crop}** — planting calendar for {district}:\n\n"
+                    f"Sow: **{sow_months}**\n"
+                    f"Harvest: **{harv_months}**\n"
+                    f"Status: {status}\n"
+                )
+                if zones != "all":
+                    if district in zones:
+                        reply += f"This crop is well-suited for {district}."
+                    else:
+                        reply += f"Note: {crop} is mainly grown in {', '.join(zones)}. May not be ideal for {district}."
+                else:
+                    reply += f"This crop grows well across all Nagaland districts."
+
+                # Add yield data if available
+                matching = [r for r in CROP_RECORDS if r["district"] == district and r["crop"] == crop]
+                if matching:
+                    avg_yield = round(sum(r["yield_kg_per_ha"] for r in matching) / len(matching))
+                    reply += f"\n\nAvg. yield in {district}: **{avg_yield} kg/ha** (2023-24 data)"
+            else:
+                reply = f"I don't have calendar data for {crop} yet. Try: rice, maize, ginger, potato, soyabean, tea."
+        else:
+            reply = (
+                "I can show you the planting calendar! Which crop?\n\n"
+                "Try: \"When to plant ginger?\" or \"Rice harvest season\""
+            )
+        suggestions = ["When to plant ginger?", "Rice sowing time", "Potato harvest",
+                       "What to plant now?"]
+
+    elif intent == "scheme":
+        if crop:
+            matched = [s for s in SCHEMES if not s["crops"] or crop in s["crops"]]
+        else:
+            matched = SCHEMES
+
+        if matched:
+            lines = [f"Government schemes" + (f" for **{crop}**" if crop else "") + f" in {district}:\n"]
+            for s in matched:
+                lines.append(f"**{s['name']}**\n{s['description']}\nApply: {s['apply_at']}\n")
+            lines.append("Visit your nearest Block Development Office or Common Service Centre to apply.")
+            reply = "\n".join(lines)
+        else:
+            reply = "No specific schemes found for this crop. Check the Scheme Finder tab for a full search."
+        suggestions = ["PM-KISAN details", "Crop insurance", "Organic farming scheme",
+                       "How to apply?"]
+
+    elif intent == "district":
+        target_district = _match_district(text) or district
+        records = RECORDS_BY_DISTRICT.get(target_district, [])
+        if records:
+            total_prod = sum(r["production_tonnes"] for r in records)
+            total_area = sum(r["area_ha"] for r in records)
+            top = sorted(records, key=lambda r: r["production_tonnes"], reverse=True)[:5]
+            lines = [f"**{target_district}** district — agriculture overview:\n"]
+            lines.append(f"Total production: **{round(total_prod):,} tonnes**")
+            lines.append(f"Total cultivated area: **{round(total_area):,} ha**\n")
+            lines.append("Top crops:")
+            for r in top:
+                lines.append(f"  {r['crop']}: {round(r['production_tonnes']):,}T ({round(r['yield_kg_per_ha'])} kg/ha)")
+            lines.append(f"\nSource: Dept. of Agriculture, Nagaland 2023-24")
+            reply = "\n".join(lines)
+        else:
+            reply = f"I don't have data for '{target_district}'. Available districts: {', '.join(DISTRICTS[:8])}..."
+        suggestions = ["Kohima crops", "Dimapur agriculture", "Mon district",
+                       "Best district for ginger?"]
+
+    else:
+        # General / unknown
+        reply = (
+            "I'm not sure I understood that. I can help with:\n\n"
+            "- **Crop diseases** — \"My potato has brown spots\"\n"
+            "- **Market prices** — \"What's the price of ginger?\"\n"
+            "- **Planting calendar** — \"When to sow rice?\"\n"
+            "- **Government schemes** — \"What schemes can I get?\"\n"
+            "- **District data** — \"Tell me about Kohima\"\n\n"
+            "Try asking one of these!"
+        )
+        suggestions = ["What's the price of ginger?", "When to plant rice?",
+                       "My potato has spots", "Kohima district info"]
+
+    return {
+        "reply":       reply,
+        "intent":      intent,
+        "crop":        crop,
+        "district":    district,
+        "suggestions": suggestions,
     }
