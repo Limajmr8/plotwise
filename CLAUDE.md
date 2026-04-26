@@ -48,7 +48,10 @@ keras==3.10.0            # MUST match the Keras version that saved the model on 
 - **i18n**: EN/NAG language toggle in nav — `data-i18n` attributes on ~40 elements, `setLang()` function, stored in localStorage
 - **Images**: All converted to WebP (originals kept as .jpg fallback), `loading="lazy"` on below-fold `<img>` tags
 - **Dissolve effect**: Feature images use blur-to-sharp focus-pull + grain overlay fade on scroll
-- **Chatbot**: Floating chat bubble → frosted glass panel, `/api/chat` POST endpoint with intent detection (disease/price/planting/scheme/district/greeting), word-boundary regex crop matching, contextual suggestion chips, typing indicator
+- **Chatbot**: Floating chat bubble → frosted glass panel, `/api/chat` POST endpoint with intent detection (disease/price/planting/scheme/district/weather/greeting), word-boundary regex crop matching, contextual suggestion chips, typing indicator
+- **Weather**: Live weather via Open-Meteo (free, no API key) — `/api/weather?district=X`, 7-day forecast, farming advisories, weather tab in app
+- **Export**: CSV download for market prices (`/api/export/prices`) and yield data (`/api/export/yield`)
+- **SEO**: Meta description, keywords, Open Graph tags, Twitter cards, preconnect hints
 
 ## Known Issues
 - CPU lacks AVX2/AVX512 — TF prints warnings on startup, runs fine (just slower)
@@ -67,8 +70,11 @@ keras==3.10.0            # MUST match the Keras version that saved the model on 
 - [x] Nagamese language toggle (EN | NAG)
 - [x] Dissolve/focus-pull effects on feature images
 - [x] AI farming chatbot (floating UI + intent detection + knowledge base)
+- [x] Live weather integration (Open-Meteo, 7-day forecast, farming advisories)
+- [x] CSV export for prices + yield data
+- [x] SEO + Open Graph + preconnect optimization
+- [x] Deploy to Railway — https://plotwise-production.up.railway.app
 - [ ] **Frontend premium redesign (IN PROGRESS)** — Porsche-inspired
-- [ ] Deploy to server
 - [ ] Android APK (TWA for Play Store, then Capacitor later)
 - [ ] Farmer profile + yield history
 - [ ] Real farmer testimonials (after field testing)

@@ -26,19 +26,54 @@ from sklearn.metrics import classification_report
 np.random.seed(42)
 tf.random.set_seed(42)
 
-# Nagaland-relevant disease classes (subset of PlantVillage)
+# Expanded disease classes for Nagaland crops
+# Use PlantVillage dataset folder names — the data generator auto-detects them.
+# To retrain: download PlantVillage from Kaggle, organize into data/train/ and data/test/
+# with subfolders matching these class names. Run on Google Colab for GPU.
+#
+# PlantVillage classes relevant to Nagaland (26 classes):
 CLASSES = [
+    # Rice (Nagaland's primary crop)
     "Rice_Blast",
     "Rice_BacterialBlight",
     "Rice_BrownSpot",
-    "Maize_GrayLeafSpot",
-    "Maize_NorthernLeafBlight",
+    # Maize (major Kharif crop)
+    "Maize_Cercospora_GrayLeafSpot",
     "Maize_CommonRust",
+    "Maize_NorthernLeafBlight",
+    # Potato (major vegetable crop)
     "Potato_EarlyBlight",
     "Potato_LateBlight",
+    # Chilli/Pepper (widely grown)
+    "Pepper_BacterialSpot",
     "Chilli_LeafCurl",
-    "Healthy"
+    # Tomato (major vegetable)
+    "Tomato_BacterialSpot",
+    "Tomato_EarlyBlight",
+    "Tomato_LateBlight",
+    "Tomato_LeafMold",
+    "Tomato_SeptoriaLeafSpot",
+    "Tomato_YellowLeafCurl",
+    # Citrus (orange is important in Nagaland)
+    "Orange_Haunglongbing",
+    # Soybean (grown in several districts)
+    "Soybean_Healthy",
+    # Apple (grown in higher elevations)
+    "Apple_AppleScab",
+    "Apple_BlackRot",
+    # Grape (emerging crop)
+    "Grape_BlackRot",
+    "Grape_Esca",
+    # Healthy baselines
+    "Healthy_Maize",
+    "Healthy_Potato",
+    "Healthy_Tomato",
+    "Healthy_Pepper",
+    "Healthy_Soybean",
 ]
+# NOTE: The actual classes used depend on what folders exist in your data/train/ directory.
+# The generator auto-detects them. The CLASSES list above is a reference for which
+# PlantVillage folders to include when downloading data.
 
 IMG_SIZE   = 224   # EfficientNet default
 N_CLASSES  = len(CLASSES)
@@ -72,16 +107,23 @@ def build_model(n_classes: int, fine_tune: bool = False) -> tf.keras.Model:
 
 
 def get_generators(data_dir: str, batch_size: int):
+    # Aggressive augmentation to handle real-world field photos:
+    # - Rotation: farmers take photos at any angle
+    # - Shift/zoom: leaf may not be centered
+    # - Brightness: field lighting varies widely
+    # - Shear: perspective distortion from phone cameras
     train_gen = ImageDataGenerator(
         rescale=1./255,
-        rotation_range=20,
-        width_shift_range=0.1,
-        height_shift_range=0.1,
-        shear_range=0.1,
-        zoom_range=0.2,
+        rotation_range=40,
+        width_shift_range=0.2,
+        height_shift_range=0.2,
+        shear_range=0.15,
+        zoom_range=0.3,
         horizontal_flip=True,
-        vertical_flip=False,
-        brightness_range=[0.8, 1.2],
+        vertical_flip=True,
+        brightness_range=[0.6, 1.4],
+        channel_shift_range=30,        # Color variation (different phones)
+        fill_mode="reflect",
         validation_split=0.2
     )
     test_gen = ImageDataGenerator(rescale=1./255)

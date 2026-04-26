@@ -353,12 +353,20 @@ async def detect_disease(
         confidence = float(preds[class_idx])
         raw_label  = DISEASE_CLASSES.get(str(class_idx), f"class_{class_idx}")
 
-        # If model isn't confident (< 60%), fall back to knowledge base
-        if confidence < 0.60:
-            use_ml = False
+        # Get top 2 predictions for uncertainty check
+        sorted_idx = preds.argsort()[::-1]
+        top1_conf  = float(preds[sorted_idx[0]])
+        top2_conf  = float(preds[sorted_idx[1]])
+        conf_gap   = top1_conf - top2_conf   # How sure vs. next best
 
-    if use_ml:
-        # Map model class → human-readable disease name
+        # Uncertain if: low confidence OR too close to second prediction
+        if confidence < 0.55 or (confidence < 0.70 and conf_gap < 0.15):
+            use_ml = "uncertain"
+        elif confidence < 0.70:
+            use_ml = "low_confidence"
+
+    if use_ml == True:
+        # Map model class -> human-readable disease name
         label_map = {
             "Maize_NorthernLeafBlight": "Northern Leaf Blight",
             "Maize_CommonRust": "Common Rust", "Potato_EarlyBlight": "Early Blight",
@@ -368,7 +376,7 @@ async def detect_disease(
         detected = label_map.get(raw_label, raw_label)
         source   = "ML model (EfficientNetB0)"
 
-        # Auto-detect crop from model class name (e.g. "Maize_CommonRust" → "Maize")
+        # Auto-detect crop from model class name
         crop_map = {
             "Maize": "Maize", "Potato": "Potato",
             "Chilli": "Chilli", "Healthy": crop,
@@ -377,14 +385,64 @@ async def detect_disease(
             if raw_label.startswith(prefix):
                 crop = crop_name
                 break
-    else:
-        # Fallback: crop-specific knowledge base
-        disease_list = DISEASES.get(crop, DISEASES["default"])
-        detected     = random.choice(disease_list)
-        confidence   = round(random.uniform(0.74, 0.97), 3)
-        source       = "Knowledge base (train model for AI predictions)"
 
-    severity = "High" if confidence >= 0.85 else "Moderate"
+    elif use_ml == "low_confidence":
+        # Model has a guess but isn't very sure — show it with a warning
+        label_map = {
+            "Maize_NorthernLeafBlight": "Northern Leaf Blight",
+            "Maize_CommonRust": "Common Rust", "Potato_EarlyBlight": "Early Blight",
+            "Potato_LateBlight": "Late Blight", "Chilli_LeafCurl": "Leaf Curl",
+            "Healthy": "Healthy (no disease detected)"
+        }
+        detected = label_map.get(raw_label, raw_label)
+        source   = "ML model (low confidence — verify with expert)"
+
+        for prefix in ["Maize", "Potato", "Chilli"]:
+            if raw_label.startswith(prefix):
+                crop = prefix
+                break
+
+    elif use_ml == "uncertain":
+        # Model is too uncertain — be honest about it
+        detected     = "Uncertain — could not identify clearly"
+        confidence   = round(confidence, 3)
+        source       = "ML model (uncertain — retake photo)"
+
+        severity = "Unknown"
+        return {
+            "crop":         crop,
+            "district":     district,
+            "disease":      detected,
+            "confidence":   round(confidence, 3),
+            "severity":     severity,
+            "treatment":    "The image was unclear or the disease is not in our training data. Try: (1) Take a closer photo of a single leaf, (2) Ensure good lighting, (3) Avoid blurry images. If symptoms persist, contact your District Agriculture Officer.",
+            "prevention":   "Use certified seeds every season. Maintain field hygiene. Rotate crops annually to break disease cycles.",
+            "nearest_help": "Contact District Agriculture Officer or call Kisan Call Centre: 1800-180-1551 (toll free)",
+            "source":       source,
+        }
+
+    else:
+        # No ML model available — use knowledge base for the selected crop
+        disease_list = DISEASES.get(crop, DISEASES["default"])
+        detected     = disease_list[0]   # Pick most common, not random
+        confidence   = 0.0
+        source       = "Knowledge base (AI model not available for this crop)"
+
+        severity = "Check required"
+        _log_disease(district, crop, detected, confidence, severity)
+        return {
+            "crop":         crop,
+            "district":     district,
+            "disease":      f"Common diseases for {crop}: {', '.join(disease_list)}",
+            "confidence":   0.0,
+            "severity":     severity,
+            "treatment":    ". ".join([f"{d}: {TREATMENTS.get(d, 'Consult DAO')}" for d in disease_list[:3]]),
+            "prevention":   "Use certified seeds every season. Maintain field hygiene. Rotate crops annually to break disease cycles.",
+            "nearest_help": "Upload a photo of Chilli, Maize, or Potato leaves for AI-powered detection. For other crops, contact Kisan Call Centre: 1800-180-1551 (toll free)",
+            "source":       source,
+        }
+
+    severity = "High" if confidence >= 0.85 else "Moderate" if confidence >= 0.70 else "Low"
 
     # Persist to DB for heatmap analytics
     _log_disease(district, crop, detected, confidence, severity)

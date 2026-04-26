@@ -2175,20 +2175,38 @@ async function runDisease(){
     const res = await fetch(`${API}/disease/detect`, {method:'POST', body:fd});
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const r = await res.json();
-    const sc = r.severity === 'High' ? 'c-high' : 'c-med';
-    el.innerHTML = `
-      <div class="r-head"><div class="r-dot"></div><div class="r-ttl">Analysis Complete — ${r.crop}</div></div>
-      <div class="r-grid">
-        <div><div class="r-item-lbl">Disease Detected</div><div class="r-item-val ${sc}">${r.disease}</div></div>
-        <div><div class="r-item-lbl">Confidence</div><div class="r-item-val">${(r.confidence*100).toFixed(0)}%</div></div>
-        <div><div class="r-item-lbl">Severity</div><div class="r-item-val ${sc}">${r.severity}</div></div>
-        <div><div class="r-item-lbl">Action</div><div class="r-item-val">Immediate</div></div>
-      </div>
-      <div class="r-box" style="margin-bottom:12px"><span class="r-box-lbl">Recommended Treatment</span>${r.treatment}</div>
-      <div class="r-box"><span class="r-box-lbl">Prevention</span>${r.prevention}</div>
-      <p style="margin-top:16px;font-size:0.75rem;color:rgba(240,235,224,0.28)">${r.nearest_help}</p>
-      <p style="margin-top:6px;font-size:0.68rem;color:rgba(240,235,224,0.18)">Source: ${r.source}</p>
-    `;
+    const isUncertain = r.severity === 'Unknown' || r.confidence === 0;
+    const isLow = r.source && r.source.includes('low confidence');
+    const sc = isUncertain ? '' : r.severity === 'High' ? 'c-high' : 'c-med';
+    const confPct = r.confidence > 0 ? (r.confidence*100).toFixed(0) + '%' : 'N/A';
+
+    if(isUncertain){
+      el.innerHTML = `
+        <div class="r-head"><div class="r-dot" style="background:var(--amber)"></div><div class="r-ttl" style="color:var(--amber)">Uncertain Result — ${r.crop}</div></div>
+        <div class="r-box" style="border-color:rgba(255,180,60,0.2);background:rgba(255,180,60,0.04);margin-bottom:12px">
+          <span class="r-box-lbl" style="color:var(--amber)">What happened</span>
+          The AI model could not clearly identify the disease from this image. This usually means the photo was unclear, or the disease is not yet in our training data.
+        </div>
+        <div class="r-box"><span class="r-box-lbl">What to try</span>${r.treatment}</div>
+        <p style="margin-top:16px;font-size:0.75rem;color:rgba(240,235,224,0.28)">${r.nearest_help}</p>
+      `;
+    } else {
+      const warnBanner = isLow ? '<div style="background:rgba(255,180,60,0.06);border:1px solid rgba(255,180,60,0.15);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:0.78rem;color:var(--amber)">Low confidence result — verify with a local agriculture expert before treatment.</div>' : '';
+      el.innerHTML = `
+        ${warnBanner}
+        <div class="r-head"><div class="r-dot"></div><div class="r-ttl">Analysis Complete — ${r.crop}</div></div>
+        <div class="r-grid">
+          <div><div class="r-item-lbl">Disease Detected</div><div class="r-item-val ${sc}">${r.disease}</div></div>
+          <div><div class="r-item-lbl">Confidence</div><div class="r-item-val">${confPct}</div></div>
+          <div><div class="r-item-lbl">Severity</div><div class="r-item-val ${sc}">${r.severity}</div></div>
+          <div><div class="r-item-lbl">Action</div><div class="r-item-val">${r.severity === 'High' ? 'Immediate' : 'Monitor'}</div></div>
+        </div>
+        <div class="r-box" style="margin-bottom:12px"><span class="r-box-lbl">Recommended Treatment</span>${r.treatment}</div>
+        <div class="r-box"><span class="r-box-lbl">Prevention</span>${r.prevention}</div>
+        <p style="margin-top:16px;font-size:0.75rem;color:rgba(240,235,224,0.28)">${r.nearest_help}</p>
+        <p style="margin-top:6px;font-size:0.68rem;color:rgba(240,235,224,0.18)">Source: ${r.source}</p>
+      `;
+    }
     loadHeatmap(); // refresh heatmap with new report
   } catch(err){
     el.innerHTML = apiError(err.message);
@@ -3102,58 +3120,58 @@ const i18n = {
     'chat-sub': 'Ask about crops, prices, diseases',
   },
   nag: {
-    'nav-features': 'Features',
+    'nav-features': 'Ki Ki Ase',
     'nav-app': 'Kishan App',
     'nav-dashboard': 'Dashboard',
     'nav-open': 'App Kholbo →',
     'hero-badge': 'Live Data · Nagaland · 2023–24',
-    'hero-sub': 'AI laga kori fasal-r rog dhora, live bazar daam, district-wise lagano calendar — Nagaland Agriculture Department-r asol data-r uporte.',
-    'hero-btn-try': 'App Try Korbo',
+    'hero-sub': 'AI lagai fasal-r rog dhora, live bazar daam, district-wise lagabo-r calendar — Nagaland Agriculture Department-r asol data loise.',
+    'hero-btn-try': 'App Chalai Dekhbo',
     'hero-btn-dash': 'Dashboard Dekhbo →',
-    'hero-scroll': 'Niche Jabo',
-    'stat-districts': 'District Cover Ase',
-    'stat-crops': 'Fasal Monitor Ase',
+    'hero-scroll': 'Tole Scroll Korbo',
+    'stat-districts': 'District Cover Koise',
+    'stat-crops': 'Fasal Track Koise',
     'stat-tonnes': 'Tonne Track Koise',
     'stat-accuracy': 'AI Accuracy',
-    'feat-eyebrow': 'Plotwise Ki Kore',
-    'feat-heading': 'Char Bastu.<br>Ek Platform.',
-    'feat-body': 'Nagaland aji bi food deficit state hoilebi 60%-r upor manu kheti kore. Plotwise real-time intelligence sidha kishan-r haath-te diye — aru Agriculture Department-ke 16-ta district-r ek view diye.',
-    'app-eyebrow': 'Kishan-r Bastu',
+    'feat-eyebrow': 'Plotwise-e Ki Ki Ase',
+    'feat-heading': 'Char Guti Tool.<br>Ek Platform.',
+    'feat-body': 'Nagaland aji-o food deficit state ase — 60%-r beshi manu kheti kore hoilebi. Plotwise-e real-time information sidha kishan-loi diye — aru Agriculture Department-ke 16-ta district-r ek view diye.',
+    'app-eyebrow': 'Kishan-r Tool',
     'app-heading': 'App',
-    'tab-disease': 'Rog Dhora',
+    'tab-disease': 'Rog Check',
     'tab-prices': 'Bazar Daam',
-    'tab-calendar': 'Lagano Calendar',
-    'tab-schemes': 'Scheme Khoja',
-    'tab-weather': 'Botas',
+    'tab-calendar': 'Lagabo-r Calendar',
+    'tab-schemes': 'Sarkari Scheme',
+    'tab-weather': 'Botaah',
     'lbl-crop': 'Fasal',
     'lbl-district': 'District',
-    'lbl-filter-crop': 'Fasal Chhana',
-    'lbl-your-district': 'Apunar District',
-    'lbl-your-crop': 'Apunar Fasal',
-    'dz-txt': 'Pata-r photo upload kora',
-    'dz-sub': 'JPG ba PNG · Click kora',
-    'btn-analyse': 'Fasal Check Kora →',
-    'btn-schemes': 'Moi-r Scheme Khoja →',
+    'lbl-filter-crop': 'Fasal Basi Lobo',
+    'lbl-your-district': 'Apuni-r District',
+    'lbl-your-crop': 'Apuni-r Fasal',
+    'dz-txt': 'Pata-r photo upload korbo',
+    'dz-sub': 'JPG ba PNG · Click korbo',
+    'btn-analyse': 'Fasal Check Korbo →',
+    'btn-schemes': 'Moi-r Scheme Khujibo →',
     'tbl-crop': 'Fasal',
     'tbl-price': 'Daam (₹/qtl)',
-    'tbl-trend': 'Trend',
-    'tbl-advice': 'Upai',
-    'hiw-eyebrow': 'Keneka Kaam Kore',
-    'hiw-heading': 'Tin step. Kono jhanjhat nai.',
-    'hiw-1-title': 'Apunar fasal-r photo tola',
-    'hiw-1-desc': 'Plotwise kholbo, apunar fasal aru district select korbo, aru kharap pata-r photo lobo. Jikuno smartphone-e hoi.',
-    'hiw-2-title': 'AI turant check kore',
-    'hiw-2-desc': 'Amar AI model second-r bhitor photo check kore — rog, severity, aru Nagaland-r fasal data logot milai.',
-    'hiw-3-title': 'Upai aru age ki koribo',
-    'hiw-3-desc': 'Specific dawai, prevention tips, najikar KVK contact, aru sarkari scheme-r link — sob ek jagat.',
-    'cta-eyebrow': 'Suru Korbo',
-    'cta-h': 'Apunar khet-r lagi<br>bhal intelligence dorkar.',
-    'cta-p': 'Plotwise free ase, jikuno phone-e cholai, signup dorkar nai. Nagaland-r 16-ta district-r lagi banaise — Kohima thika Mon porjonto.',
+    'tbl-trend': 'Bazar Haal',
+    'tbl-advice': 'Ki Koribo',
+    'hiw-eyebrow': 'Kenekoi Kaam Kore',
+    'hiw-heading': 'Tin step. Kono jhamela nai.',
+    'hiw-1-title': 'Apuni-r fasal-r photo lobo',
+    'hiw-1-desc': 'Plotwise kholbo, apuni-r fasal aru district select korbo, aru rog laga pata-r photo lobo. Jikuno smartphone-e hoi.',
+    'hiw-2-title': 'AI loge loge check kore',
+    'hiw-2-desc': 'Amar AI model second-r bhitor-e photo check kore — rog, kitiman serious, aru Nagaland-r fasal data logote milai.',
+    'hiw-3-title': 'Dawai aru age ki koribo paai',
+    'hiw-3-desc': 'Kon dawai lagabo, prevention tips, najik-r KVK contact, aru sarkari scheme-r link — sob ek jagah-te.',
+    'cta-eyebrow': 'Suru Korbo Aahok',
+    'cta-h': 'Apuni-r khet-r lagi<br>bhal information dorkar.',
+    'cta-p': 'Plotwise free ase, jikuno phone-e cholai pai, signup dorkar nai. Nagaland-r 16-ta district-r lagi — Kohima laga thiki Mon loka.',
     'cta-btn-try': 'App Kholbo',
     'cta-btn-dash': 'Data Dekhbo →',
-    'cta-pill': 'Signup dorkar nai · Data collect nai · Offline-e cholai',
-    'chat-title': 'Plotwise Sahayok',
-    'chat-sub': 'Fasal, daam, rog-r kotha hudh',
+    'cta-pill': 'Signup nai dorkar · Data collect nai kore · Offline-eo cholai',
+    'chat-title': 'Plotwise Sahaay',
+    'chat-sub': 'Fasal, daam, rog-r kotha hudhibo',
   }
 };
 
