@@ -1,6 +1,6 @@
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
-tensorflow==2.16.1
+tensorflow-cpu==2.16.1
 keras==3.4.1
 tf-keras==2.16.1
 optree==0.12.1
