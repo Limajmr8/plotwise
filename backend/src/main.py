@@ -12,7 +12,7 @@ Disease reports stored in SQLite for heatmap analytics.
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
@@ -22,6 +22,8 @@ import os
 import random
 import sqlite3
 import io
+import urllib.request
+import urllib.error
 
 app = FastAPI(
     title="Plotwise API",
@@ -671,6 +673,9 @@ def _detect_intent(text: str) -> str:
                   "yojana", "sahayota", "pmkisan"]
     district_kw = ["district", "area", "production", "yield", "crops in",
                    "grow in", "tell me about", "info about"]
+    weather_kw = ["weather", "rain", "temperature", "temp", "forecast",
+                  "humidity", "wind", "storm", "sunny", "cloudy",
+                  "botas", "bristi", "bah", "thanda", "gorom"]
     greet_kw   = ["hello", "hi", "help", "namaste", "hey", "hola",
                   "good morning", "good evening", "thanks", "thank",
                   "what can you", "ki koribo", "sahajyo"]
@@ -687,6 +692,9 @@ def _detect_intent(text: str) -> str:
     for kw in scheme_kw:
         if kw in text_l:
             return "scheme"
+    for kw in weather_kw:
+        if kw in text_l:
+            return "weather"
     for kw in district_kw:
         if kw in text_l:
             return "district"
@@ -716,7 +724,8 @@ def chat(msg: ChatMessage):
             f"- Crop disease identification & treatment\n"
             f"- Live market prices for Nagaland crops\n"
             f"- Planting & harvest calendar by district\n"
-            f"- Government schemes you qualify for\n\n"
+            f"- Government schemes you qualify for\n"
+            f"- Live weather & farming advisories\n\n"
             f"Just ask me anything about your farm!"
         )
         suggestions = ["What's the price of ginger?", "When to plant rice?",
@@ -854,6 +863,49 @@ def chat(msg: ChatMessage):
         suggestions = ["Kohima crops", "Dimapur agriculture", "Mon district",
                        "Best district for ginger?"]
 
+    elif intent == "weather":
+        try:
+            coords = DISTRICT_COORDS.get(district, (25.67, 94.12))
+            lat, lon = coords
+            w_url = (
+                f"https://api.open-meteo.com/v1/forecast?"
+                f"latitude={lat}&longitude={lon}"
+                f"&current=temperature_2m,relative_humidity_2m,weather_code,precipitation"
+                f"&timezone=Asia/Kolkata"
+            )
+            req = urllib.request.Request(w_url, headers={"User-Agent": "Plotwise/1.1"})
+            with urllib.request.urlopen(req, timeout=8) as resp:
+                w_data = json.loads(resp.read().decode())
+            cur = w_data.get("current", {})
+            WMO = {0:"Clear sky",1:"Mainly clear",2:"Partly cloudy",3:"Overcast",
+                   45:"Foggy",51:"Light drizzle",53:"Moderate drizzle",
+                   61:"Slight rain",63:"Moderate rain",65:"Heavy rain",
+                   80:"Rain showers",81:"Moderate rain showers",82:"Heavy rain showers",
+                   95:"Thunderstorm",96:"Thunderstorm with hail"}
+            weather_desc = WMO.get(cur.get("weather_code", 0), "Unknown")
+            temp = cur.get("temperature_2m", 0)
+            hum  = cur.get("relative_humidity_2m", 0)
+            rain = cur.get("precipitation", 0)
+
+            reply = (
+                f"**Weather in {district}** right now:\n\n"
+                f"**{weather_desc}** · {temp}°C\n"
+                f"Humidity: {hum}% · Rain: {rain} mm\n\n"
+            )
+            if hum > 85:
+                reply += "⚠️ High humidity — watch for fungal diseases.\n"
+            if rain > 10:
+                reply += "⚠️ Heavy rain expected — ensure field drainage.\n"
+            if temp > 35:
+                reply += "⚠️ Extreme heat — irrigate early morning or late evening.\n"
+            if hum <= 85 and rain <= 10 and temp <= 35:
+                reply += "Conditions look good for field work today.\n"
+            reply += "\nCheck the **Weather tab** for a 7-day forecast."
+        except Exception:
+            reply = f"Sorry, I couldn't fetch weather for {district} right now. Try the **Weather tab** in the app instead."
+        suggestions = ["Weather in Kohima", "Will it rain tomorrow?",
+                       "Weather Dimapur", "Price of ginger"]
+
     else:
         # General / unknown
         reply = (
@@ -862,11 +914,12 @@ def chat(msg: ChatMessage):
             "- **Market prices** — \"What's the price of ginger?\"\n"
             "- **Planting calendar** — \"When to sow rice?\"\n"
             "- **Government schemes** — \"What schemes can I get?\"\n"
-            "- **District data** — \"Tell me about Kohima\"\n\n"
+            "- **District data** — \"Tell me about Kohima\"\n"
+            "- **Weather** — \"Weather in Kohima\"\n\n"
             "Try asking one of these!"
         )
         suggestions = ["What's the price of ginger?", "When to plant rice?",
-                       "My potato has spots", "Kohima district info"]
+                       "My potato has spots", "Weather in Kohima"]
 
     return {
         "reply":       reply,
@@ -874,4 +927,169 @@ def chat(msg: ChatMessage):
         "crop":        crop,
         "district":    district,
         "suggestions": suggestions,
+    }
+
+
+# ── Export endpoints ──────────────────────────────────────────────────────────
+
+@app.get("/api/export/prices")
+def export_prices(district: str = "Kohima"):
+    """Export market prices as CSV download."""
+    price_data = get_prices(district)
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Crop", "Price (Rs/qtl)", "MSP (Rs/qtl)", "Trend", "Advice", "Market", "Source"])
+    for p in price_data.get("prices", []):
+        writer.writerow([
+            p["crop"], p["price_per_quintal"], p.get("msp", "N/A"),
+            p.get("trend", ""), p.get("advice", ""),
+            p.get("market", district), price_data.get("source", "")
+        ])
+    output.seek(0)
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename=plotwise_prices_{district}.csv"}
+    )
+
+
+@app.get("/api/export/yield")
+def export_yield(district: str = None):
+    """Export yield analytics as CSV download."""
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["District", "Crop", "Area (ha)", "Production (tonnes)", "Yield (kg/ha)", "Season"])
+    for r in CROP_RECORDS:
+        if district and r.get("district") != district:
+            continue
+        writer.writerow([
+            r.get("district", ""), r.get("crop", ""),
+            r.get("area_ha", ""), r.get("production_tonnes", ""),
+            r.get("yield_kg_per_ha", ""), r.get("season", "")
+        ])
+    output.seek(0)
+    fname = f"plotwise_yield_{district}.csv" if district else "plotwise_yield_all.csv"
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={fname}"}
+    )
+
+
+# ── Weather (Open-Meteo — free, no API key) ──────────────────────────────────
+
+DISTRICT_COORDS = {
+    "Kohima":      (25.67, 94.12),
+    "Dimapur":     (25.90, 93.73),
+    "Mokokchung":  (26.32, 94.52),
+    "Tuensang":    (26.27, 94.83),
+    "Mon":         (26.75, 95.00),
+    "Wokha":       (26.10, 94.27),
+    "Zunheboto":   (25.97, 94.52),
+    "Phek":        (25.67, 94.47),
+    "Longleng":    (26.43, 94.87),
+    "Kiphire":     (25.88, 95.12),
+    "Peren":       (25.52, 93.73),
+    "Noklak":      (26.60, 95.03),
+    "Shamator":    (26.08, 95.20),
+    "Niuland":     (25.82, 93.80),
+    "Chumoukedima":(25.78, 93.78),
+    "Tseminyu":    (25.78, 94.18),
+}
+
+
+@app.get("/api/weather")
+def get_weather(district: str = "Kohima"):
+    """
+    Live weather data from Open-Meteo (free, no API key).
+    Returns current conditions + 7-day forecast for the specified district.
+    """
+    coords = DISTRICT_COORDS.get(district)
+    if not coords:
+        raise HTTPException(404, f"District '{district}' not found.")
+
+    lat, lon = coords
+
+    url = (
+        f"https://api.open-meteo.com/v1/forecast?"
+        f"latitude={lat}&longitude={lon}"
+        f"&current=temperature_2m,relative_humidity_2m,wind_speed_10m,"
+        f"weather_code,precipitation"
+        f"&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,"
+        f"weather_code,wind_speed_10m_max"
+        f"&timezone=Asia/Kolkata&forecast_days=7"
+    )
+
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "Plotwise/1.1"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read().decode())
+    except (urllib.error.URLError, Exception) as e:
+        raise HTTPException(502, f"Weather service unavailable: {str(e)}")
+
+    # Weather code → description
+    WMO_CODES = {
+        0: "Clear sky", 1: "Mainly clear", 2: "Partly cloudy", 3: "Overcast",
+        45: "Foggy", 48: "Depositing rime fog",
+        51: "Light drizzle", 53: "Moderate drizzle", 55: "Dense drizzle",
+        61: "Slight rain", 63: "Moderate rain", 65: "Heavy rain",
+        71: "Slight snow", 73: "Moderate snow", 75: "Heavy snow",
+        80: "Slight rain showers", 81: "Moderate rain showers",
+        82: "Violent rain showers",
+        95: "Thunderstorm", 96: "Thunderstorm with hail",
+        99: "Thunderstorm with heavy hail",
+    }
+
+    current = data.get("current", {})
+    daily   = data.get("daily", {})
+
+    # Build farming advisory based on weather
+    temp = current.get("temperature_2m", 0)
+    humidity = current.get("relative_humidity_2m", 0)
+    precip = current.get("precipitation", 0)
+    code = current.get("weather_code", 0)
+
+    advisories = []
+    if humidity > 85:
+        advisories.append("High humidity — watch for fungal diseases (blight, mildew). Consider preventive fungicide.")
+    if temp > 35:
+        advisories.append("Extreme heat — irrigate in early morning or late evening. Mulch to retain soil moisture.")
+    if temp < 10:
+        advisories.append("Cold conditions — protect tender crops with mulch or row covers.")
+    if precip > 20:
+        advisories.append("Heavy rainfall expected — ensure field drainage. Delay fertilizer application.")
+    if code >= 95:
+        advisories.append("Thunderstorm alert — secure structures, avoid open fields.")
+    if not advisories:
+        advisories.append("Conditions are favourable for field work.")
+
+    # Build 7-day forecast
+    forecast = []
+    dates = daily.get("time", [])
+    for i in range(len(dates)):
+        forecast.append({
+            "date":     dates[i],
+            "temp_max": daily["temperature_2m_max"][i],
+            "temp_min": daily["temperature_2m_min"][i],
+            "precip":   daily["precipitation_sum"][i],
+            "wind_max": daily["wind_speed_10m_max"][i],
+            "weather":  WMO_CODES.get(daily["weather_code"][i], "Unknown"),
+            "code":     daily["weather_code"][i],
+        })
+
+    return {
+        "district":   district,
+        "lat":        lat,
+        "lon":        lon,
+        "current": {
+            "temperature": current.get("temperature_2m"),
+            "humidity":    current.get("relative_humidity_2m"),
+            "wind_speed":  current.get("wind_speed_10m"),
+            "precipitation": current.get("precipitation"),
+            "weather":     WMO_CODES.get(code, "Unknown"),
+            "code":        code,
+        },
+        "forecast":   forecast,
+        "advisories": advisories,
+        "source":     "Open-Meteo.com (free, open-source weather API)",
     }
