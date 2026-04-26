@@ -4,11 +4,29 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Plotwise — Smart Farming for Nagaland</title>
+  <meta name="description" content="AI-powered smart farming platform for Nagaland — crop disease detection, live market prices, planting calendar, and government scheme finder. Built with real 2023-24 agriculture data."/>
+  <meta name="keywords" content="Nagaland, agriculture, crop disease detection, smart farming, market prices, planting calendar, government schemes, AI farming"/>
+  <meta name="author" content="Limawapang Jamir"/>
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Plotwise — Smart Farming for Nagaland"/>
+  <meta property="og:description" content="AI-powered crop disease detection, live market prices, and planting calendar for Nagaland farmers."/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:image" content="/static/images/hero-terraces.webp"/>
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="Plotwise — Smart Farming for Nagaland"/>
+  <meta name="twitter:description" content="AI-powered crop disease detection, live market prices, and planting calendar for Nagaland farmers."/>
+
   <link rel="manifest" href="/static/manifest.json"/>
   <meta name="theme-color" content="#3a6828"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -1681,7 +1699,7 @@
             <div class="dz-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--sprout)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
             <div class="dz-txt" data-i18n="dz-txt">Upload a leaf photo</div>
             <div class="dz-sub" data-i18n="dz-sub">JPG or PNG · Click to browse</div>
-            <img id="prev"/>
+            <img id="prev" alt="Uploaded leaf preview"/>
           </div>
           <button class="btn-go" onclick="runDisease()"><span data-i18n="btn-analyse">Analyse Crop →</span></button>
           <div class="result" id="d-result"></div>
