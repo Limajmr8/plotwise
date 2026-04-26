@@ -17,16 +17,19 @@ env/
 .venv/
 .env
 
-# ML — large files (do not commit)
+# ML — large training data (do not commit)
 data/raw/
 data/train/
 data/test/
-ml/saved_models/
 ml/results/
-*.h5
 *.keras
 *.pb
 *.tflite
+
+# ML — keep trained model for deployment
+# ml/saved_models/disease_model.h5 — TRACKED (31MB, needed for inference)
+# ml/saved_models/class_indices.json — TRACKED
+ml/saved_models/disease_model_fixed.h5
 
 # Jupyter
 .ipynb_checkpoints/
