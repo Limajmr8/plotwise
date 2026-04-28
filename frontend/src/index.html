@@ -1405,6 +1405,8 @@
       .footer-statement { font-size: clamp(1.6rem, 5vw, 2rem) !important; letter-spacing: -1px !important; }
       .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
       .cursor-glow { display: none; }
+      section[style*="padding:100px 60px"] { padding: 80px 24px !important; }
+      section[style*="padding:100px 60px"] > div:last-of-type { grid-template-columns: 1fr !important; gap: 40px !important; }
       .cta-sec { padding: 80px 24px; }
       .cta-h { letter-spacing: -1.5px; }
       .cta-btns { flex-direction: column; }
@@ -1500,16 +1502,16 @@
       <div class="stat-l" data-i18n="stat-districts">Districts Covered</div>
     </div>
     <div class="stat">
-      <div class="stat-n">30</div>
-      <div class="stat-l" data-i18n="stat-crops">Crops Monitored</div>
+      <div class="stat-n">44</div>
+      <div class="stat-l" data-i18n="stat-crops">Crops Tracked</div>
     </div>
     <div class="stat">
-      <div class="stat-n">2.1M+</div>
-      <div class="stat-l" data-i18n="stat-tonnes">Tonnes Tracked</div>
+      <div class="stat-n">1.18M</div>
+      <div class="stat-l" data-i18n="stat-tonnes">Tonnes (2023-24)</div>
     </div>
     <div class="stat">
-      <div class="stat-n">95%</div>
-      <div class="stat-l" data-i18n="stat-accuracy">AI Detection Accuracy</div>
+      <div class="stat-n">24</div>
+      <div class="stat-l" data-i18n="stat-accuracy">Disease Classes</div>
     </div>
   </div>
 </div>
@@ -1527,7 +1529,7 @@
       <div class="hscroll-panel-content">
         <div class="hscroll-num">01</div>
         <div class="hscroll-title">AI Disease<br>Detection</div>
-        <div class="hscroll-desc">Snap a photo of any crop leaf. Our EfficientNetB0 model identifies the disease in seconds — with treatment specific to Nagaland crops.</div>
+        <div class="hscroll-desc">Snap a photo of any crop leaf. Our AI identifies the disease in seconds — with treatment recommendations specific to Nagaland crops.</div>
       </div>
     </div>
     <div class="hscroll-panel">
@@ -1596,7 +1598,7 @@
         <div class="feat-num-tag">01 — Disease Detection</div>
         <div class="feat-ico-wrap"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--sprout)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="M11 8v6"/><path d="M8 11h6"/></svg></div>
         <div class="feat-h">Diagnose before<br>it spreads</div>
-        <div class="feat-p">Photograph a crop leaf and our EfficientNetB0 AI model identifies the disease within seconds — with treatment recommendations specific to Nagaland's crops: Rice Blast, Ginger Soft Rot, Potato Late Blight and more.</div>
+        <div class="feat-p">Photograph a crop leaf and our AI identifies the disease within seconds — trained on 24 disease classes across 9 crop types including Apple, Maize, Potato, Tomato, Grape, Chilli, and more.</div>
         <button class="feat-cta" onclick="openTab('disease');go('app')">Try Disease Detection →</button>
       </div>
     </div>
@@ -1625,7 +1627,7 @@
         <div class="feat-num-tag">02 — Market Prices</div>
         <div class="feat-ico-wrap"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--sprout)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
         <div class="feat-h">Know the right<br>time to sell</div>
-        <div class="feat-p">Real-time mandi prices from Agmarknet and Nagaland APMC across all districts. Never be shortchanged by middlemen again — see live trends for Ginger, Paddy, Maize, Turmeric and 26 more crops.</div>
+        <div class="feat-p">Market prices anchored to government MSP data and Agmarknet APMC rates across all 16 districts. Track Ginger, Paddy, Maize, Soyabean, Tea, Potato and 30+ more crops — with sell/hold advisories.</div>
         <button class="feat-cta" onclick="openTab('prices');go('app')">Check Live Prices →</button>
       </div>
     </div>
@@ -1724,15 +1726,19 @@
           <div class="frow">
             <div class="fld"><label data-i18n="lbl-crop">Crop</label>
               <select id="dc">
-                <option>Rice</option><option>Maize</option><option>Ginger</option>
-                <option>Turmeric</option><option>Potato</option><option>Chilli</option>
-                <option>Soyabean</option><option>Mustard</option>
+                <option>Apple</option><option>Chilli</option><option>Grape</option>
+                <option>Maize</option><option>Orange</option><option>Pepper</option>
+                <option>Potato</option><option>Soyabean</option><option>Tomato</option>
               </select>
             </div>
             <div class="fld"><label data-i18n="lbl-district">District</label>
               <select id="dd">
-                <option>Mokokchung</option><option>Kohima</option><option>Dimapur</option>
-                <option>Phek</option><option>Wokha</option><option>Mon</option>
+                <option>Kohima</option><option>Tseminyu</option><option>Phek</option>
+                <option>Mokokchung</option><option>Tuensang</option><option>Noklak</option>
+                <option>Shamator</option><option>Mon</option><option>Dimapur</option>
+                <option>Niuland</option><option>Chumoukedima</option><option>Wokha</option>
+                <option>Zunheboto</option><option>Peren</option><option>Kiphire</option>
+                <option>Longleng</option>
               </select>
             </div>
           </div>
@@ -1752,15 +1758,20 @@
           <div class="frow">
             <div class="fld"><label data-i18n="lbl-district">District</label>
               <select id="pd" onchange="renderPrices()">
-                <option>Kohima</option><option>Dimapur</option><option>Mokokchung</option>
-                <option>Wokha</option><option>Phek</option><option>Mon</option>
+                <option>Kohima</option><option>Tseminyu</option><option>Phek</option>
+                <option>Mokokchung</option><option>Tuensang</option><option>Noklak</option>
+                <option>Shamator</option><option>Mon</option><option>Dimapur</option>
+                <option>Niuland</option><option>Chumoukedima</option><option>Wokha</option>
+                <option>Zunheboto</option><option>Peren</option><option>Kiphire</option>
+                <option>Longleng</option>
               </select>
             </div>
             <div class="fld"><label data-i18n="lbl-filter-crop">Filter Crop</label>
               <select id="pc" onchange="renderPrices()">
                 <option value="">All Crops</option>
-                <option>Rice</option><option>Maize</option><option>Ginger</option>
-                <option>Turmeric</option><option>Potato</option>
+                <option>Jhum Paddy</option><option>WTRC Paddy Kharif</option><option>Maize Kharif</option>
+                <option>Ginger</option><option>Potato</option><option>Soyabean</option>
+                <option>Mustard</option><option>Tea</option><option>Sugarcane</option>
               </select>
             </div>
           </div>
@@ -1781,8 +1792,12 @@
           <div class="frow" style="margin-bottom:28px">
             <div class="fld"><label data-i18n="lbl-your-district">Your District</label>
               <select id="cd" onchange="renderCal()">
-                <option>Kohima</option><option>Dimapur</option><option>Mokokchung</option>
-                <option>Wokha</option><option>Phek</option><option>Peren</option>
+                <option>Kohima</option><option>Tseminyu</option><option>Phek</option>
+                <option>Mokokchung</option><option>Tuensang</option><option>Noklak</option>
+                <option>Shamator</option><option>Mon</option><option>Dimapur</option>
+                <option>Niuland</option><option>Chumoukedima</option><option>Wokha</option>
+                <option>Zunheboto</option><option>Peren</option><option>Kiphire</option>
+                <option>Longleng</option>
               </select>
             </div>
           </div>
@@ -1794,14 +1809,20 @@
           <div class="frow">
             <div class="fld"><label data-i18n="lbl-your-crop">Your Crop</label>
               <select id="sc">
-                <option>Rice</option><option>Maize</option><option>Ginger</option>
-                <option>Potato</option><option>Soyabean</option><option>Turmeric</option>
+                <option>Jhum Paddy</option><option>WTRC Paddy Kharif</option>
+                <option>Maize Kharif</option><option>Ginger</option><option>Potato</option>
+                <option>Soyabean</option><option>Mustard</option><option>Tea</option>
+                <option>Sugarcane</option><option>Sweet Potato</option><option>Groundnut</option>
               </select>
             </div>
             <div class="fld"><label data-i18n="lbl-your-district">Your District</label>
               <select id="sd">
-                <option>Kohima</option><option>Dimapur</option><option>Mokokchung</option>
-                <option>Wokha</option><option>Phek</option><option>Mon</option>
+                <option>Kohima</option><option>Tseminyu</option><option>Phek</option>
+                <option>Mokokchung</option><option>Tuensang</option><option>Noklak</option>
+                <option>Shamator</option><option>Mon</option><option>Dimapur</option>
+                <option>Niuland</option><option>Chumoukedima</option><option>Wokha</option>
+                <option>Zunheboto</option><option>Peren</option><option>Kiphire</option>
+                <option>Longleng</option>
               </select>
             </div>
           </div>
@@ -1814,10 +1835,12 @@
           <div class="frow">
             <div class="fld"><label data-i18n="lbl-your-district">Your District</label>
               <select id="wd" onchange="renderWeather()">
-                <option>Kohima</option><option>Dimapur</option><option>Mokokchung</option>
-                <option>Wokha</option><option>Phek</option><option>Mon</option>
-                <option>Tuensang</option><option>Zunheboto</option><option>Peren</option>
-                <option>Longleng</option><option>Kiphire</option>
+                <option>Kohima</option><option>Tseminyu</option><option>Phek</option>
+                <option>Mokokchung</option><option>Tuensang</option><option>Noklak</option>
+                <option>Shamator</option><option>Mon</option><option>Dimapur</option>
+                <option>Niuland</option><option>Chumoukedima</option><option>Wokha</option>
+                <option>Zunheboto</option><option>Peren</option><option>Kiphire</option>
+                <option>Longleng</option>
               </select>
             </div>
           </div>
@@ -1848,7 +1871,7 @@
         <div class="hiw-step-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--sprout)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
         <div class="hiw-step-num">02</div>
         <div class="hiw-step-title" data-i18n="hiw-2-title">AI analyses instantly</div>
-        <div class="hiw-step-desc" data-i18n="hiw-2-desc">Our EfficientNetB0 model processes the image in seconds — identifying the disease, severity, and matching it against Nagaland-specific crop data.</div>
+        <div class="hiw-step-desc" data-i18n="hiw-2-desc">Our AI processes the image in seconds — identifying the disease, severity, and matching it against Nagaland-specific crop data from the Department of Agriculture.</div>
       </div>
       <div class="hiw-step">
         <div class="hiw-step-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--sprout)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
@@ -1861,19 +1884,50 @@
 </section>
 
 
+<!-- ABOUT & DATA SOURCES -->
+<section style="padding:100px 60px;max-width:1000px;margin:0 auto">
+  <div class="eyebrow" style="margin-bottom:16px">About</div>
+  <h2 style="font-family:var(--font-display);font-size:clamp(1.8rem,3vw,2.6rem);font-weight:800;letter-spacing:-1.5px;color:var(--cream);line-height:1.15;margin-bottom:40px">Built on real data,<br>for real decisions.</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px">
+    <div>
+      <h3 style="font-family:var(--font-head);font-size:0.85rem;color:var(--sprout);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px">Data Sources</h3>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:14px;font-size:0.92rem;color:rgba(242,239,230,0.6);line-height:1.7">
+        <li style="padding-left:16px;border-left:2px solid var(--sprout)"><strong style="color:var(--cream)">Crop Production Data</strong><br>District-wise Area, Production & Yield (Achievement) 2023-24 — Director of Agriculture, Nagaland, Kohima. 576 records across 16 districts and 44 crops. Verified 30 July 2024.</li>
+        <li style="padding-left:16px;border-left:2px solid rgba(106,191,59,0.3)"><strong style="color:var(--cream)">Market Prices</strong><br>Minimum Support Prices (MSP) 2023-24, Commission for Agricultural Costs & Prices (CACP). Supplemented with Agmarknet APMC data for Nagaland.</li>
+        <li style="padding-left:16px;border-left:2px solid rgba(106,191,59,0.3)"><strong style="color:var(--cream)">Weather</strong><br>Live forecast from Open-Meteo — open-source weather API. 7-day forecasts updated every 15 minutes. GPS coordinates for all 16 district headquarters.</li>
+        <li style="padding-left:16px;border-left:2px solid rgba(106,191,59,0.3)"><strong style="color:var(--cream)">Disease Detection</strong><br>AI model trained on PlantVillage dataset (Penn State University). 24 disease classes across 9 crop types. Transfer learning on EfficientNetB0 architecture.</li>
+      </ul>
+    </div>
+    <div>
+      <h3 style="font-family:var(--font-head);font-size:0.85rem;color:var(--sprout);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px">Methodology</h3>
+      <div style="font-size:0.92rem;color:rgba(242,239,230,0.6);line-height:1.8">
+        <p style="margin-bottom:16px">All crop area, production, and yield figures are sourced directly from the Department of Agriculture, Nagaland's official achievement report for the financial year 2023-24. No data has been interpolated, estimated, or generated.</p>
+        <p style="margin-bottom:16px">Disease detection uses deep learning (convolutional neural network) with a three-tier confidence system: results above 70% are reported as confident, 55-70% as low confidence requiring expert verification, and below 55% as uncertain with a recommendation to retake the photo.</p>
+        <p>Market prices shown are anchored to the Minimum Support Price declared by the Government of India for the 2023-24 season. Actual market prices fluctuate and are indicative only.</p>
+      </div>
+      <div style="margin-top:32px;padding:20px;background:rgba(106,191,59,0.04);border:1px solid rgba(106,191,59,0.08);border-radius:12px">
+        <div style="font-family:var(--font-head);font-size:0.72rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--sprout);margin-bottom:8px">Developer</div>
+        <div style="font-size:0.95rem;color:var(--cream);font-weight:600">Limawapang L Jamir</div>
+        <div style="font-size:0.82rem;color:rgba(242,239,230,0.4);margin-top:4px">B.Tech Computer Science · Bennett University</div>
+        <div style="font-size:0.82rem;color:rgba(242,239,230,0.4)">Mokokchung, Nagaland</div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- CTA BANNER -->
 <section class="cta-sec">
   <div class="cta-inner">
     <div class="eyebrow" data-i18n="cta-eyebrow">Get Started</div>
     <div class="cta-h" data-i18n="cta-h">Your farm deserves<br>better intelligence.</div>
-    <div class="cta-p" data-i18n="cta-p">Plotwise is free, works on any phone, and needs no signup. Designed for Nagaland's 16 districts — from Kohima to Mon.</div>
+    <div class="cta-p" data-i18n="cta-p">Plotwise is built on real agriculture data from the Department of Agriculture, Nagaland. Designed for all 16 districts — from Kohima to Mon.</div>
     <div class="cta-btns">
       <button class="btn-primary magnetic" onclick="go('app')"><span data-i18n="cta-btn-try">Open the App</span></button>
       <button class="btn-ghost" onclick="go('dashboard')"><span data-i18n="cta-btn-dash">Explore Dashboard →</span></button>
     </div>
     <div class="cta-pill">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      <span data-i18n="cta-pill">No signup · No data collected · Works offline</span>
+      <span data-i18n="cta-pill">Real government data · 16 districts · 44 crops</span>
     </div>
   </div>
 </section>
@@ -1897,7 +1951,7 @@
 
     <div class="kpi-row">
       <div class="kpi"><div class="kpi-n">16</div><div class="kpi-l">Districts</div></div>
-      <div class="kpi"><div class="kpi-n">30</div><div class="kpi-l">Crops Tracked</div></div>
+      <div class="kpi"><div class="kpi-n">44</div><div class="kpi-l">Crops Tracked</div></div>
       <div class="kpi"><div class="kpi-n" id="k-prod">—</div><div class="kpi-l">Total Production (T)</div></div>
       <div class="kpi"><div class="kpi-n" id="k-area">—</div><div class="kpi-l">Total Area (Ha)</div></div>
       <div class="kpi"><div class="kpi-n" id="k-top">—</div><div class="kpi-l">Top District</div></div>
@@ -1987,7 +2041,7 @@
     </div>
     <div style="margin-top:32px;display:flex;gap:16px;align-items:center">
       <button class="btn-primary magnetic" onclick="go('app')" style="padding:16px 40px">Try the App</button>
-      <span style="font-size:0.78rem;color:rgba(240,235,224,0.25);font-family:var(--font-head);letter-spacing:0.5px">Free. No signup. Open source.</span>
+      <span style="font-size:0.78rem;color:rgba(240,235,224,0.25);font-family:var(--font-head);letter-spacing:0.5px">Built for Nagaland. Powered by real agriculture data.</span>
     </div>
   </div>
   <div class="footer-grid" style="padding-top:60px">
@@ -2059,36 +2113,38 @@ function closeMobile() {
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
 const API = window.location.origin;
 
-// ─── REAL DATA (Dept. of Agriculture, Nagaland 2023-24) ───────────────────────
+// ─── REAL DATA (Director of Agriculture, Nagaland 2023-24, verified 30-07-2024) ─
 const DS = [
-  {d:"Longleng",      a:371629, p:1087374, c:30},
-  {d:"Shamator",      a:42309,  p:109412,  c:30},
-  {d:"Tseminyu",      a:33577,  p:104457,  c:29},
-  {d:"Dimapur",       a:27999,  p:101588,  c:29},
-  {d:"Chumuoukedima", a:31190,  p:92697,   c:30},
-  {d:"Zunheboto",     a:24815,  p:86308,   c:28},
-  {d:"Nuiland",       a:26300,  p:85909,   c:30},
-  {d:"Phek",          a:28072,  p:81174,   c:28},
-  {d:"Wokha",         a:29084,  p:71300,   c:27},
-  {d:"Mokokchung",    a:20369,  p:57551,   c:26},
-  {d:"Peren",         a:23715,  p:54196,   c:28},
-  {d:"Tuensang",      a:15539,  p:44555,   c:26},
-  {d:"Kiphire",       a:15195,  p:40238,   c:26},
-  {d:"Noklak",        a:13800,  p:34799,   c:26},
-  {d:"Mon",           a:9846,   p:34561,   c:29},
-  {d:"Kohima",        a:9567,   p:24135,   c:28},
+  {d:"Mon",           a:45458, p:131351, c:37},
+  {d:"Phek",          a:34318, p:109855, c:37},
+  {d:"Niuland",       a:29071, p:105496, c:37},
+  {d:"Wokha",         a:33033, p:102234, c:36},
+  {d:"Peren",         a:26110, p:93978,  c:36},
+  {d:"Chumoukedima",  a:27471, p:90441,  c:37},
+  {d:"Mokokchung",    a:29918, p:88471,  c:36},
+  {d:"Zunheboto",     a:29880, p:76288,  c:35},
+  {d:"Kohima",        a:20525, p:66622,  c:37},
+  {d:"Kiphire",       a:24533, p:60808,  c:35},
+  {d:"Tuensang",      a:21014, p:61243,  c:36},
+  {d:"Noklak",        a:15886, p:46266,  c:35},
+  {d:"Longleng",      a:15760, p:44334,  c:34},
+  {d:"Shamator",      a:14241, p:37915,  c:34},
+  {d:"Dimapur",       a:10520, p:37325,  c:36},
+  {d:"Tseminyu",      a:9849,  p:26430,  c:34},
 ];
 const CS = [
-  {c:"WTRC Paddy",   p:703673, y:3114},
-  {c:"Jhum Paddy",   p:353996, y:1982},
-  {c:"Sugarcane",    p:228578, y:43414},
-  {c:"Maize",        p:152590, y:2000},
-  {c:"Tapioca",      p:118786, y:20229},
-  {c:"Potato",       p:111702, y:11140},
-  {c:"Ginger",       p:99814,  y:10192},
-  {c:"Tea",          p:68448,  y:4432},
+  {c:"WTRC Paddy",   p:367481, y:3119},
+  {c:"Jhum Paddy",   p:179085, y:1983},
+  {c:"Sugarcane",    p:115115, y:43571},
+  {c:"Maize",        p:88985,  y:1999},
+  {c:"Colocasia",    p:64949,  y:10630},
+  {c:"Tapioca",      p:60852,  y:20230},
+  {c:"Potato",       p:60480,  y:11200},
+  {c:"Ginger",       p:52076,  y:10195},
+  {c:"Tea",          p:34812,  y:4470},
+  {c:"Soyabean",     p:17344,  y:1260},
 ];
-const GREENS = ['#5a9e3a','#3a6828','#8fce52','#2a4e1e','#78b840','#2e5522','#a8d866','#1a3212'];
+const GREENS = ['#5a9e3a','#3a6828','#8fce52','#2a4e1e','#78b840','#2e5522','#a8d866','#1a3212','#4b8a30','#6ab445'];
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 function loadingRow(cols, msg='Loading…'){
@@ -2106,11 +2162,11 @@ function apiError(msg){
 // ─── TICKER ───────────────────────────────────────────────────────────────────
 async function buildTicker(){
   const fallback = [
-    {n:"WTRC Paddy",p:2340,t:"up"},{n:"Jhum Paddy",p:2190,t:"flat"},
-    {n:"Maize",p:1820,t:"dn"},{n:"Ginger",p:8900,t:"up"},
-    {n:"Turmeric",p:7100,t:"up"},{n:"Potato",p:1150,t:"flat"},
-    {n:"Soyabean",p:3950,t:"up"},{n:"Mustard",p:4800,t:"flat"},
-    {n:"Tea",p:14500,t:"up"},{n:"Sugarcane",p:3100,t:"flat"},
+    {n:"WTRC Paddy",p:2183,t:"up"},{n:"Jhum Paddy",p:2183,t:"flat"},
+    {n:"Maize",p:1962,t:"dn"},{n:"Ginger",p:8500,t:"up"},
+    {n:"Soyabean",p:4600,t:"up"},{n:"Potato",p:1200,t:"flat"},
+    {n:"Mustard",p:5650,t:"flat"},{n:"Tea",p:14800,t:"up"},
+    {n:"Sugarcane",p:3150,t:"flat"},{n:"Groundnut",p:6377,t:"up"},
   ];
   let items = fallback;
   try {
@@ -3076,9 +3132,9 @@ const i18n = {
     'hero-btn-dash': 'View Dashboard →',
     'hero-scroll': 'Scroll',
     'stat-districts': 'Districts Covered',
-    'stat-crops': 'Crops Monitored',
-    'stat-tonnes': 'Tonnes Tracked',
-    'stat-accuracy': 'AI Detection Accuracy',
+    'stat-crops': 'Crops Tracked',
+    'stat-tonnes': 'Tonnes (2023-24)',
+    'stat-accuracy': 'Disease Classes',
     'feat-eyebrow': 'What Plotwise Does',
     'feat-heading': 'Four tools.<br>One platform.',
     'feat-body': 'Nagaland is still a food deficit state despite over 60% of its population farming the land. Plotwise puts real-time intelligence directly into farmers\' hands — and gives the Agriculture Department a unified view across all 16 districts.',
@@ -3107,15 +3163,15 @@ const i18n = {
     'hiw-1-title': 'Photograph your crop',
     'hiw-1-desc': 'Open Plotwise, select your crop and district, and snap a photo of the affected leaf. Works on any smartphone camera.',
     'hiw-2-title': 'AI analyses instantly',
-    'hiw-2-desc': 'Our EfficientNetB0 model processes the image in seconds — identifying the disease, severity, and matching it against Nagaland-specific crop data.',
+    'hiw-2-desc': 'Our AI processes the image in seconds — identifying the disease, severity, and matching it against Nagaland-specific crop data from the Department of Agriculture.',
     'hiw-3-title': 'Get treatment + next steps',
     'hiw-3-desc': 'Receive specific treatment recommendations, prevention tips, nearest KVK contact, and links to government schemes — all in one result.',
     'cta-eyebrow': 'Get Started',
     'cta-h': 'Your farm deserves<br>better intelligence.',
-    'cta-p': 'Plotwise is free, works on any phone, and needs no signup. Designed for Nagaland\'s 16 districts — from Kohima to Mon.',
+    'cta-p': 'Plotwise is built on real agriculture data from the Department of Agriculture, Nagaland. Designed for all 16 districts — from Kohima to Mon.',
     'cta-btn-try': 'Open the App',
     'cta-btn-dash': 'Explore Dashboard →',
-    'cta-pill': 'No signup · No data collected · Works offline',
+    'cta-pill': 'Real government data · 16 districts · 44 crops',
     'chat-title': 'Plotwise Assistant',
     'chat-sub': 'Ask about crops, prices, diseases',
   },
@@ -3131,8 +3187,8 @@ const i18n = {
     'hero-scroll': 'Tole Scroll Korbo',
     'stat-districts': 'District Cover Koise',
     'stat-crops': 'Fasal Track Koise',
-    'stat-tonnes': 'Tonne Track Koise',
-    'stat-accuracy': 'AI Accuracy',
+    'stat-tonnes': 'Tonne (2023-24)',
+    'stat-accuracy': 'Disease Class',
     'feat-eyebrow': 'Plotwise-e Ki Ki Ase',
     'feat-heading': 'Char Guti Tool.<br>Ek Platform.',
     'feat-body': 'Nagaland aji-o food deficit state ase — 60%-r beshi manu kheti kore hoilebi. Plotwise-e real-time information sidha kishan-loi diye — aru Agriculture Department-ke 16-ta district-r ek view diye.',
@@ -3161,15 +3217,15 @@ const i18n = {
     'hiw-1-title': 'Apuni-r fasal-r photo lobo',
     'hiw-1-desc': 'Plotwise kholbo, apuni-r fasal aru district select korbo, aru rog laga pata-r photo lobo. Jikuno smartphone-e hoi.',
     'hiw-2-title': 'AI loge loge check kore',
-    'hiw-2-desc': 'Amar AI model second-r bhitor-e photo check kore — rog, kitiman serious, aru Nagaland-r fasal data logote milai.',
+    'hiw-2-desc': 'Amar AI second-r bhitor-e photo check kore — rog, kitiman serious, aru Department of Agriculture-r Nagaland data logote milai.',
     'hiw-3-title': 'Dawai aru age ki koribo paai',
     'hiw-3-desc': 'Kon dawai lagabo, prevention tips, najik-r KVK contact, aru sarkari scheme-r link — sob ek jagah-te.',
     'cta-eyebrow': 'Suru Korbo Aahok',
     'cta-h': 'Apuni-r khet-r lagi<br>bhal information dorkar.',
-    'cta-p': 'Plotwise free ase, jikuno phone-e cholai pai, signup dorkar nai. Nagaland-r 16-ta district-r lagi — Kohima laga thiki Mon loka.',
+    'cta-p': 'Plotwise Department of Agriculture, Nagaland-r real data-r upor-e bonaise. 16-ta district-r lagi — Kohima laga thiki Mon loka.',
     'cta-btn-try': 'App Kholbo',
     'cta-btn-dash': 'Data Dekhbo →',
-    'cta-pill': 'Signup nai dorkar · Data collect nai kore · Offline-eo cholai',
+    'cta-pill': 'Sarkari data · 16-ta district · 44-ta fasal',
     'chat-title': 'Plotwise Sahaay',
     'chat-sub': 'Fasal, daam, rog-r kotha hudhibo',
   }

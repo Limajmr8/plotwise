@@ -65,6 +65,7 @@ with open(CSV_FILE, "r") as f:
             "year":              row["year"],
             "district":          row["district"],
             "crop":              row["crop"],
+            "season":            row.get("season", ""),
             "area_ha":           float(row["area_ha"])           if row["area_ha"]           else 0,
             "production_tonnes": float(row["production_tonnes"]) if row["production_tonnes"] else 0,
             "yield_kg_per_ha":   float(row["yield_kg_per_ha"])   if row["yield_kg_per_ha"]   else 0,
@@ -259,14 +260,14 @@ PLANTING_CALENDAR = {
     "WTRC Paddy Kharif": {"sow": [4, 5],    "harvest": [9, 10],  "zones": "all"},
     "WTRC Paddy Rabi":   {"sow": [11, 12],  "harvest": [3, 4],   "zones": ["Kohima", "Tseminyu", "Phek"]},
     "Maize Kharif":      {"sow": [3, 4],    "harvest": [7, 8],   "zones": "all"},
-    "Maize Rabi":        {"sow": [10, 11],  "harvest": [2, 3],   "zones": ["Dimapur", "Peren", "Nuiland"]},
+    "Maize Rabi":        {"sow": [10, 11],  "harvest": [2, 3],   "zones": ["Dimapur", "Peren", "Niuland"]},
     "Ginger":            {"sow": [3, 4],    "harvest": [11, 12], "zones": "all"},
     "Potato":            {"sow": [1, 2],    "harvest": [4, 5],   "zones": ["Kohima", "Phek", "Zunheboto"]},
     "Sweet Potato":      {"sow": [6, 7],    "harvest": [10, 11], "zones": "all"},
     "Tapioca":           {"sow": [2, 3],    "harvest": [11, 12], "zones": ["Dimapur", "Peren", "Mon"]},
     "Soyabean":          {"sow": [5, 6],    "harvest": [9, 10],  "zones": "all"},
     "Mustard":           {"sow": [10, 11],  "harvest": [2, 3],   "zones": "all"},
-    "Sugarcane":         {"sow": [2, 3],    "harvest": [12, 1],  "zones": ["Dimapur", "Peren", "Nuiland"]},
+    "Sugarcane":         {"sow": [2, 3],    "harvest": [12, 1],  "zones": ["Dimapur", "Peren", "Niuland"]},
     "Tea":               {"sow": [2, 3],    "harvest": [3, 11],  "zones": ["Mokokchung", "Tuensang", "Wokha"]},
     "Groundnut":         {"sow": [5, 6],    "harvest": [9, 10],  "zones": "all"},
     "Beans":             {"sow": [4, 5],    "harvest": [7, 8],   "zones": "all"},
@@ -278,24 +279,43 @@ MONTH_NAMES = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun",
 # ── Market price anchors (real 2023-24 MSP / Agmarknet data) ─────────────────
 
 PRICE_ANCHORS = {
+    # Cereals (MSP 2023-24)
     "Jhum Paddy":        {"base": 2183, "unit": "₹/quintal"},
     "WTRC Paddy Kharif": {"base": 2183, "unit": "₹/quintal"},
     "WTRC Paddy Rabi":   {"base": 2183, "unit": "₹/quintal"},
     "Maize Kharif":      {"base": 1962, "unit": "₹/quintal"},
     "Maize Rabi":        {"base": 1962, "unit": "₹/quintal"},
+    "Jowar":             {"base": 3180, "unit": "₹/quintal"},
+    "Bajra":             {"base": 2500, "unit": "₹/quintal"},
+    "Ragi":              {"base": 3846, "unit": "₹/quintal"},
+    "Small Millet":      {"base": 3150, "unit": "₹/quintal"},
+    "Wheat":             {"base": 2275, "unit": "₹/quintal"},
+    # Pulses (MSP 2023-24)
+    "Tur/Arhar":         {"base": 7000, "unit": "₹/quintal"},
+    "Urd/Moong":         {"base": 6950, "unit": "₹/quintal"},
+    "Pea":               {"base": 5500, "unit": "₹/quintal"},
+    "Gram":              {"base": 5440, "unit": "₹/quintal"},
+    "Beans":             {"base": 4200, "unit": "₹/quintal"},
+    "Rajmash Kharif":    {"base": 6500, "unit": "₹/quintal"},
+    "Rajmash Rabi":      {"base": 6500, "unit": "₹/quintal"},
+    "Lentil":            {"base": 6425, "unit": "₹/quintal"},
+    # Oilseeds (MSP 2023-24)
+    "Soyabean":          {"base": 4600, "unit": "₹/quintal"},
+    "Groundnut":         {"base": 6377, "unit": "₹/quintal"},
+    "Mustard":           {"base": 5650, "unit": "₹/quintal"},
+    "Sesamum":           {"base": 8635, "unit": "₹/quintal"},
+    "Linseed":           {"base": 7080, "unit": "₹/quintal"},
+    "Sunflower":         {"base": 6760, "unit": "₹/quintal"},
+    # Commercial crops (Agmarknet / industry)
     "Ginger":            {"base": 8500, "unit": "₹/quintal"},
     "Potato":            {"base": 1200, "unit": "₹/quintal"},
     "Sweet Potato":      {"base": 1800, "unit": "₹/quintal"},
     "Tapioca":           {"base": 900,  "unit": "₹/quintal"},
-    "Soyabean":          {"base": 4600, "unit": "₹/quintal"},
-    "Mustard":           {"base": 5650, "unit": "₹/quintal"},
     "Sugarcane":         {"base": 3150, "unit": "₹/quintal"},
     "Tea":               {"base": 14800,"unit": "₹/quintal"},
-    "Groundnut":         {"base": 6377, "unit": "₹/quintal"},
-    "Beans":             {"base": 4200, "unit": "₹/quintal"},
-    "Wheat":             {"base": 2275, "unit": "₹/quintal"},
-    "Jowar":             {"base": 3180, "unit": "₹/quintal"},
-    "Bajra":             {"base": 2500, "unit": "₹/quintal"},
+    "Colocasia":         {"base": 2500, "unit": "₹/quintal"},
+    "Yam":               {"base": 3000, "unit": "₹/quintal"},
+    "Jute":              {"base": 4750, "unit": "₹/quintal"},
 }
 
 
@@ -353,8 +373,12 @@ async def detect_disease(
     if not file.content_type.startswith("image/"):
         raise HTTPException(400, "Please upload an image file.")
 
-    # Crops the ML model was actually trained on
-    ML_SUPPORTED_CROPS = {"Chilli", "Maize", "Maize Kharif", "Maize Rabi", "Potato"}
+    # Crops the ML model was actually trained on (24-class EfficientNetB0)
+    ML_SUPPORTED_CROPS = {
+        "Apple", "Chilli", "Grape", "Maize", "Maize Kharif", "Maize Rabi",
+        "Orange", "Pepper", "Potato", "Soyabean", "Soybean",
+        "Tomato", "Tomato Kharif",
+    }
 
     use_ml = (
         DISEASE_MODEL is not None
@@ -1084,8 +1108,9 @@ DISTRICT_COORDS = {
     "Peren":       (25.52, 93.73),
     "Noklak":      (26.60, 95.03),
     "Shamator":    (26.08, 95.20),
-    "Niuland":     (25.82, 93.80),
-    "Chumoukedima":(25.78, 93.78),
+    "Niuland":      (25.82, 93.80),
+    "Nuiland":      (25.82, 93.80),
+    "Chumoukedima": (25.78, 93.78),
     "Tseminyu":    (25.78, 94.18),
 }
 
