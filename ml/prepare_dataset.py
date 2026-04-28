@@ -1,171 +1,148 @@
 """
-Plotwise — PlantVillage Dataset Preparation
-Author: Limawapang L Jamir
+Plotwise — PlantVillage Dataset Preparation Script
+Author: Limawapang Jamir
 
-Downloads PlantVillage from Kaggle and organises into the folder structure
-that train_disease_model.py expects:
+Reads already-downloaded PlantVillage 'color' folder, renames classes to
+match our model, and splits into train/test:
 
     data/
-    ├── train/
-    │   ├── Rice_Blast/
-    │   ├── Rice_BacterialBlight/
-    │   ├── Rice_BrownSpot/
-    │   ├── Maize_GrayLeafSpot/
-    │   ├── Maize_NorthernLeafBlight/
-    │   ├── Maize_CommonRust/
-    │   ├── Potato_EarlyBlight/
-    │   ├── Potato_LateBlight/
-    │   ├── Chilli_LeafCurl/
-    │   └── Healthy/
-    └── test/
-        └── ... (same structure, 20% split)
-
-Prerequisites:
-    pip install kaggle
-    Place your kaggle.json API token at ~/.kaggle/kaggle.json
-    (Download from: https://www.kaggle.com/settings → API → Create New Token)
+      train/   (80%)
+      test/    (20%)
 
 Usage:
     python ml/prepare_dataset.py
-    python ml/prepare_dataset.py --limit 500   # cap per class (faster for testing)
+    (no arguments needed — paths are set below)
 """
 
-import os
 import shutil
 import random
-import argparse
 from pathlib import Path
 
-# ── Mapping: PlantVillage folder name → our class label ──────────────────────
-# Dataset: vipoooool/new-plant-diseases-dataset (Kaggle)
-# The dataset already has a train/valid split — we'll use train only and re-split.
-
-CLASS_MAP = {
-    # PlantVillage folder name                          → our label
-    "Rice___Leaf_blast":                                 "Rice_Blast",
-    "Rice___Bacterial_leaf_blight":                      "Rice_BacterialBlight",
-    "Rice___Brown_spot":                                 "Rice_BrownSpot",
-    "Corn_(maize)___Gray_leaf_spot":                     "Maize_GrayLeafSpot",
-    "Corn_(maize)___Northern_Leaf_Blight":               "Maize_NorthernLeafBlight",
-    "Corn_(maize)___Common_rust_":                       "Maize_CommonRust",
-    "Potato___Early_blight":                             "Potato_EarlyBlight",
-    "Potato___Late_blight":                              "Potato_LateBlight",
-    "Pepper,_bell___Bacterial_spot":                     "Chilli_LeafCurl",   # closest proxy
-    # Healthy images — pull from multiple crops for variety
-    "Rice___healthy":                                    "Healthy",
-    "Corn_(maize)___healthy":                            "Healthy",
-    "Potato___healthy":                                  "Healthy",
-    "Pepper,_bell___healthy":                            "Healthy",
-}
-
-VAL_SPLIT  = 0.2   # 80% train, 20% test
-SEED       = 42
-
+# ── CONFIGURE THESE TWO PATHS ────────────────────────────────────────────────
+SRC = r"D:\projects\plotwised dataset\plantvillage dataset\color"
+DST = r"D:\projects\plotwise\data"
 # ─────────────────────────────────────────────────────────────────────────────
 
-def download_dataset(dest: Path):
-    """Download from Kaggle using the kaggle CLI."""
-    import subprocess
-    dest.mkdir(parents=True, exist_ok=True)
-    print("Downloading PlantVillage dataset from Kaggle (~1.5 GB)…")
-    result = subprocess.run(
-        ["kaggle", "datasets", "download",
-         "-d", "vipoooool/new-plant-diseases-dataset",
-         "--unzip", "-p", str(dest)],
-        capture_output=False
-    )
-    if result.returncode != 0:
-        raise RuntimeError(
-            "Kaggle download failed.\n"
-            "Make sure kaggle is installed (pip install kaggle) and\n"
-            "~/.kaggle/kaggle.json is present with your API key."
-        )
-    print(f"Dataset extracted to: {dest}")
+SPLIT = 0.8   # 80% train, 20% test
+SEED  = 42
+
+# Flexible mapping — tries both double (__) and triple (___) underscore variants
+# since different Kaggle uploads use different conventions.
+# Format:  "keyword fragments to match" → "our class name"
+# Matching is done by normalising folder names (lowercase, strip punctuation).
+FOLDER_MAP = {
+    # Maize / Corn
+    "corn_maize_cercospora":          "Maize_Cercospora_GrayLeafSpot",
+    "corn_maize_common_rust":         "Maize_CommonRust",
+    "corn_maize_northern_leaf":       "Maize_NorthernLeafBlight",
+    "corn_maize_healthy":             "Healthy_Maize",
+
+    # Potato
+    "potato_early_blight":            "Potato_EarlyBlight",
+    "potato_late_blight":             "Potato_LateBlight",
+    "potato_healthy":                 "Healthy_Potato",
+
+    # Pepper / Chilli
+    "pepper_bell_bacterial_spot":     "Pepper_BacterialSpot",
+    "pepper_bell_healthy":            "Healthy_Pepper",
+
+    # Tomato
+    "tomato_bacterial_spot":          "Tomato_BacterialSpot",
+    "tomato_early_blight":            "Tomato_EarlyBlight",
+    "tomato_late_blight":             "Tomato_LateBlight",
+    "tomato_leaf_mold":               "Tomato_LeafMold",
+    "tomato_septoria":                "Tomato_SeptoriaLeafSpot",
+    "tomato_yellow_leaf_curl":        "Tomato_YellowLeafCurl",
+    "tomato_healthy":                 "Healthy_Tomato",
+
+    # Orange / Citrus
+    "orange_haunglongbing":           "Orange_Haunglongbing",
+
+    # Soybean
+    "soybean_healthy":                "Soybean_Healthy",
+
+    # Apple
+    "apple_apple_scab":               "Apple_AppleScab",
+    "apple_black_rot":                "Apple_BlackRot",
+
+    # Grape
+    "grape_black_rot":                "Grape_BlackRot",
+    "grape_esca":                     "Grape_Esca",
+}
+
+# Rice and Chilli_LeafCurl are not in standard PlantVillage — skipped automatically.
 
 
-def collect_images(raw_dir: Path) -> dict[str, list[Path]]:
-    """
-    Walk the raw PlantVillage folders and collect image paths per target class.
-    PlantVillage may be nested under New Plant Diseases Dataset/train/ or similar.
-    """
-    collected: dict[str, list[Path]] = {label: [] for label in set(CLASS_MAP.values())}
-
-    # Find the actual train folder (Kaggle zip may be nested)
-    train_roots = list(raw_dir.rglob("train"))
-    if not train_roots:
-        raise FileNotFoundError(
-            f"Could not find a 'train' folder under {raw_dir}.\n"
-            "The Kaggle zip may have extracted differently — check the folder structure."
-        )
-    train_root = train_roots[0]
-    print(f"Found train root: {train_root}")
-
-    for pv_folder, label in CLASS_MAP.items():
-        src = train_root / pv_folder
-        if not src.exists():
-            print(f"  ⚠️  Not found: {src.name}")
-            continue
-        imgs = [p for p in src.iterdir() if p.suffix.lower() in {".jpg", ".jpeg", ".png"}]
-        collected[label].extend(imgs)
-        print(f"  {label:30s} ← {pv_folder:45s}  ({len(imgs)} images)")
-
-    return collected
+def normalise(name: str) -> str:
+    """Lowercase, replace spaces/commas/brackets/underscores → single underscore."""
+    import re
+    name = name.lower()
+    name = re.sub(r"[^a-z0-9]+", "_", name)
+    name = re.sub(r"_+", "_", name).strip("_")
+    return name
 
 
-def build_split(collected: dict, out_dir: Path, limit: int):
-    """Copy images into train/ and test/ folders with the 80/20 split."""
+def build_match_table(src_path: Path) -> dict[str, Path]:
+    """Return {normalised_folder_name: actual_path} for all subfolders."""
+    return {normalise(f.name): f for f in src_path.iterdir() if f.is_dir()}
+
+
+def prepare():
     random.seed(SEED)
+    src_path = Path(SRC)
+    dst_path = Path(DST)
 
-    for label, paths in collected.items():
-        if not paths:
-            print(f"  ⚠️  No images collected for class: {label} — skipping")
+    if not src_path.exists():
+        raise FileNotFoundError(f"Source folder not found:\n  {src_path}\nUpdate SRC in this script.")
+
+    match_table = build_match_table(src_path)
+
+    print(f"\nSource : {src_path}")
+    print(f"Output : {dst_path}")
+    print(f"Found  : {len(match_table)} folders in source\n")
+
+    matched = 0
+    not_found = []
+
+    for key, our_name in FOLDER_MAP.items():
+        # Find a folder whose normalised name contains all key fragments
+        hit = next((path for norm, path in match_table.items() if key in norm), None)
+
+        if hit is None:
+            not_found.append(key)
             continue
 
-        random.shuffle(paths)
-        if limit:
-            paths = paths[:limit]
+        images = [f for f in hit.iterdir()
+                  if f.is_file() and f.suffix.lower() in {".jpg", ".jpeg", ".png"}]
+        random.shuffle(images)
 
-        split_at   = int(len(paths) * (1 - VAL_SPLIT))
-        train_imgs = paths[:split_at]
-        test_imgs  = paths[split_at:]
+        cut         = int(len(images) * SPLIT)
+        train_imgs  = images[:cut]
+        test_imgs   = images[cut:]
 
-        for subset, imgs in [("train", train_imgs), ("test", test_imgs)]:
-            dest = out_dir / subset / label
+        for split_name, imgs in [("train", train_imgs), ("test", test_imgs)]:
+            dest = dst_path / split_name / our_name
             dest.mkdir(parents=True, exist_ok=True)
-            for src in imgs:
-                shutil.copy2(src, dest / src.name)
+            for img in imgs:
+                shutil.copy2(img, dest / img.name)
 
-        print(f"  {label:30s}  train={len(train_imgs)}  test={len(test_imgs)}")
+        print(f"  [OK] {our_name:42s}  train={len(train_imgs):4d}  test={len(test_imgs):4d}")
+        matched += 1
 
+    print(f"\nDone: {matched} classes prepared")
 
-def main(args):
-    base    = Path(__file__).resolve().parent.parent   # repo root
-    raw_dir = base / "data" / "raw" / "plantvillage"
-    out_dir = base / "data"
+    if not_found:
+        print(f"\nNot found (normal for Rice/Chilli — not in PlantVillage): {len(not_found)}")
+        for nf in not_found:
+            print(f"  - {nf}")
 
-    # Step 1 — Download
-    if not raw_dir.exists() or not any(raw_dir.iterdir()):
-        download_dataset(raw_dir)
-    else:
-        print(f"Raw dataset already present at {raw_dir} — skipping download.")
-
-    # Step 2 — Collect
-    print("\nCollecting images…")
-    collected = collect_images(raw_dir)
-    total = sum(len(v) for v in collected.values())
-    print(f"Total images collected: {total}\n")
-
-    # Step 3 — Split and copy
-    print("Building train/test split…")
-    build_split(collected, out_dir, args.limit)
-
-    print(f"\n✅  Dataset ready at {out_dir}/train  and  {out_dir}/test")
-    print("\nNext step — train the model:")
-    print("    python ml/train_disease_model.py --epochs 20 --batch 32")
+    total_train = sum(1 for f in (dst_path / "train").rglob("*") if f.is_file())
+    total_test  = sum(1 for f in (dst_path / "test").rglob("*")  if f.is_file())
+    print(f"\nTotal images — train: {total_train:,}   test: {total_test:,}")
+    print(f"\nDataset ready at: {dst_path}")
+    print("\nNext — upload 'data/' folder to Google Drive and run training on Colab:")
+    print("    python ml/train_disease_model.py --data-dir /content/data --epochs 30 --batch 32")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Prepare PlantVillage dataset for Plotwise")
-    parser.add_argument("--limit", type=int, default=0,
-                        help="Max images per class (0 = no limit). Use ~500 for a quick test run.")
-    main(parser.parse_args())
+    prepare()

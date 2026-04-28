@@ -13,9 +13,10 @@ Author: Limawapang Jamir. Intended for real deployment to farmers + Nagaland Agr
 - **Animation**: GSAP 3.12.5 + ScrollTrigger + Lenis smooth scroll (replaced AOS)
 
 ## ML Model
-- Trained on Google Colab (PlantVillage dataset)
-- 98.83% test accuracy, 6 classes: Chilli_LeafCurl, Healthy, Maize_CommonRust, Maize_NorthernLeafBlight, Potato_EarlyBlight, Potato_LateBlight
-- Architecture: EfficientNetB0 → GlobalAveragePooling2D → BatchNorm → Dropout(0.4) → Dense(256, relu) → BatchNorm → Dropout(0.3) → Dense(6, softmax)
+- Trained on Kaggle (PlantVillage dataset, T4 GPU)
+- 24 classes: Apple (2), Chilli (1), Grape (2), Healthy (5), Maize (3), Orange (1), Pepper (1), Potato (2), Soybean (1), Tomato (6)
+- Architecture: EfficientNetB0 → GlobalAveragePooling2D → BatchNorm → Dropout(0.4) → Dense(256, relu) → BatchNorm → Dropout(0.3) → Dense(24, softmax)
+- 3-tier confidence: confident (>=70%), low (55-70%), uncertain (<55% or small top-2 gap)
 - Input: 224x224 RGB, NO manual rescale (EfficientNetB0 has built-in preprocessing)
 
 ## Running the Backend (Windows / Anaconda Prompt)

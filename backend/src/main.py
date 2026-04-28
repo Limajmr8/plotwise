@@ -165,18 +165,36 @@ DISEASES = {
 }
 
 TREATMENTS = {
+    # Rice
     "Blast":               "Apply tricyclazole fungicide. Remove infected leaves immediately. Avoid excess nitrogen.",
     "Bacterial Blight":    "Use copper-based bactericide. Drain waterlogged fields. Plant resistant varieties.",
     "Brown Spot":          "Apply mancozeb fungicide. Use balanced fertilizers. Improve drainage.",
     "Sheath Blight":       "Apply hexaconazole fungicide. Reduce dense planting. Drain excess water.",
-    "Soft Rot":            "Improve field drainage immediately. Apply Bordeaux mixture. Remove all infected rhizomes.",
-    "Bacterial Wilt":      "Remove infected plants. Disinfect tools. Use disease-free seed rhizomes.",
-    "Yellow Mottle Virus": "Control mite vectors with acaricide. Remove and destroy infected plants.",
+    # Maize
     "Gray Leaf Spot":      "Apply mancozeb fungicide. Rotate crops with non-host plants. Improve air circulation.",
     "Northern Leaf Blight":"Apply propiconazole fungicide. Plant resistant hybrids. Remove crop debris.",
     "Common Rust":         "Apply azoxystrobin fungicide. Use resistant varieties. Scout fields regularly.",
+    # Potato / Tomato
     "Late Blight":         "Apply chlorothalonil fungicide immediately. Avoid overhead irrigation. Remove affected plants.",
     "Early Blight":        "Apply mancozeb at first sign. Maintain plant nutrition. Improve spacing.",
+    # Pepper / Chilli
+    "Bacterial Spot":      "Apply copper-based bactericide. Avoid overhead watering. Remove infected plant debris. Use disease-free seeds.",
+    "Leaf Curl":           "Control whitefly vectors with neem oil or imidacloprid. Remove infected plants. Use reflective mulch to repel whiteflies.",
+    # Tomato
+    "Leaf Mold":           "Improve ventilation and reduce humidity. Apply chlorothalonil fungicide. Remove lower affected leaves.",
+    "Septoria Leaf Spot":  "Apply mancozeb or chlorothalonil at first sign. Remove infected lower leaves. Avoid working in wet foliage.",
+    "Yellow Leaf Curl Virus": "Control whitefly with sticky traps and neem spray. Remove infected plants immediately. Use resistant varieties.",
+    # Apple
+    "Apple Scab":          "Apply captan or myclobutanil fungicide in spring. Rake and destroy fallen leaves. Plant scab-resistant varieties.",
+    "Black Rot":           "Prune out cankers and dead wood. Apply captan fungicide. Remove mummified fruit from trees.",
+    # Grape
+    "Esca (Black Measles)":"No chemical cure. Remove severely affected vines. Protect pruning wounds with wound sealant. Avoid stress.",
+    # Citrus
+    "Citrus Greening (Huanglongbing)": "No cure exists. Control Asian citrus psyllid vector with insecticide. Remove infected trees to prevent spread.",
+    # General
+    "Soft Rot":            "Improve field drainage immediately. Apply Bordeaux mixture. Remove all infected rhizomes.",
+    "Bacterial Wilt":      "Remove infected plants. Disinfect tools. Use disease-free seed rhizomes.",
+    "Yellow Mottle Virus": "Control mite vectors with acaricide. Remove and destroy infected plants.",
     "Pod Blight":          "Apply carbendazim at flowering stage. Harvest at correct maturity to reduce losses.",
     "Alternaria Blight":   "Apply mancozeb or iprodione. Use disease-free certified seeds. Maintain proper spacing.",
     "Powdery Mildew":      "Apply sulfur-based fungicide. Avoid overhead irrigation. Improve air circulation.",
@@ -365,42 +383,58 @@ async def detect_disease(
         elif confidence < 0.70:
             use_ml = "low_confidence"
 
-    if use_ml == True:
-        # Map model class -> human-readable disease name
-        label_map = {
-            "Maize_NorthernLeafBlight": "Northern Leaf Blight",
-            "Maize_CommonRust": "Common Rust", "Potato_EarlyBlight": "Early Blight",
-            "Potato_LateBlight": "Late Blight", "Chilli_LeafCurl": "Leaf Curl",
-            "Healthy": "Healthy (no disease detected)"
-        }
-        detected = label_map.get(raw_label, raw_label)
-        source   = "ML model (EfficientNetB0)"
+    # Map model class -> human-readable disease name (shared across confidence tiers)
+    LABEL_MAP = {
+        "Apple_AppleScab": "Apple Scab",
+        "Apple_BlackRot": "Black Rot",
+        "Chilli_LeafCurl": "Leaf Curl",
+        "Grape_BlackRot": "Black Rot",
+        "Grape_Esca": "Esca (Black Measles)",
+        "Healthy": "Healthy (no disease detected)",
+        "Healthy_Maize": "Healthy (no disease detected)",
+        "Healthy_Pepper": "Healthy (no disease detected)",
+        "Healthy_Potato": "Healthy (no disease detected)",
+        "Healthy_Tomato": "Healthy (no disease detected)",
+        "Maize_Cercospora_GrayLeafSpot": "Gray Leaf Spot",
+        "Maize_CommonRust": "Common Rust",
+        "Maize_NorthernLeafBlight": "Northern Leaf Blight",
+        "Orange_Haunglongbing": "Citrus Greening (Huanglongbing)",
+        "Pepper_BacterialSpot": "Bacterial Spot",
+        "Potato_EarlyBlight": "Early Blight",
+        "Potato_LateBlight": "Late Blight",
+        "Soybean_Healthy": "Healthy (no disease detected)",
+        "Tomato_BacterialSpot": "Bacterial Spot",
+        "Tomato_EarlyBlight": "Early Blight",
+        "Tomato_LateBlight": "Late Blight",
+        "Tomato_LeafMold": "Leaf Mold",
+        "Tomato_SeptoriaLeafSpot": "Septoria Leaf Spot",
+        "Tomato_YellowLeafCurl": "Yellow Leaf Curl Virus",
+    }
 
-        # Auto-detect crop from model class name
-        crop_map = {
-            "Maize": "Maize", "Potato": "Potato",
-            "Chilli": "Chilli", "Healthy": crop,
-        }
-        for prefix, crop_name in crop_map.items():
-            if raw_label.startswith(prefix):
-                crop = crop_name
-                break
+    # Auto-detect crop from model class name (order matters — specific before generic)
+    CROP_MAP = [
+        ("Healthy_Maize", "Maize"), ("Healthy_Pepper", "Chilli"),
+        ("Healthy_Potato", "Potato"), ("Healthy_Tomato", "Tomato"),
+        ("Soybean_", "Soybean"), ("Apple_", "Apple"), ("Grape_", "Grape"),
+        ("Orange_", "Orange"), ("Maize_", "Maize"), ("Potato_", "Potato"),
+        ("Tomato_", "Tomato"), ("Pepper_", "Chilli"), ("Chilli_", "Chilli"),
+    ]
+
+    def _detect_crop(label):
+        for prefix, c in CROP_MAP:
+            if label.startswith(prefix):
+                return c
+        return crop   # fallback to user-selected crop
+
+    if use_ml == True:
+        detected = LABEL_MAP.get(raw_label, raw_label)
+        source   = "ML model (EfficientNetB0)"
+        crop     = _detect_crop(raw_label)
 
     elif use_ml == "low_confidence":
-        # Model has a guess but isn't very sure — show it with a warning
-        label_map = {
-            "Maize_NorthernLeafBlight": "Northern Leaf Blight",
-            "Maize_CommonRust": "Common Rust", "Potato_EarlyBlight": "Early Blight",
-            "Potato_LateBlight": "Late Blight", "Chilli_LeafCurl": "Leaf Curl",
-            "Healthy": "Healthy (no disease detected)"
-        }
-        detected = label_map.get(raw_label, raw_label)
+        detected = LABEL_MAP.get(raw_label, raw_label)
         source   = "ML model (low confidence — verify with expert)"
-
-        for prefix in ["Maize", "Potato", "Chilli"]:
-            if raw_label.startswith(prefix):
-                crop = prefix
-                break
+        crop     = _detect_crop(raw_label)
 
     elif use_ml == "uncertain":
         # Model is too uncertain — be honest about it
@@ -438,7 +472,7 @@ async def detect_disease(
             "severity":     severity,
             "treatment":    ". ".join([f"{d}: {TREATMENTS.get(d, 'Consult DAO')}" for d in disease_list[:3]]),
             "prevention":   "Use certified seeds every season. Maintain field hygiene. Rotate crops annually to break disease cycles.",
-            "nearest_help": "Upload a photo of Chilli, Maize, or Potato leaves for AI-powered detection. For other crops, contact Kisan Call Centre: 1800-180-1551 (toll free)",
+            "nearest_help": "Upload a photo of Apple, Chilli, Grape, Maize, Orange, Pepper, Potato, Soybean, or Tomato leaves for AI-powered detection. For other crops, contact Kisan Call Centre: 1800-180-1551 (toll free)",
             "source":       source,
         }
 
