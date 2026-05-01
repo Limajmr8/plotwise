@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Plotwise</string>
+    <string name="title_activity_main">Plotwise</string>
+    <string name="package_name">com.plotwise.app</string>
+    <string name="custom_url_scheme">com.plotwise.app</string>
+</resources>

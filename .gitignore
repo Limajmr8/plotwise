@@ -48,6 +48,20 @@ Thumbs.db
 # Claude Code internals
 .claude/
 
+# Node
+node_modules/
+
+# Android build artifacts
+android/app/build/
+android/.gradle/
+android/build/
+android/capacitor-cordova-android-plugins/build/
+*.apk
+*.aab
+*.keystore
+*.jks
+local.properties
+
 # SQLite DB (runtime artifact)
 *.db
 *.sqlite
