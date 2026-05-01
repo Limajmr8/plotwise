@@ -1,6 +1,6 @@
 # Plotwise — Project Status
 **Author:** Limawapang Jamir
-**Goal:** Agriculture app for Nagaland farmers + Dept. of Agriculture (actual deployment)
+**Goal:** Agriculture intelligence platform for Nagaland (B2G deployment)
 
 ---
 
@@ -25,7 +25,7 @@ A full-stack smart farming platform with:
   - 6 classes: Chilli_LeafCurl, Healthy, Maize_CommonRust, Maize_NorthernLeafBlight, Potato_EarlyBlight, Potato_LateBlight
   - 400 train / 100 test images per class (PlantVillage dataset)
 
-- **Data** — Real Nagaland agriculture data 2023-24 from Dept. of Agriculture
+- **Data** — Real Nagaland agriculture data 2023-24 (verified records)
   - `data/sample/nagaland_agriculture_2023_24.json`
   - `data/sample/nagaland_crop_data_2023_24.csv`
 

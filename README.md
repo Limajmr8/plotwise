@@ -3,7 +3,7 @@
 > An AI-powered full-stack farming platform built specifically for Nagaland farmers — combining crop disease detection, real-time market prices, planting calendars, government scheme discovery, and a department-level analytics dashboard.
 
 **Author:** Limawapang Jamir  
-**Built for:** Department of Agriculture, Nagaland  
+**Built for:** Nagaland Agriculture Sector  
 **Stack:** Python · FastAPI · TensorFlow · EfficientNet · HTML/CSS/JS · Chart.js
 
 ---

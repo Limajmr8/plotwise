@@ -3,9 +3,9 @@ Plotwise — Smart Farming Platform for Nagaland
 FastAPI Backend
 
 Author: Limawapang L Jamir
-For: Department of Agriculture, Nagaland
+For: Nagaland Agriculture Department (B2G)
 
-All data served from real 2023-24 Dept. of Agriculture records.
+All data sourced from verified Nagaland agriculture records 2023-24.
 Disease reports stored in SQLite for heatmap analytics.
 """
 
@@ -356,7 +356,7 @@ def api_status():
         "tagline":      "Smart farming for Nagaland",
         "version":      "1.1.0",
         "status":       "running",
-        "data":         f"{len(CROP_RECORDS)} real records loaded from Dept. of Agriculture, Nagaland 2023-24",
+        "data":         f"{len(CROP_RECORDS)} real records loaded from Nagaland agriculture data 2023-24",
         "districts":    len(DISTRICTS),
         "crops":        len(CROPS),
         "model_loaded": DISEASE_MODEL is not None,
@@ -613,7 +613,7 @@ def find_schemes(query: SchemeQuery):
 
 @app.get("/dashboard/yield")
 def yield_dashboard(district: Optional[str] = None, crop: Optional[str] = None):
-    """Real yield analytics from Dept. of Agriculture, Nagaland 2023-24."""
+    """Real yield analytics from Nagaland agriculture data 2023-24."""
     records = CROP_RECORDS
     if district:
         records = [r for r in records if r["district"] == district]
@@ -640,7 +640,7 @@ def yield_dashboard(district: Optional[str] = None, crop: Optional[str] = None):
             "total_area_ha":      round(total_area, 1),
             "avg_yield_kg_ha":    round(total_production * 1000 / total_area, 1) if total_area > 0 else 0,
             "period":             "2023-24",
-            "source":             "Department of Agriculture, Nagaland",
+            "source":             "Nagaland Agriculture Data 2023-24",
         },
         "top_crops":     [{"crop": c,     "production_t": round(p, 1)} for c, p in top_crops],
         "top_districts": [{"district": d, "production_t": round(p, 1)} for d, p in top_districts],
@@ -972,7 +972,7 @@ def chat(msg: ChatMessage):
             lines.append("Top crops:")
             for r in top:
                 lines.append(f"  {r['crop']}: {round(r['production_tonnes']):,}T ({round(r['yield_kg_per_ha'])} kg/ha)")
-            lines.append(f"\nSource: Dept. of Agriculture, Nagaland 2023-24")
+            lines.append(f"\nSource: Nagaland agriculture data 2023-24")
             reply = "\n".join(lines)
         else:
             reply = f"I don't have data for '{target_district}'. Available districts: {', '.join(DISTRICTS[:8])}..."
