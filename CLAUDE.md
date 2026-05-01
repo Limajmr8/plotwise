@@ -72,7 +72,7 @@ keras==3.10.0            # MUST match the Keras version that saved the model on 
 - **Theme**: Dark (#060905 bg, #3a6828 primary green) — matches web app
 - **Build**: GitHub Actions (`build-android.yml`) auto-builds APK on push to main
 - **Local build**: Requires JDK 17 (Temurin) + Android SDK. Run `npx cap sync android` then `cd android && gradlew assembleDebug`
-- **JAVA_HOME**: `C:\Program Files\Eclipse Adoptium\jdk-17.0.18.8-hotspot`
+- **JAVA_HOME**: `C:\Program Files\Eclipse Adoptium\jdk-21.0.10.7-hotspot` (JDK 21 required by Capacitor 8)
 - **ANDROID_HOME**: `%LOCALAPPDATA%\Android\Sdk`
 
 ## Known Issues
