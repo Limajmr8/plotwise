@@ -349,6 +349,16 @@ def root():
     return {"app": "Plotwise", "status": "running", "model_loaded": DISEASE_MODEL is not None}
 
 
+@app.get("/mobile")
+def mobile_app():
+    """Serve the mobile-optimized app HTML (used by Capacitor Android app)."""
+    mobile = os.path.join(FRONTEND_DIR, "mobile.html")
+    if os.path.exists(mobile):
+        return FileResponse(mobile)
+    # Fallback to main index if mobile.html doesn't exist yet
+    return root()
+
+
 @app.get("/api/status")
 def api_status():
     return {

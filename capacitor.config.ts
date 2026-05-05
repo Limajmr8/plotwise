@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'Plotwise',
   webDir: 'frontend/src',
   server: {
-    url: 'https://plotwise-production.up.railway.app',
+    url: 'https://plotwise-production.up.railway.app/mobile',
     cleartext: false
   },
   android: {

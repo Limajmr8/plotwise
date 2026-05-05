@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no"/>
+  <title>Plotwise</title>
+  <meta name="theme-color" content="#060905"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <link rel="manifest" href="/static/manifest.json"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <style>
+/* ─── RESET & BASE ──────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060905;--forest:#0a0f07;--moss:#131f0e;
+  --leaf:#3a6828;--sprout:#6abf3b;--lime:#a4e856;
+  --mist:#b3d09a;--cream:#f2efe6;--gold:#c9952a;--amber:#e8b84b;
+  --border:rgba(106,191,59,0.1);--card:rgba(255,255,255,0.03);
+  --font-head:'Plus Jakarta Sans',sans-serif;
+  --font-body:'DM Sans',sans-serif;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bot:env(safe-area-inset-bottom,0px);
+  --nav-h:64px;
+  --top-h:56px;
+}
+html{background:var(--bg);color:var(--cream);font-family:var(--font-body);-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent;overscroll-behavior:contain}
+body{background:var(--bg);min-height:100dvh;padding-top:calc(var(--top-h) + var(--safe-top));padding-bottom:calc(var(--nav-h) + var(--safe-bot))}
+img{display:block;max-width:100%}
+a{color:var(--sprout);text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+select{font-family:var(--font-body);font-size:0.88rem;background:rgba(255,255,255,0.06);color:var(--cream);border:1px solid var(--border);border-radius:10px;padding:12px 14px;width:100%;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(242,239,230,0.3)' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;outline:none}
+select:focus{border-color:var(--sprout)}
+input[type="text"]{font-family:var(--font-body);font-size:0.88rem;background:rgba(255,255,255,0.06);color:var(--cream);border:1px solid var(--border);border-radius:10px;padding:12px 14px;width:100%;outline:none}
+input[type="text"]:focus{border-color:var(--sprout)}
+label{display:block;font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;color:rgba(242,239,230,0.4);margin-bottom:6px;font-family:var(--font-head)}
+
+/* ─── TOP BAR ───────────────────────────────────────────────────── */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;height:calc(var(--top-h) + var(--safe-top));padding-top:var(--safe-top);background:rgba(6,9,5,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:space-between;padding-left:20px;padding-right:16px}
+.topbar-logo{font-family:var(--font-head);font-size:1.15rem;font-weight:800;letter-spacing:-0.5px;color:var(--cream)}
+.topbar-logo span{color:var(--sprout)}
+.topbar-actions{display:flex;gap:8px;align-items:center}
+.topbar-btn{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.05)}
+.topbar-btn svg{width:18px;height:18px;stroke:rgba(242,239,230,0.5);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.lang-toggle{display:flex;gap:2px;background:rgba(255,255,255,0.05);border-radius:8px;padding:2px}
+.lang-btn{font-size:0.7rem;font-weight:600;padding:4px 10px;border-radius:6px;color:rgba(242,239,230,0.4);font-family:var(--font-head);transition:all 0.2s}
+.lang-btn.active{background:var(--leaf);color:var(--cream)}
+
+/* ─── BOTTOM NAV ────────────────────────────────────────────────── */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;height:calc(var(--nav-h) + var(--safe-bot));padding-bottom:var(--safe-bot);background:rgba(6,9,5,0.95);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-around}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;min-width:56px;-webkit-tap-highlight-color:transparent}
+.nav-item svg{width:22px;height:22px;stroke:rgba(242,239,230,0.35);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;transition:all 0.2s}
+.nav-item span{font-size:0.62rem;font-weight:600;color:rgba(242,239,230,0.35);letter-spacing:0.3px;font-family:var(--font-head);transition:all 0.2s}
+.nav-item.active svg{stroke:var(--sprout)}
+.nav-item.active span{color:var(--sprout)}
+
+/* ─── SCREENS ───────────────────────────────────────────────────── */
+.screen{display:none;padding:20px 16px;animation:fadeIn 0.2s ease}
+.screen.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ─── CARDS ─────────────────────────────────────────────────────── */
+.card{background:var(--card);border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:18px;margin-bottom:14px}
+.card-title{font-family:var(--font-head);font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;color:rgba(242,239,230,0.35);margin-bottom:12px}
+.card-val{font-family:var(--font-head);font-size:1.6rem;font-weight:800;letter-spacing:-1px;color:var(--cream)}
+.card-sub{font-size:0.78rem;color:rgba(242,239,230,0.35);margin-top:4px}
+
+/* ─── HOME SCREEN ───────────────────────────────────────────────── */
+.home-greeting{font-family:var(--font-head);font-size:1.4rem;font-weight:800;letter-spacing:-0.5px;margin-bottom:4px}
+.home-sub{font-size:0.84rem;color:rgba(242,239,230,0.4);margin-bottom:20px}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.kpi-card{background:var(--card);border:1px solid rgba(255,255,255,0.05);border-radius:14px;padding:16px}
+.kpi-num{font-family:var(--font-head);font-size:1.35rem;font-weight:800;letter-spacing:-0.5px;color:var(--cream)}
+.kpi-lbl{font-size:0.7rem;color:rgba(242,239,230,0.35);margin-top:2px}
+.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.qa-btn{display:flex;align-items:center;gap:10px;background:rgba(58,104,40,0.15);border:1px solid rgba(106,191,59,0.12);border-radius:14px;padding:16px;text-align:left;transition:all 0.15s;-webkit-tap-highlight-color:transparent}
+.qa-btn:active{transform:scale(0.97);background:rgba(58,104,40,0.25)}
+.qa-icon{width:38px;height:38px;border-radius:10px;background:rgba(106,191,59,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.qa-icon svg{width:18px;height:18px;stroke:var(--sprout);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.qa-text{font-family:var(--font-head);font-size:0.82rem;font-weight:600;color:var(--cream)}
+.qa-sub{font-size:0.68rem;color:rgba(242,239,230,0.35);margin-top:2px}
+
+/* Weather summary card */
+.weather-sum{display:flex;align-items:center;gap:14px}
+.weather-sum-icon{font-size:2.2rem}
+.weather-sum-temp{font-family:var(--font-head);font-size:1.8rem;font-weight:800;letter-spacing:-1px}
+.weather-sum-desc{font-size:0.82rem;color:rgba(242,239,230,0.5)}
+.weather-sum-stats{display:flex;gap:14px;margin-top:10px;font-size:0.78rem;color:rgba(242,239,230,0.4)}
+
+/* Price ticker */
+.home-ticker{display:flex;gap:10px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;scrollbar-width:none;-ms-overflow-style:none}
+.home-ticker::-webkit-scrollbar{display:none}
+.tick-chip{flex-shrink:0;background:var(--card);border:1px solid rgba(255,255,255,0.05);border-radius:10px;padding:10px 14px;min-width:120px}
+.tick-crop{font-family:var(--font-head);font-size:0.78rem;font-weight:600;color:var(--cream)}
+.tick-price{font-size:0.72rem;color:rgba(242,239,230,0.4);margin-top:2px}
+.tick-trend{font-size:0.68rem;margin-top:2px}
+.tick-trend.up{color:#4ade80}.tick-trend.dn{color:#f87171}.tick-trend.fl{color:rgba(242,239,230,0.25)}
+
+/* ─── DETECT SCREEN ─────────────────────────────────────────────── */
+.screen-title{font-family:var(--font-head);font-size:1.25rem;font-weight:800;letter-spacing:-0.5px;margin-bottom:16px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.field-row.single{grid-template-columns:1fr}
+.dropzone{background:rgba(255,255,255,0.02);border:2px dashed rgba(106,191,59,0.15);border-radius:16px;padding:32px 16px;text-align:center;margin-bottom:14px;position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent}
+.dropzone.drag-over{border-color:var(--sprout);background:rgba(106,191,59,0.04)}
+.dz-icon{margin-bottom:10px}
+.dz-icon svg{width:32px;height:32px;stroke:var(--sprout);opacity:0.4;fill:none;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round}
+.dz-txt{font-family:var(--font-head);font-size:0.88rem;font-weight:600;color:rgba(242,239,230,0.5)}
+.dz-sub{font-size:0.72rem;color:rgba(242,239,230,0.25);margin-top:4px}
+.dz-input{position:absolute;inset:0;opacity:0;cursor:pointer}
+#detect-prev{max-height:200px;border-radius:12px;margin:10px auto 0;display:none;object-fit:contain}
+.btn-primary{width:100%;background:var(--sprout);color:#060905;font-family:var(--font-head);font-size:0.88rem;font-weight:700;padding:14px;border-radius:12px;margin-bottom:14px;transition:all 0.15s;-webkit-tap-highlight-color:transparent}
+.btn-primary:active{transform:scale(0.98);background:var(--lime)}
+.btn-primary:disabled{opacity:0.4;pointer-events:none}
+
+/* Result display */
+.result-box{display:none;animation:fadeIn 0.3s ease}
+.result-box.show{display:block}
+.r-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.r-dot{width:8px;height:8px;border-radius:50%;background:var(--sprout)}
+.r-ttl{font-family:var(--font-head);font-size:0.92rem;font-weight:700;color:var(--cream)}
+.r-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.r-item{background:rgba(255,255,255,0.03);border-radius:10px;padding:12px}
+.r-item-lbl{font-size:0.68rem;text-transform:uppercase;letter-spacing:0.8px;color:rgba(242,239,230,0.3);margin-bottom:4px;font-family:var(--font-head)}
+.r-item-val{font-family:var(--font-head);font-size:0.92rem;font-weight:700}
+.c-high{color:#f87171}.c-med{color:var(--amber)}
+.r-box{background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.04);border-radius:12px;padding:14px;font-size:0.84rem;color:rgba(242,239,230,0.6);line-height:1.7;margin-bottom:10px}
+.r-box-lbl{display:block;font-family:var(--font-head);font-size:0.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--sprout);margin-bottom:6px;font-weight:600}
+
+/* ─── MARKET SCREEN ─────────────────────────────────────────────── */
+.price-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.price-row:last-child{border-bottom:none}
+.pr-name{font-family:var(--font-head);font-size:0.88rem;font-weight:600}
+.pr-price{font-family:var(--font-head);font-size:0.92rem;font-weight:700;color:var(--cream)}
+.pr-trend{font-size:0.72rem;margin-top:2px}
+.pr-trend.up{color:#4ade80}.pr-trend.dn{color:#f87171}.pr-trend.fl{color:rgba(242,239,230,0.25)}
+.pr-tip{font-size:0.72rem;color:rgba(242,239,230,0.3);margin-top:2px}
+.btn-export{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 16px;font-size:0.78rem;font-weight:600;color:rgba(242,239,230,0.5);font-family:var(--font-head);margin-top:14px;transition:all 0.15s}
+.btn-export:active{background:rgba(255,255,255,0.1)}
+.btn-export svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ─── FARM SCREEN ───────────────────────────────────────────────── */
+.subtab-bar{display:flex;gap:4px;background:rgba(255,255,255,0.04);border-radius:12px;padding:4px;margin-bottom:18px}
+.subtab{flex:1;text-align:center;font-family:var(--font-head);font-size:0.76rem;font-weight:600;padding:10px 8px;border-radius:10px;color:rgba(242,239,230,0.4);transition:all 0.2s;-webkit-tap-highlight-color:transparent}
+.subtab.active{background:var(--leaf);color:var(--cream)}
+.subpane{display:none;animation:fadeIn 0.2s ease}
+.subpane.active{display:block}
+.cal-card{background:var(--card);border:1px solid rgba(255,255,255,0.05);border-radius:14px;padding:14px;margin-bottom:10px}
+.cal-crop{font-family:var(--font-head);font-size:0.92rem;font-weight:700;margin-bottom:8px}
+.cal-info{display:flex;gap:16px;font-size:0.78rem;color:rgba(242,239,230,0.45);margin-bottom:8px}
+.cal-info span:first-child{color:rgba(242,239,230,0.25);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;width:50px}
+.cal-tag{display:inline-block;font-size:0.68rem;font-weight:600;padding:3px 10px;border-radius:6px;font-family:var(--font-head)}
+.tag-sow{background:rgba(106,191,59,0.15);color:var(--sprout)}
+.tag-hvst{background:rgba(232,184,75,0.15);color:var(--amber)}
+.tag-grow{background:rgba(59,130,246,0.12);color:#60a5fa}
+.tag-off{background:rgba(255,255,255,0.05);color:rgba(242,239,230,0.3)}
+.sch-card{background:var(--card);border:1px solid rgba(255,255,255,0.05);border-radius:14px;padding:16px;margin-bottom:10px}
+.sch-name{font-family:var(--font-head);font-size:0.92rem;font-weight:700;margin-bottom:4px}
+.sch-desc{font-size:0.82rem;color:rgba(242,239,230,0.5);line-height:1.6;margin-bottom:6px}
+.sch-elig{font-size:0.72rem;color:rgba(242,239,230,0.3);margin-bottom:8px}
+.sch-link{font-size:0.78rem;color:var(--sprout);font-weight:600}
+
+/* Weather screen */
+.w-current{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.w-icon{font-size:3rem}
+.w-temp{font-family:var(--font-head);font-size:2.4rem;font-weight:800;letter-spacing:-1px}
+.w-desc{font-size:0.88rem;color:rgba(242,239,230,0.5);margin-top:2px}
+.w-stats{display:flex;gap:16px;font-size:0.82rem;color:rgba(242,239,230,0.4);margin-bottom:16px}
+.w-advisory{background:rgba(106,191,59,0.06);border:1px solid rgba(106,191,59,0.1);border-radius:14px;padding:14px;font-size:0.82rem;color:rgba(242,239,230,0.55);line-height:1.7;margin-bottom:16px}
+.w-advisory strong{color:var(--sprout)}
+.forecast-row{display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:6px;scrollbar-width:none;-ms-overflow-style:none}
+.forecast-row::-webkit-scrollbar{display:none}
+.fc-card{flex-shrink:0;width:80px;background:var(--card);border:1px solid rgba(255,255,255,0.05);border-radius:12px;padding:12px 8px;text-align:center}
+.fc-day{font-family:var(--font-head);font-size:0.72rem;font-weight:600;color:rgba(242,239,230,0.4)}
+.fc-icon{font-size:1.5rem;margin:6px 0}
+.fc-temps{font-family:var(--font-head);font-size:0.78rem;font-weight:700}
+.fc-temps span{font-weight:400;color:rgba(242,239,230,0.35)}
+.fc-rain{font-size:0.66rem;color:rgba(242,239,230,0.3);margin-top:4px}
+
+/* ─── CHAT SCREEN ───────────────────────────────────────────────── */
+.chat-screen{display:none;flex-direction:column;height:calc(100dvh - var(--top-h) - var(--safe-top) - var(--nav-h) - var(--safe-bot));padding:0}
+.chat-screen.active{display:flex}
+.chat-messages{flex:1;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch}
+.chat-msg{max-width:85%;padding:12px 16px;border-radius:16px;font-size:0.86rem;line-height:1.6;margin-bottom:10px;word-wrap:break-word}
+.chat-msg.bot{background:rgba(255,255,255,0.05);border-radius:16px 16px 16px 4px;color:rgba(242,239,230,0.7);align-self:flex-start}
+.chat-msg.user{background:var(--leaf);border-radius:16px 16px 4px 16px;color:var(--cream);margin-left:auto}
+.chat-msg strong{color:var(--cream)}
+.chat-chips{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;scrollbar-width:none;-ms-overflow-style:none;flex-shrink:0}
+.chat-chips::-webkit-scrollbar{display:none}
+.chat-chip{flex-shrink:0;background:rgba(106,191,59,0.1);border:1px solid rgba(106,191,59,0.15);border-radius:20px;padding:8px 14px;font-size:0.76rem;color:var(--sprout);font-weight:600;font-family:var(--font-head);-webkit-tap-highlight-color:transparent}
+.chat-chip:active{background:rgba(106,191,59,0.2)}
+.chat-input-wrap{display:flex;gap:8px;padding:10px 16px;padding-bottom:calc(10px);border-top:1px solid rgba(255,255,255,0.04);flex-shrink:0}
+.chat-input{flex:1;background:rgba(255,255,255,0.06);color:var(--cream);border:1px solid var(--border);border-radius:24px;padding:12px 18px;font-size:0.86rem;outline:none;font-family:var(--font-body)}
+.chat-input:focus{border-color:var(--sprout)}
+.chat-send{width:44px;height:44px;border-radius:50%;background:var(--sprout);display:flex;align-items:center;justify-content:center;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.chat-send:active{background:var(--lime)}
+.chat-send svg{width:18px;height:18px;stroke:#060905;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.chat-typing{display:none;padding:0 16px 8px;gap:4px;align-items:center}
+.chat-typing.show{display:flex}
+.chat-typing span{width:6px;height:6px;border-radius:50%;background:rgba(242,239,230,0.2);animation:typeBounce 1.4s infinite}
+.chat-typing span:nth-child(2){animation-delay:0.2s}
+.chat-typing span:nth-child(3){animation-delay:0.4s}
+@keyframes typeBounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
+
+/* ─── ABOUT MODAL ───────────────────────────────────────────────── */
+.about-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:20px;padding-top:calc(20px + var(--safe-top));overflow-y:auto;-webkit-overflow-scrolling:touch}
+.about-overlay.open{display:block;animation:fadeIn 0.2s ease}
+.about-close{position:sticky;top:0;text-align:right;margin-bottom:10px}
+.about-close button{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.1);display:inline-flex;align-items:center;justify-content:center}
+.about-close button svg{width:20px;height:20px;stroke:var(--cream);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.about-content{max-width:600px;margin:0 auto}
+.about-content h2{font-family:var(--font-head);font-size:1.4rem;font-weight:800;letter-spacing:-0.5px;margin-bottom:20px}
+.about-content h3{font-family:var(--font-head);font-size:0.78rem;color:var(--sprout);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:12px;margin-top:24px}
+.about-content p,.about-content li{font-size:0.84rem;color:rgba(242,239,230,0.55);line-height:1.7}
+.about-content ul{list-style:none;display:flex;flex-direction:column;gap:12px}
+.about-content li{padding-left:14px;border-left:2px solid var(--sprout)}
+.about-content li strong{color:var(--cream)}
+.about-dev{margin-top:24px;padding:18px;background:rgba(106,191,59,0.04);border:1px solid rgba(106,191,59,0.08);border-radius:14px}
+.about-dev-name{font-family:var(--font-head);font-size:0.92rem;font-weight:700;color:var(--cream)}
+.about-dev-sub{font-size:0.78rem;color:rgba(242,239,230,0.35);margin-top:4px}
+
+/* ─── LOADING / SKELETON ────────────────────────────────────────── */
+.skeleton{background:linear-gradient(90deg,rgba(255,255,255,0.03) 25%,rgba(255,255,255,0.06) 50%,rgba(255,255,255,0.03) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.loading-msg{text-align:center;padding:32px;color:rgba(242,239,230,0.25);font-size:0.84rem}
+
+/* ─── PULL TO REFRESH ───────────────────────────────────────────── */
+.ptr-indicator{text-align:center;padding:12px;color:var(--sprout);font-size:0.78rem;font-weight:600;display:none;font-family:var(--font-head)}
+.ptr-indicator.show{display:block}
+
+/* ─── DASHBOARD ─────────────────────────────────────────────────── */
+.chart-wrap{position:relative;margin-bottom:8px}
+.chart-wrap canvas{max-height:200px}
+.source-note{font-size:0.68rem;color:rgba(242,239,230,0.18);margin-top:8px}
+  </style>
+</head>
+<body>
+
+<!-- ═══ TOP BAR ════════════════════════════════════════════════════ -->
+<header class="topbar">
+  <div class="topbar-logo">Plot<span>wise</span></div>
+  <div class="topbar-actions">
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="btnEn" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" id="btnNag" onclick="setLang('nag')">NAG</button>
+    </div>
+    <button class="topbar-btn" onclick="openAbout()">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ═══ SCREENS ════════════════════════════════════════════════════ -->
+
+<!-- HOME -->
+<div class="screen active" id="screen-home">
+  <div class="home-greeting" data-i18n="m-greeting">Welcome to Plotwise</div>
+  <div class="home-sub" data-i18n="m-sub">Smart farming intelligence for Nagaland</div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-num">16</div><div class="kpi-lbl" data-i18n="m-districts">Districts</div></div>
+    <div class="kpi-card"><div class="kpi-num">44</div><div class="kpi-lbl" data-i18n="m-crops">Crops Tracked</div></div>
+    <div class="kpi-card"><div class="kpi-num" id="home-prod">—</div><div class="kpi-lbl" data-i18n="m-production">Total Production (T)</div></div>
+    <div class="kpi-card"><div class="kpi-num" id="home-area">—</div><div class="kpi-lbl" data-i18n="m-area">Total Area (Ha)</div></div>
+  </div>
+
+  <div class="quick-actions">
+    <button class="qa-btn" onclick="switchTab('detect')">
+      <div class="qa-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div>
+      <div><div class="qa-text" data-i18n="m-qa-detect">Detect Disease</div><div class="qa-sub" data-i18n="m-qa-detect-sub">Snap a leaf photo</div></div>
+    </button>
+    <button class="qa-btn" onclick="switchTab('market')">
+      <div class="qa-icon"><svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
+      <div><div class="qa-text" data-i18n="m-qa-prices">Market Prices</div><div class="qa-sub" data-i18n="m-qa-prices-sub">Check live rates</div></div>
+    </button>
+    <button class="qa-btn" onclick="switchTab('farm');openSubTab('calendar')">
+      <div class="qa-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg></div>
+      <div><div class="qa-text" data-i18n="m-qa-calendar">Calendar</div><div class="qa-sub" data-i18n="m-qa-calendar-sub">Sowing &amp; harvest</div></div>
+    </button>
+    <button class="qa-btn" onclick="switchTab('farm');openSubTab('schemes')">
+      <div class="qa-icon"><svg viewBox="0 0 24 24"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-6h6v6"/></svg></div>
+      <div><div class="qa-text" data-i18n="m-qa-schemes">Govt Schemes</div><div class="qa-sub" data-i18n="m-qa-schemes-sub">Find eligibility</div></div>
+    </button>
+  </div>
+
+  <!-- Weather summary -->
+  <div class="card" id="home-weather-card">
+    <div class="card-title" data-i18n="m-weather-title">Today's Weather</div>
+    <div id="home-weather">
+      <div class="loading-msg">Loading weather...</div>
+    </div>
+  </div>
+
+  <!-- Price ticker -->
+  <div class="card">
+    <div class="card-title" data-i18n="m-prices-title">Market Prices</div>
+    <div class="home-ticker" id="home-ticker">
+      <div class="loading-msg" style="width:100%">Loading prices...</div>
+    </div>
+  </div>
+
+  <!-- Mini charts -->
+  <div class="card">
+    <div class="card-title">Top Crops — Production (T)</div>
+    <div class="chart-wrap"><canvas id="home-chart"></canvas></div>
+  </div>
+</div>
+
+<!-- DETECT -->
+<div class="screen" id="screen-detect">
+  <div class="screen-title" data-i18n="m-detect-title">🔍 Detect Disease</div>
+  <div class="field-row">
+    <div><label data-i18n="lbl-crop">Crop</label>
+      <select id="detect-crop">
+        <option>Apple</option><option>Chilli</option><option>Grape</option>
+        <option>Maize</option><option>Orange</option><option>Pepper</option>
+        <option>Potato</option><option>Soyabean</option><option>Tomato</option>
+      </select>
+    </div>
+    <div><label data-i18n="lbl-district">District</label>
+      <select id="detect-district"></select>
+    </div>
+  </div>
+  <div class="dropzone" id="detect-dropzone">
+    <input type="file" id="detect-file" accept="image/*" capture="environment" class="dz-input"/>
+    <div class="dz-icon"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+    <div class="dz-txt" data-i18n="m-dz-txt">Take a photo or upload</div>
+    <div class="dz-sub" data-i18n="m-dz-sub">Camera opens directly · JPG or PNG</div>
+    <img id="detect-prev" alt="Preview"/>
+  </div>
+  <button class="btn-primary" onclick="runDetect()" data-i18n="btn-analyse">Analyse Crop →</button>
+  <div class="result-box" id="detect-result"></div>
+</div>
+
+<!-- MARKET -->
+<div class="screen" id="screen-market">
+  <div class="screen-title" data-i18n="m-market-title">📊 Market Prices</div>
+  <div class="ptr-indicator" id="market-ptr">↻ Pull to refresh</div>
+  <div class="field-row">
+    <div><label data-i18n="lbl-district">District</label>
+      <select id="market-district" onchange="loadPrices()"></select>
+    </div>
+    <div><label data-i18n="lbl-filter-crop">Filter Crop</label>
+      <select id="market-crop" onchange="loadPrices()">
+        <option value="">All Crops</option>
+        <option>Jhum Paddy</option><option>WTRC Paddy Kharif</option><option>Maize Kharif</option>
+        <option>Ginger</option><option>Potato</option><option>Soyabean</option>
+        <option>Mustard</option><option>Tea</option><option>Sugarcane</option>
+      </select>
+    </div>
+  </div>
+  <div class="card" id="market-list">
+    <div class="loading-msg">Loading prices...</div>
+  </div>
+  <button class="btn-export" id="market-export-btn" onclick="exportPrices()">
+    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Export CSV
+  </button>
+  <div class="source-note">Source: Agmarknet / Nagaland APMC. Indicative prices.</div>
+</div>
+
+<!-- FARM (Calendar + Schemes + Weather sub-tabs) -->
+<div class="screen" id="screen-farm">
+  <div class="screen-title" data-i18n="m-farm-title">📅 Farm Tools</div>
+  <div class="subtab-bar">
+    <button class="subtab active" onclick="openSubTab('calendar')" id="stab-calendar" data-i18n="tab-calendar">Calendar</button>
+    <button class="subtab" onclick="openSubTab('schemes')" id="stab-schemes" data-i18n="tab-schemes">Schemes</button>
+    <button class="subtab" onclick="openSubTab('weather')" id="stab-weather" data-i18n="tab-weather">Weather</button>
+  </div>
+
+  <!-- Calendar sub-pane -->
+  <div class="subpane active" id="subpane-calendar">
+    <div class="field-row single">
+      <div><label data-i18n="lbl-your-district">Your District</label>
+        <select id="cal-district" onchange="loadCalendar()"></select>
+      </div>
+    </div>
+    <div id="cal-list"><div class="loading-msg">Loading calendar...</div></div>
+  </div>
+
+  <!-- Schemes sub-pane -->
+  <div class="subpane" id="subpane-schemes">
+    <div class="field-row">
+      <div><label data-i18n="lbl-your-crop">Your Crop</label>
+        <select id="scheme-crop">
+          <option>Jhum Paddy</option><option>WTRC Paddy Kharif</option>
+          <option>Maize Kharif</option><option>Ginger</option><option>Potato</option>
+          <option>Soyabean</option><option>Mustard</option><option>Tea</option>
+          <option>Sugarcane</option><option>Sweet Potato</option><option>Groundnut</option>
+        </select>
+      </div>
+      <div><label data-i18n="lbl-your-district">Your District</label>
+        <select id="scheme-district"></select>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="loadSchemes()" data-i18n="btn-schemes">Find My Schemes →</button>
+    <div id="scheme-list"></div>
+  </div>
+
+  <!-- Weather sub-pane -->
+  <div class="subpane" id="subpane-weather">
+    <div class="field-row single">
+      <div><label data-i18n="lbl-your-district">Your District</label>
+        <select id="weather-district" onchange="loadWeather()"></select>
+      </div>
+    </div>
+    <div id="weather-content"><div class="loading-msg">Loading weather...</div></div>
+  </div>
+</div>
+
+<!-- CHAT -->
+<div class="chat-screen" id="screen-chat">
+  <div class="chat-messages" id="chat-messages">
+    <div class="chat-msg bot" data-i18n="m-chat-welcome">Hello! I'm the Plotwise farming assistant. Ask me about crop diseases, market prices, planting calendar, or government schemes.</div>
+  </div>
+  <div class="chat-typing" id="chat-typing"><span></span><span></span><span></span></div>
+  <div class="chat-chips" id="chat-chips">
+    <button class="chat-chip" onclick="sendChat('What\'s the price of ginger?')">Ginger price</button>
+    <button class="chat-chip" onclick="sendChat('When to plant rice?')">Rice planting</button>
+    <button class="chat-chip" onclick="sendChat('My potato has spots')">Potato disease</button>
+    <button class="chat-chip" onclick="sendChat('Show me government schemes')">Schemes</button>
+  </div>
+  <div class="chat-input-wrap">
+    <input class="chat-input" id="chat-input" type="text" placeholder="Ask about your farm..." onkeydown="if(event.key==='Enter')sendChat()"/>
+    <button class="chat-send" onclick="sendChat()">
+      <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ═══ ABOUT OVERLAY ═════════════════════════════════════════════ -->
+<div class="about-overlay" id="about-overlay">
+  <div class="about-close"><button onclick="closeAbout()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+  <div class="about-content">
+    <h2>About Plotwise</h2>
+    <p>Built on real data, for real decisions.</p>
+    <h3>Data Sources</h3>
+    <ul>
+      <li><strong>Crop Production Data</strong><br>District-wise Area, Production &amp; Yield data for 2023-24. 576 records across 16 districts and 44 crops.</li>
+      <li><strong>Market Prices</strong><br>MSP 2023-24 (CACP) + Agmarknet APMC data for Nagaland. 33 crops with price anchors.</li>
+      <li><strong>Weather</strong><br>Live forecast from Open-Meteo. 7-day forecasts updated every 15 minutes. GPS coordinates for all 16 district HQs.</li>
+      <li><strong>Disease Detection</strong><br>AI model trained on PlantVillage dataset (Penn State). 24 disease classes across 9 crop types.</li>
+    </ul>
+    <h3>Methodology</h3>
+    <p>All crop area, production, and yield figures are sourced from verified 2023-24 agriculture records for Nagaland. No data has been interpolated, estimated, or generated.</p>
+    <p style="margin-top:12px">Disease detection uses deep learning with a three-tier confidence system: above 70% (confident), 55-70% (low confidence), below 55% (uncertain).</p>
+    <p style="margin-top:12px">Market prices are anchored to the Government of India MSP for 2023-24. Actual market prices fluctuate and are indicative only.</p>
+    <div class="about-dev">
+      <div style="font-family:var(--font-head);font-size:0.68rem;text-transform:uppercase;letter-spacing:1.2px;color:var(--sprout);margin-bottom:6px">Developer</div>
+      <div class="about-dev-name">Limawapang L Jamir</div>
+      <div class="about-dev-sub">B.Tech Computer Science · Bennett University</div>
+      <div class="about-dev-sub">Mokokchung, Nagaland</div>
+    </div>
+    <p style="margin-top:20px;font-size:0.72rem;color:rgba(242,239,230,0.2);text-align:center">Plotwise v1.1.0 · Nagaland Agriculture Data 2023-24</p>
+  </div>
+</div>
+
+<!-- ═══ BOTTOM NAV ════════════════════════════════════════════════ -->
+<nav class="bottom-nav">
+  <button class="nav-item active" onclick="switchTab('home')" id="nav-home">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span data-i18n="m-nav-home">Home</span>
+  </button>
+  <button class="nav-item" onclick="switchTab('detect')" id="nav-detect">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <span data-i18n="m-nav-detect">Detect</span>
+  </button>
+  <button class="nav-item" onclick="switchTab('market')" id="nav-market">
+    <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+    <span data-i18n="m-nav-market">Market</span>
+  </button>
+  <button class="nav-item" onclick="switchTab('farm')" id="nav-farm">
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
+    <span data-i18n="m-nav-farm">Farm</span>
+  </button>
+  <button class="nav-item" onclick="switchTab('chat')" id="nav-chat">
+    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span data-i18n="m-nav-chat">Chat</span>
+  </button>
+</nav>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────────────
+const API = window.location.origin;
+const DISTRICTS = ['Kohima','Tseminyu','Phek','Mokokchung','Tuensang','Noklak','Shamator','Mon','Dimapur','Niuland','Chumoukedima','Wokha','Zunheboto','Peren','Kiphire','Longleng'];
+
+// District + crop data for home dashboard
+const DS = [
+  {d:"Mon",a:45458,p:131351,c:37},{d:"Phek",a:34318,p:109855,c:37},
+  {d:"Niuland",a:29071,p:105496,c:37},{d:"Wokha",a:33033,p:102234,c:36},
+  {d:"Peren",a:26110,p:93978,c:36},{d:"Chumoukedima",a:27471,p:90441,c:37},
+  {d:"Mokokchung",a:29918,p:88471,c:36},{d:"Zunheboto",a:29880,p:76288,c:35},
+  {d:"Kohima",a:20525,p:66622,c:37},{d:"Kiphire",a:24533,p:60808,c:35},
+  {d:"Tuensang",a:21014,p:61243,c:36},{d:"Noklak",a:15886,p:46266,c:35},
+  {d:"Longleng",a:15760,p:44334,c:34},{d:"Shamator",a:14241,p:37915,c:34},
+  {d:"Dimapur",a:10520,p:37325,c:36},{d:"Tseminyu",a:9849,p:26430,c:34}
+];
+const CS = [
+  {c:"WTRC Paddy",p:367481},{c:"Jhum Paddy",p:179085},{c:"Sugarcane",p:115115},
+  {c:"Maize",p:88985},{c:"Colocasia",p:64949},{c:"Tapioca",p:60852},
+  {c:"Potato",p:60480},{c:"Ginger",p:52076}
+];
+const GREENS = ['#5a9e3a','#3a6828','#8fce52','#2a4e1e','#78b840','#2e5522','#a8d866','#1a3212'];
+const WEATHER_ICONS = {0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌧️',55:'🌧️',61:'🌦️',63:'🌧️',65:'🌧️',71:'🌨️',73:'🌨️',75:'❄️',80:'🌦️',81:'🌧️',82:'⛈️',95:'⛈️',96:'⛈️',99:'⛈️'};
+const TC = {"sowing now":"tag-sow","harvest time":"tag-hvst","growing":"tag-grow","off season":"tag-off","upcoming":"tag-off"};
+
+// ─── POPULATE DISTRICT DROPDOWNS ─────────────────────────────────
+function populateDistricts(){
+  const selects = document.querySelectorAll('#detect-district,#market-district,#cal-district,#scheme-district,#weather-district');
+  selects.forEach(sel=>{
+    sel.innerHTML = DISTRICTS.map(d=>`<option>${d}</option>`).join('');
+  });
+}
+
+// ─── TAB SWITCHING ───────────────────────────────────────────────
+let currentTab = 'home';
+function switchTab(name){
+  currentTab = name;
+  document.querySelectorAll('.screen,.chat-screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('nav-'+name).classList.add('active');
+  // Auto-load data
+  if(name==='market') loadPrices();
+  if(name==='farm'){
+    const active = document.querySelector('.subtab.active');
+    if(active){
+      const sub = active.id.replace('stab-','');
+      if(sub==='calendar') loadCalendar();
+      if(sub==='weather') loadWeather();
+    }
+  }
+  if(name==='chat') document.getElementById('chat-input').focus();
+}
+
+// ─── SUB-TAB SWITCHING (Farm screen) ─────────────────────────────
+function openSubTab(name){
+  document.querySelectorAll('.subtab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.subpane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('stab-'+name).classList.add('active');
+  document.getElementById('subpane-'+name).classList.add('active');
+  if(name==='calendar') loadCalendar();
+  if(name==='weather') loadWeather();
+}
+
+// ─── ABOUT ───────────────────────────────────────────────────────
+function openAbout(){ document.getElementById('about-overlay').classList.add('open'); }
+function closeAbout(){ document.getElementById('about-overlay').classList.remove('open'); }
+
+// ─── HOME INIT ───────────────────────────────────────────────────
+function initHome(){
+  const totalP = DS.reduce((s,d)=>s+d.p,0);
+  const totalA = DS.reduce((s,d)=>s+d.a,0);
+  document.getElementById('home-prod').textContent = Math.round(totalP/1000)+'K';
+  document.getElementById('home-area').textContent = Math.round(totalA/1000)+'K';
+
+  // Chart
+  Chart.defaults.color = 'rgba(240,235,224,0.4)';
+  Chart.defaults.borderColor = 'rgba(255,255,255,0.045)';
+  new Chart(document.getElementById('home-chart'),{
+    type:'bar',
+    data:{labels:CS.map(c=>c.c),datasets:[{data:CS.map(c=>c.p),backgroundColor:GREENS,borderRadius:4,borderSkipped:false}]},
+    options:{plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:9},maxRotation:45},grid:{display:false}},y:{ticks:{font:{size:9}}}},maintainAspectRatio:true,responsive:true}
+  });
+
+  // Load weather for default district
+  loadHomeWeather();
+  loadHomePrices();
+}
+
+async function loadHomeWeather(){
+  const el = document.getElementById('home-weather');
+  try{
+    const res = await fetch(`${API}/api/weather?district=Kohima`);
+    if(!res.ok) throw new Error();
+    const d = await res.json();
+    const c = d.current;
+    const icon = WEATHER_ICONS[c.code]||'🌡️';
+    el.innerHTML = `
+      <div class="weather-sum">
+        <div class="weather-sum-icon">${icon}</div>
+        <div>
+          <div class="weather-sum-temp">${Math.round(c.temperature)}°C</div>
+          <div class="weather-sum-desc">${c.weather} in Kohima</div>
+        </div>
+      </div>
+      <div class="weather-sum-stats">
+        <span>💧 ${c.humidity}%</span>
+        <span>💨 ${c.wind_speed} km/h</span>
+        <span>🌧️ ${c.precipitation} mm</span>
+      </div>
+      ${d.advisories.length?`<div style="margin-top:10px;font-size:0.78rem;color:rgba(242,239,230,0.4)">🌾 ${d.advisories[0]}</div>`:''}
+    `;
+  }catch(e){
+    el.innerHTML = `<div class="loading-msg">Weather unavailable</div>`;
+  }
+}
+
+async function loadHomePrices(){
+  const el = document.getElementById('home-ticker');
+  try{
+    const res = await fetch(`${API}/prices`);
+    if(!res.ok) throw new Error();
+    const data = await res.json();
+    el.innerHTML = data.prices.map(p=>`
+      <div class="tick-chip">
+        <div class="tick-crop">${p.crop}</div>
+        <div class="tick-price">₹${p.price_per_qtl.toLocaleString()}/qtl</div>
+        <div class="tick-trend ${p.trend==='up'?'up':p.trend==='down'?'dn':'fl'}">${p.trend==='up'?'▲ Rising':p.trend==='down'?'▼ Falling':'— Stable'}</div>
+      </div>
+    `).join('');
+  }catch(e){
+    el.innerHTML = `<div class="loading-msg">Prices unavailable</div>`;
+  }
+}
+
+// ─── DISEASE DETECTION ───────────────────────────────────────────
+document.getElementById('detect-file').addEventListener('change', function(e){
+  const img = document.getElementById('detect-prev');
+  if(e.target.files[0]){ img.src = URL.createObjectURL(e.target.files[0]); img.style.display='block'; }
+});
+
+async function runDetect(){
+  const crop = document.getElementById('detect-crop').value;
+  const district = document.getElementById('detect-district').value;
+  const fileInput = document.getElementById('detect-file');
+  const el = document.getElementById('detect-result');
+
+  if(!fileInput.files[0]){
+    el.innerHTML = `<div style="padding:14px;color:#f87171;font-size:0.86rem;text-align:center">Please take or upload a leaf photo first.</div>`;
+    el.classList.add('show');
+    return;
+  }
+
+  el.innerHTML = `<div class="loading-msg">Analysing leaf...</div>`;
+  el.classList.add('show');
+
+  try{
+    const fd = new FormData();
+    fd.append('file',fileInput.files[0]);
+    fd.append('crop',crop);
+    fd.append('district',district);
+    const res = await fetch(`${API}/disease/detect`,{method:'POST',body:fd});
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const r = await res.json();
+    const isUncertain = r.severity==='Unknown'||r.confidence===0;
+    const isLow = r.source && r.source.includes('low confidence');
+    const sc = isUncertain?'':r.severity==='High'?'c-high':'c-med';
+    const confPct = r.confidence>0?(r.confidence*100).toFixed(0)+'%':'N/A';
+
+    if(isUncertain){
+      el.innerHTML = `
+        <div class="card" style="border-color:rgba(255,180,60,0.15)">
+          <div class="r-head"><div class="r-dot" style="background:var(--amber)"></div><div class="r-ttl" style="color:var(--amber)">Uncertain Result — ${r.crop}</div></div>
+          <div class="r-box" style="border-color:rgba(255,180,60,0.15);background:rgba(255,180,60,0.04)">
+            <span class="r-box-lbl" style="color:var(--amber)">What happened</span>
+            The AI could not clearly identify the disease. The photo may be unclear, or the disease is not in our training data.
+          </div>
+          <div class="r-box"><span class="r-box-lbl">What to try</span>${r.treatment}</div>
+          <div style="margin-top:10px;font-size:0.72rem;color:rgba(242,239,230,0.25)">${r.nearest_help}</div>
+        </div>`;
+    } else {
+      const warnBanner = isLow?`<div style="background:rgba(255,180,60,0.06);border:1px solid rgba(255,180,60,0.15);border-radius:10px;padding:10px;margin-bottom:12px;font-size:0.76rem;color:var(--amber)">Low confidence — verify with an agriculture expert.</div>`:'';
+      el.innerHTML = `
+        <div class="card">
+          ${warnBanner}
+          <div class="r-head"><div class="r-dot"></div><div class="r-ttl">Analysis Complete — ${r.crop}</div></div>
+          <div class="r-grid">
+            <div class="r-item"><div class="r-item-lbl">Disease</div><div class="r-item-val ${sc}">${r.disease}</div></div>
+            <div class="r-item"><div class="r-item-lbl">Confidence</div><div class="r-item-val">${confPct}</div></div>
+            <div class="r-item"><div class="r-item-lbl">Severity</div><div class="r-item-val ${sc}">${r.severity}</div></div>
+            <div class="r-item"><div class="r-item-lbl">Action</div><div class="r-item-val">${r.severity==='High'?'Immediate':'Monitor'}</div></div>
+          </div>
+          <div class="r-box"><span class="r-box-lbl">Treatment</span>${r.treatment}</div>
+          <div class="r-box"><span class="r-box-lbl">Prevention</span>${r.prevention}</div>
+          <div style="margin-top:10px;font-size:0.72rem;color:rgba(242,239,230,0.25)">${r.nearest_help}</div>
+          <div style="margin-top:4px;font-size:0.66rem;color:rgba(242,239,230,0.15)">Source: ${r.source}</div>
+        </div>`;
+    }
+  }catch(err){
+    el.innerHTML = `<div class="card" style="text-align:center;color:#f87171;font-size:0.84rem;padding:20px">Connection error — ${err.message}<br><span style="font-size:0.72rem;opacity:0.5">Check your internet and try again.</span></div>`;
+  }
+}
+
+// ─── PRICES ──────────────────────────────────────────────────────
+async function loadPrices(){
+  const district = document.getElementById('market-district').value;
+  const crop = document.getElementById('market-crop').value;
+  const el = document.getElementById('market-list');
+  el.innerHTML = `<div class="loading-msg">Loading prices...</div>`;
+
+  try{
+    let url = `${API}/prices?district=${encodeURIComponent(district)}`;
+    if(crop) url += `&crop=${encodeURIComponent(crop)}`;
+    const res = await fetch(url);
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if(!data.prices.length){ el.innerHTML=`<div class="loading-msg">No prices found.</div>`; return; }
+    el.innerHTML = data.prices.map(p=>`
+      <div class="price-row">
+        <div>
+          <div class="pr-name">${p.crop}</div>
+          <div class="pr-tip">${p.tip}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="pr-price">₹${p.price_per_qtl.toLocaleString()}</div>
+          <div class="pr-trend ${p.trend==='up'?'up':p.trend==='down'?'dn':'fl'}">${p.trend==='up'?'▲ Rising':p.trend==='down'?'▼ Falling':'— Stable'}</div>
+        </div>
+      </div>
+    `).join('');
+  }catch(err){
+    el.innerHTML = `<div class="loading-msg" style="color:#f87171">Connection error — ${err.message}</div>`;
+  }
+}
+
+function exportPrices(){
+  const district = document.getElementById('market-district').value;
+  window.location.href = `${API}/api/export/prices?district=${encodeURIComponent(district)}`;
+}
+
+// ─── CALENDAR ────────────────────────────────────────────────────
+async function loadCalendar(){
+  const district = document.getElementById('cal-district').value;
+  const el = document.getElementById('cal-list');
+  el.innerHTML = `<div class="loading-msg">Loading calendar...</div>`;
+
+  try{
+    const res = await fetch(`${API}/calendar?district=${encodeURIComponent(district)}`);
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if(!data.calendar.length){ el.innerHTML=`<div class="loading-msg">No crops found for this district.</div>`; return; }
+    el.innerHTML = data.calendar.map(c=>`
+      <div class="cal-card">
+        <div class="cal-crop">${c.crop}</div>
+        <div class="cal-info"><span>Sow</span><span>${c.sow_window.join(' – ')}</span></div>
+        <div class="cal-info"><span>Harvest</span><span>${c.harvest_window.join(' – ')}</span></div>
+        <span class="cal-tag ${TC[c.status]||'tag-off'}">${c.status}</span>
+      </div>
+    `).join('');
+  }catch(err){
+    el.innerHTML = `<div class="loading-msg" style="color:#f87171">Connection error — ${err.message}</div>`;
+  }
+}
+
+// ─── SCHEMES ─────────────────────────────────────────────────────
+async function loadSchemes(){
+  const crop = document.getElementById('scheme-crop').value;
+  const district = document.getElementById('scheme-district').value;
+  const el = document.getElementById('scheme-list');
+  el.innerHTML = `<div class="loading-msg">Finding schemes...</div>`;
+
+  try{
+    const res = await fetch(`${API}/schemes`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({crop,district,land_acres:1.0})
+    });
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    el.innerHTML = data.schemes.map(s=>`
+      <div class="sch-card">
+        <div class="sch-name">${s.name}</div>
+        <div class="sch-desc">${s.description}</div>
+        <div class="sch-elig">Eligibility: ${s.eligibility}</div>
+        <a class="sch-link" href="https://${s.apply_at}" target="_blank" rel="noopener">Apply at ${s.apply_at} →</a>
+      </div>
+    `).join('') + `<div style="font-size:0.72rem;color:rgba(242,239,230,0.2);margin-top:10px">${data.tip}</div>`;
+  }catch(err){
+    el.innerHTML = `<div class="loading-msg" style="color:#f87171">Connection error — ${err.message}</div>`;
+  }
+}
+
+// ─── WEATHER ─────────────────────────────────────────────────────
+async function loadWeather(){
+  const district = document.getElementById('weather-district').value;
+  const el = document.getElementById('weather-content');
+  el.innerHTML = `<div class="loading-msg">Loading weather...</div>`;
+
+  try{
+    const res = await fetch(`${API}/api/weather?district=${encodeURIComponent(district)}`);
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const d = await res.json();
+    const c = d.current;
+    const icon = WEATHER_ICONS[c.code]||'🌡️';
+    const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+    el.innerHTML = `
+      <div class="w-current">
+        <div class="w-icon">${icon}</div>
+        <div>
+          <div class="w-temp">${Math.round(c.temperature)}°C</div>
+          <div class="w-desc">${c.weather} in ${district}</div>
+        </div>
+      </div>
+      <div class="w-stats">
+        <span>💧 Humidity: <strong>${c.humidity}%</strong></span>
+        <span>💨 Wind: <strong>${c.wind_speed} km/h</strong></span>
+        <span>🌧️ Rain: <strong>${c.precipitation} mm</strong></span>
+      </div>
+      ${d.advisories.length?`<div class="w-advisory"><strong>🌾 Farming Advisory</strong><br>${d.advisories.map(a=>'• '+a).join('<br>')}</div>`:''}
+      <div class="card-title">7-Day Forecast</div>
+      <div class="forecast-row">
+        ${d.forecast.map(f=>{
+          const dt = new Date(f.date);
+          const fIcon = WEATHER_ICONS[f.code]||'🌡️';
+          return `<div class="fc-card">
+            <div class="fc-day">${days[dt.getDay()]}</div>
+            <div class="fc-icon">${fIcon}</div>
+            <div class="fc-temps">${Math.round(f.temp_max)}° <span>${Math.round(f.temp_min)}°</span></div>
+            <div class="fc-rain">${f.precip>0?f.precip+' mm':'No rain'}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="source-note" style="margin-top:12px">Source: Open-Meteo.com — live data, updates every 15 min</div>
+    `;
+  }catch(err){
+    el.innerHTML = `<div class="loading-msg" style="color:#f87171">Weather unavailable — ${err.message}</div>`;
+  }
+}
+
+// ─── CHAT ────────────────────────────────────────────────────────
+function sendChat(text){
+  const input = document.getElementById('chat-input');
+  const message = text || input.value.trim();
+  if(!message) return;
+  input.value = '';
+  addChatMsg(message,'user');
+
+  const typing = document.getElementById('chat-typing');
+  typing.classList.add('show');
+  scrollChatBottom();
+
+  fetch(`${API}/api/chat`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({message,district:'Kohima',lang:currentLang})
+  })
+  .then(r=>r.json())
+  .then(data=>{
+    typing.classList.remove('show');
+    const formatted = data.reply.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+    addChatMsg(formatted,'bot');
+    if(data.suggestions && data.suggestions.length) updateChips(data.suggestions);
+  })
+  .catch(()=>{
+    typing.classList.remove('show');
+    addChatMsg('Sorry, could not connect. Check your internet connection.','bot');
+  });
+}
+
+function addChatMsg(html,type){
+  const container = document.getElementById('chat-messages');
+  const msg = document.createElement('div');
+  msg.className = 'chat-msg '+type;
+  msg.innerHTML = html;
+  container.appendChild(msg);
+  scrollChatBottom();
+}
+
+function scrollChatBottom(){
+  const c = document.getElementById('chat-messages');
+  requestAnimationFrame(()=>{c.scrollTop=c.scrollHeight});
+}
+
+function updateChips(suggestions){
+  document.getElementById('chat-chips').innerHTML = suggestions.map(s=>
+    `<button class="chat-chip" onclick="sendChat('${s.replace(/'/g,"\\'")}')">${s}</button>`
+  ).join('');
+}
+
+// ─── i18n ────────────────────────────────────────────────────────
+const i18n = {
+  en: {
+    'm-greeting':'Welcome to Plotwise','m-sub':'Smart farming intelligence for Nagaland',
+    'm-districts':'Districts','m-crops':'Crops Tracked','m-production':'Total Production (T)','m-area':'Total Area (Ha)',
+    'm-qa-detect':'Detect Disease','m-qa-detect-sub':'Snap a leaf photo',
+    'm-qa-prices':'Market Prices','m-qa-prices-sub':'Check live rates',
+    'm-qa-calendar':'Calendar','m-qa-calendar-sub':'Sowing & harvest',
+    'm-qa-schemes':'Govt Schemes','m-qa-schemes-sub':'Find eligibility',
+    'm-weather-title':"Today's Weather",'m-prices-title':'Market Prices',
+    'm-detect-title':'🔍 Detect Disease','m-market-title':'📊 Market Prices','m-farm-title':'📅 Farm Tools',
+    'm-dz-txt':'Take a photo or upload','m-dz-sub':'Camera opens directly · JPG or PNG',
+    'm-nav-home':'Home','m-nav-detect':'Detect','m-nav-market':'Market','m-nav-farm':'Farm','m-nav-chat':'Chat',
+    'm-chat-welcome':"Hello! I'm the Plotwise farming assistant. Ask me about crop diseases, market prices, planting calendar, or government schemes.",
+    'lbl-crop':'Crop','lbl-district':'District','lbl-filter-crop':'Filter Crop',
+    'lbl-your-district':'Your District','lbl-your-crop':'Your Crop',
+    'btn-analyse':'Analyse Crop →','btn-schemes':'Find My Schemes →',
+    'tab-calendar':'Calendar','tab-schemes':'Schemes','tab-weather':'Weather',
+  },
+  nag: {
+    'm-greeting':'Plotwise-te Aahise','m-sub':'Nagaland-r lagi smart farming intelligence',
+    'm-districts':'District','m-crops':'Fasal Track','m-production':'Total Production (T)','m-area':'Total Area (Ha)',
+    'm-qa-detect':'Rog Check','m-qa-detect-sub':'Pata-r photo lobo',
+    'm-qa-prices':'Bazar Daam','m-qa-prices-sub':'Live daam dekhbo',
+    'm-qa-calendar':'Calendar','m-qa-calendar-sub':'Lagabo & katibo',
+    'm-qa-schemes':'Sarkari Scheme','m-qa-schemes-sub':'Eligibility dekhbo',
+    'm-weather-title':'Aji-r Botaah','m-prices-title':'Bazar Daam',
+    'm-detect-title':'🔍 Rog Check','m-market-title':'📊 Bazar Daam','m-farm-title':'📅 Kheti Tool',
+    'm-dz-txt':'Photo lobo ba upload korbo','m-dz-sub':'Camera sidha kholibo · JPG ba PNG',
+    'm-nav-home':'Ghor','m-nav-detect':'Check','m-nav-market':'Bazar','m-nav-farm':'Kheti','m-nav-chat':'Kotha',
+    'm-chat-welcome':'Namaskar! Moi Plotwise-r farming assistant. Fasal-r rog, bazar daam, lagabo-r calendar, ba sarkari scheme-r kotha hudhibo.',
+    'lbl-crop':'Fasal','lbl-district':'District','lbl-filter-crop':'Fasal Basi Lobo',
+    'lbl-your-district':'Apuni-r District','lbl-your-crop':'Apuni-r Fasal',
+    'btn-analyse':'Fasal Check Korbo →','btn-schemes':'Moi-r Scheme Khujibo →',
+    'tab-calendar':'Calendar','tab-schemes':'Scheme','tab-weather':'Botaah',
+  }
+};
+
+let currentLang = localStorage.getItem('plotwise-lang')||'en';
+
+function setLang(lang){
+  currentLang = lang;
+  localStorage.setItem('plotwise-lang',lang);
+  document.getElementById('btnEn').classList.toggle('active',lang==='en');
+  document.getElementById('btnNag').classList.toggle('active',lang==='nag');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    if(i18n[lang] && i18n[lang][key]) el.innerHTML = i18n[lang][key];
+  });
+  document.documentElement.lang = lang==='nag'?'nag':'en';
+}
+
+// ─── INIT ────────────────────────────────────────────────────────
+window.onload = ()=>{
+  populateDistricts();
+  initHome();
+  if(currentLang!=='en') setLang(currentLang);
+};
+</script>
+</body>
+</html>

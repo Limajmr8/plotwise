@@ -65,8 +65,10 @@ keras==3.10.0            # MUST match the Keras version that saved the model on 
 - **SEO**: Meta description, keywords, Open Graph, Twitter cards, preconnect hints
 
 ## Android App (Capacitor)
-- **Package**: `com.plotwise.app` — Capacitor wraps the Railway-deployed site
-- **Config**: `capacitor.config.ts` — loads `https://plotwise-production.up.railway.app`
+- **Package**: `com.plotwise.app` — Capacitor loads the mobile-optimized UI from Railway
+- **Config**: `capacitor.config.ts` — loads `https://plotwise-production.up.railway.app/mobile`
+- **Mobile UI**: `frontend/src/mobile.html` — standalone file with bottom tab nav (Home/Detect/Market/Farm/Chat), no GSAP/Lenis, touch-optimized
+- **Backend route**: `/mobile` serves `mobile.html` (added to `main.py`)
 - **Plugins**: @capacitor/splash-screen, @capacitor/status-bar
 - **Icons**: Generated from `frontend/src/icon-512.png` into all mipmap densities
 - **Theme**: Dark (#060905 bg, #3a6828 primary green) — matches web app
@@ -98,5 +100,6 @@ keras==3.10.0            # MUST match the Keras version that saved the model on 
 - [x] Deploy to Railway — https://plotwise-production.up.railway.app
 - [ ] June 2026 department presentation (B2G pitch)
 - [x] Android APK — Capacitor + GitHub Actions CI/CD
+- [x] Mobile-optimized app UI — `frontend/src/mobile.html` with bottom tab nav (Home/Detect/Market/Farm/Chat)
 - [ ] Farmer profile + yield history
 - [ ] Real farmer testimonials (after field testing)
