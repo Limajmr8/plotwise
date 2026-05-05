@@ -281,7 +281,7 @@ label{display:block;font-size:0.72rem;font-weight:600;text-transform:uppercase;l
     </button>
     <button class="qa-btn" onclick="switchTab('farm');openSubTab('schemes')">
       <div class="qa-icon"><svg viewBox="0 0 24 24"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-6h6v6"/></svg></div>
-      <div><div class="qa-text" data-i18n="m-qa-schemes">Govt Schemes</div><div class="qa-sub" data-i18n="m-qa-schemes-sub">Find eligibility</div></div>
+      <div><div class="qa-text" data-i18n="m-qa-schemes">Schemes</div><div class="qa-sub" data-i18n="m-qa-schemes-sub">Find eligibility</div></div>
     </button>
   </div>
 
@@ -413,14 +413,14 @@ label{display:block;font-size:0.72rem;font-weight:600;text-transform:uppercase;l
 <!-- CHAT -->
 <div class="chat-screen" id="screen-chat">
   <div class="chat-messages" id="chat-messages">
-    <div class="chat-msg bot" data-i18n="m-chat-welcome">Hello! I'm the Plotwise farming assistant. Ask me about crop diseases, market prices, planting calendar, or government schemes.</div>
+    <div class="chat-msg bot" data-i18n="m-chat-welcome">Hello! I'm the Plotwise farming assistant. Ask me about crop diseases, market prices, planting calendar, or farm schemes.</div>
   </div>
   <div class="chat-typing" id="chat-typing"><span></span><span></span><span></span></div>
   <div class="chat-chips" id="chat-chips">
     <button class="chat-chip" onclick="sendChat('What\'s the price of ginger?')">Ginger price</button>
     <button class="chat-chip" onclick="sendChat('When to plant rice?')">Rice planting</button>
     <button class="chat-chip" onclick="sendChat('My potato has spots')">Potato disease</button>
-    <button class="chat-chip" onclick="sendChat('Show me government schemes')">Schemes</button>
+    <button class="chat-chip" onclick="sendChat('Show me farming schemes')">Schemes</button>
   </div>
   <div class="chat-input-wrap">
     <input class="chat-input" id="chat-input" type="text" placeholder="Ask about your farm..." onkeydown="if(event.key==='Enter')sendChat()"/>
@@ -446,7 +446,7 @@ label{display:block;font-size:0.72rem;font-weight:600;text-transform:uppercase;l
     <h3>Methodology</h3>
     <p>All crop area, production, and yield figures are sourced from verified 2023-24 agriculture records for Nagaland. No data has been interpolated, estimated, or generated.</p>
     <p style="margin-top:12px">Disease detection uses deep learning with a three-tier confidence system: above 70% (confident), 55-70% (low confidence), below 55% (uncertain).</p>
-    <p style="margin-top:12px">Market prices are anchored to the Government of India MSP for 2023-24. Actual market prices fluctuate and are indicative only.</p>
+    <p style="margin-top:12px">Market prices are anchored to MSP 2023-24. Actual market prices fluctuate and are indicative only.</p>
     <div class="about-dev">
       <div style="font-family:var(--font-head);font-size:0.68rem;text-transform:uppercase;letter-spacing:1.2px;color:var(--sprout);margin-bottom:6px">Developer</div>
       <div class="about-dev-name">Limawapang L Jamir</div>
@@ -878,12 +878,12 @@ const i18n = {
     'm-qa-detect':'Detect Disease','m-qa-detect-sub':'Snap a leaf photo',
     'm-qa-prices':'Market Prices','m-qa-prices-sub':'Check live rates',
     'm-qa-calendar':'Calendar','m-qa-calendar-sub':'Sowing & harvest',
-    'm-qa-schemes':'Govt Schemes','m-qa-schemes-sub':'Find eligibility',
+    'm-qa-schemes':'Schemes','m-qa-schemes-sub':'Find eligibility',
     'm-weather-title':"Today's Weather",'m-prices-title':'Market Prices',
     'm-detect-title':'🔍 Detect Disease','m-market-title':'📊 Market Prices','m-farm-title':'📅 Farm Tools',
     'm-dz-txt':'Take a photo or upload','m-dz-sub':'Camera opens directly · JPG or PNG',
     'm-nav-home':'Home','m-nav-detect':'Detect','m-nav-market':'Market','m-nav-farm':'Farm','m-nav-chat':'Chat',
-    'm-chat-welcome':"Hello! I'm the Plotwise farming assistant. Ask me about crop diseases, market prices, planting calendar, or government schemes.",
+    'm-chat-welcome':"Hello! I'm the Plotwise farming assistant. Ask me about crop diseases, market prices, planting calendar, or farm schemes.",
     'lbl-crop':'Crop','lbl-district':'District','lbl-filter-crop':'Filter Crop',
     'lbl-your-district':'Your District','lbl-your-crop':'Your Crop',
     'btn-analyse':'Analyse Crop →','btn-schemes':'Find My Schemes →',
@@ -895,7 +895,7 @@ const i18n = {
     'm-qa-detect':'Rog Check','m-qa-detect-sub':'Pata-r photo lobo',
     'm-qa-prices':'Bazar Daam','m-qa-prices-sub':'Live daam dekhbo',
     'm-qa-calendar':'Calendar','m-qa-calendar-sub':'Lagabo & katibo',
-    'm-qa-schemes':'Sarkari Scheme','m-qa-schemes-sub':'Eligibility dekhbo',
+    'm-qa-schemes':'Scheme','m-qa-schemes-sub':'Eligibility dekhbo',
     'm-weather-title':'Aji-r Botaah','m-prices-title':'Bazar Daam',
     'm-detect-title':'🔍 Rog Check','m-market-title':'📊 Bazar Daam','m-farm-title':'📅 Kheti Tool',
     'm-dz-txt':'Photo lobo ba upload korbo','m-dz-sub':'Camera sidha kholibo · JPG ba PNG',

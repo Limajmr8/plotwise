@@ -540,7 +540,9 @@ def get_market_prices(crop: Optional[str] = None, district: Optional[str] = None
             continue
         base  = anchor["base"]
         price = base + random.randint(-150, 200)
-        trend = random.choice(["up", "down", "stable"])
+        # Deterministic trend based on crop name hash so the mix looks realistic
+        trend_idx = hash(c) % 3
+        trend = ["up", "stable", "down"][trend_idx]
         prices.append({
             "crop":          c,
             "price_per_qtl": price,
