@@ -224,6 +224,7 @@ label{display:block;font-size:0.72rem;font-weight:600;text-transform:uppercase;l
 /* ─── LOADING / SKELETON ────────────────────────────────────────── */
 .skeleton{background:linear-gradient(90deg,rgba(255,255,255,0.03) 25%,rgba(255,255,255,0.06) 50%,rgba(255,255,255,0.03) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes spin{to{transform:rotate(360deg)}}
 .loading-msg{text-align:center;padding:32px;color:rgba(242,239,230,0.25);font-size:0.84rem}
 
 /* ─── PULL TO REFRESH ───────────────────────────────────────────── */
@@ -234,9 +235,13 @@ label{display:block;font-size:0.72rem;font-weight:600;text-transform:uppercase;l
 .chart-wrap{position:relative;margin-bottom:8px}
 .chart-wrap canvas{max-height:200px}
 .source-note{font-size:0.68rem;color:rgba(242,239,230,0.18);margin-top:8px}
+.offline-bar{position:fixed;top:0;left:0;right:0;z-index:9999;background:#b91c1c;color:#fff;text-align:center;padding:10px 16px;font-size:0.82rem;font-family:var(--font-body);transform:translateY(-100%);transition:transform .3s ease}
+.offline-bar.show{transform:translateY(0)}
   </style>
 </head>
 <body>
+
+<div class="offline-bar" id="offline-bar">No internet connection. Some features may be unavailable.</div>
 
 <!-- ═══ TOP BAR ════════════════════════════════════════════════════ -->
 <header class="topbar">
@@ -358,7 +363,7 @@ label{display:block;font-size:0.72rem;font-weight:600;text-transform:uppercase;l
     <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
     Export CSV
   </button>
-  <div class="source-note">Source: Agmarknet / Nagaland APMC. Indicative prices.</div>
+  <div class="source-note">Source: MSP 2023-24 (CACP) / Agmarknet Nagaland APMC. Indicative prices anchored to government data.</div>
 </div>
 
 <!-- FARM (Calendar + Schemes + Weather sub-tabs) -->
@@ -634,7 +639,10 @@ async function runDetect(){
     return;
   }
 
-  el.innerHTML = `<div class="loading-msg">Analysing leaf...</div>`;
+  el.innerHTML = `<div style="padding:28px;text-align:center">
+    <div style="display:inline-block;width:28px;height:28px;border:2.5px solid rgba(106,191,59,0.15);border-top-color:var(--sprout);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:10px"></div>
+    <div class="loading-msg" style="padding:0">Analysing leaf — this may take a few seconds…</div>
+  </div>`;
   el.classList.add('show');
 
   try{
@@ -922,10 +930,18 @@ function setLang(lang){
   document.documentElement.lang = lang==='nag'?'nag':'en';
 }
 
+// ─── OFFLINE DETECTION ───────────────────────────────────────────
+function updateOnlineStatus(){
+  document.getElementById('offline-bar').classList.toggle('show', !navigator.onLine);
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+
 // ─── INIT ────────────────────────────────────────────────────────
 window.onload = ()=>{
   populateDistricts();
   initHome();
+  updateOnlineStatus();
   if(currentLang!=='en') setLang(currentLang);
 };
 </script>

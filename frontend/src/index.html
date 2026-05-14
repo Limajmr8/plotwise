@@ -657,6 +657,7 @@
     }
     .result.show { display: block; animation: resultIn 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
     @keyframes resultIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes spin { to { transform: rotate(360deg); } }
     .r-head { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
     .r-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--amber); flex-shrink: 0; }
     .r-ttl { font-family: var(--font-head); font-weight: 700; font-size: 0.95rem; }
@@ -1436,6 +1437,8 @@
 </head>
 <body>
 
+<div id="offline-bar" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#b91c1c;color:#fff;text-align:center;padding:10px 16px;font-size:0.84rem;font-family:var(--font-body);transform:translateY(-100%);transition:transform .3s ease">No internet connection. Some features may be unavailable.</div>
+
 <!-- PRELOADER -->
 <div class="preloader" id="preloader">
   <div class="preloader-logo">Plot<span>wise</span></div>
@@ -1783,7 +1786,7 @@
             <button class="btn-export" onclick="window.location.href=API+'/api/export/prices?district='+document.getElementById('pd').value">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export CSV
             </button>
-            <p style="font-size:0.72rem;color:rgba(240,235,224,0.2);margin:0">Source: Agmarknet / Nagaland APMC. Indicative prices.</p>
+            <p style="font-size:0.72rem;color:rgba(240,235,224,0.45);margin:0">Source: MSP 2023-24 (CACP) / Agmarknet Nagaland APMC. Indicative prices anchored to government data.</p>
           </div>
         </div>
 
@@ -2220,7 +2223,10 @@ async function runDisease(){
     return;
   }
 
-  el.innerHTML = `<div style="padding:28px;text-align:center;color:rgba(240,235,224,0.38);font-size:0.88rem">Analysing leaf…</div>`;
+  el.innerHTML = `<div style="padding:36px;text-align:center">
+    <div style="display:inline-block;width:32px;height:32px;border:2.5px solid rgba(106,191,59,0.15);border-top-color:var(--sprout);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:14px"></div>
+    <div style="color:rgba(240,235,224,0.5);font-size:0.88rem">Analysing leaf — this may take a few seconds…</div>
+  </div>`;
   el.classList.add('show');
 
   try {
@@ -3247,6 +3253,14 @@ function setLang(lang) {
   document.documentElement.lang = lang === 'nag' ? 'nag' : 'en';
 }
 
+// ─── OFFLINE DETECTION ───────────────────────────────────────────────────────
+function updateOnlineStatus(){
+  const bar = document.getElementById('offline-bar');
+  bar.style.transform = navigator.onLine ? 'translateY(-100%)' : 'translateY(0)';
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 window.onload = () => {
   buildTicker();
@@ -3254,6 +3268,7 @@ window.onload = () => {
   renderCal();
   initDash();
   loadHeatmap();
+  updateOnlineStatus();
 
   // Apply saved language preference
   if (currentLang !== 'en') setLang(currentLang);

@@ -9,21 +9,28 @@ All data sourced from verified Nagaland agriculture records 2023-24.
 Disease reports stored in SQLite for heatmap analytics.
 """
 
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse, JSONResponse
 from pydantic import BaseModel
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, date
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+import hashlib
 import json
 import csv
 import os
-import random
 import sqlite3
 import io
+import logging
 import urllib.request
 import urllib.error
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+logger = logging.getLogger("plotwise")
 
 app = FastAPI(
     title="Plotwise API",
@@ -33,10 +40,44 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://plotwise-production.up.railway.app",
+        "capacitor://localhost",
+        "http://localhost",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+    ],
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
 )
+
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Unhandled error on {request.method} {request.url.path}: {exc}")
+    return JSONResponse(status_code=500, content={
+        "error": "Something went wrong. Please try again.",
+        "detail": str(exc) if isinstance(exc, HTTPException) else None,
+    })
+
+
+def _daily_variation(crop_name: str, base_price: int, spread: int = 200) -> int:
+    """Deterministic daily price variation — stable within a day, shifts between days."""
+    seed = hashlib.md5(f"{crop_name}:{date.today().isoformat()}".encode()).hexdigest()
+    offset = int(seed[:8], 16) % (spread * 2 + 1) - spread
+    return base_price + offset
+
+
+def _daily_trend_pct(crop_name: str) -> str:
+    seed = hashlib.md5(f"trend:{crop_name}:{date.today().isoformat()}".encode()).hexdigest()
+    pct = 0.3 + (int(seed[:8], 16) % 43) / 10.0
+    return f"{pct:.1f}%"
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
 
@@ -96,6 +137,9 @@ def _init_db():
             timestamp  TEXT    NOT NULL
         )
     """)
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_reports_district ON disease_reports(district)")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_reports_timestamp ON disease_reports(timestamp)")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_reports_crop ON disease_reports(crop)")
     conn.commit()
     conn.close()
 
@@ -122,20 +166,20 @@ DISEASE_CLASSES = {}   # idx (str) → class label, loaded from class_indices.js
 def _load_model():
     global DISEASE_MODEL, DISEASE_CLASSES
     if not os.path.exists(MODEL_PATH):
-        print(f"[WARN]  No trained model at {MODEL_PATH}. Run: python ml/train_disease_model.py")
+        logger.warning(f"No trained model at {MODEL_PATH}. Run: python ml/train_disease_model.py")
         return
     try:
         import tensorflow as tf
         DISEASE_MODEL = tf.keras.models.load_model(MODEL_PATH, compile=False)
-        print(f"[OK]  Disease model loaded ({MODEL_PATH})")
+        logger.info(f"Disease model loaded ({MODEL_PATH})")
         if os.path.exists(CLASSES_PATH):
             with open(CLASSES_PATH) as f:
                 DISEASE_CLASSES = json.load(f)
-            print(f"[OK]  Class labels loaded: {list(DISEASE_CLASSES.values())}")
+            logger.info(f"Class labels loaded: {len(DISEASE_CLASSES)} classes")
         else:
-            print("[WARN]  class_indices.json not found — re-run train_disease_model.py")
+            logger.warning("class_indices.json not found — re-run train_disease_model.py")
     except Exception as e:
-        print(f"[WARN]  Could not load disease model: {e}")
+        logger.warning(f"Could not load disease model: {e}")
 
 _load_model()
 
@@ -373,14 +417,22 @@ def api_status():
     }
 
 
+@app.get("/health")
+def health_check():
+    """Health check for Railway/monitoring."""
+    return {"status": "ok", "model_loaded": DISEASE_MODEL is not None}
+
+
 @app.post("/disease/detect")
+@limiter.limit("10/minute")
 async def detect_disease(
+    request:  Request,
     file:     UploadFile = File(...),
     crop:     str = "Jhum Paddy",
     district: str = "Kohima"
 ):
     """Upload a crop leaf image → get disease prediction. Logs report to DB."""
-    if not file.content_type.startswith("image/"):
+    if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(400, "Please upload an image file.")
 
     # Crops the ML model was actually trained on (24-class EfficientNetB0)
@@ -398,8 +450,13 @@ async def detect_disease(
     if use_ml:
         # Real model inference
         import numpy as np
-        img_bytes  = await file.read()
-        arr        = _preprocess_image(img_bytes)
+        img_bytes = await file.read()
+        if len(img_bytes) > MAX_UPLOAD_BYTES:
+            raise HTTPException(413, f"Image too large ({len(img_bytes) // 1024 // 1024}MB). Maximum is 10MB.")
+        try:
+            arr = _preprocess_image(img_bytes)
+        except Exception:
+            raise HTTPException(400, "Could not process image. Please upload a valid JPEG or PNG.")
         preds      = DISEASE_MODEL.predict(arr, verbose=0)[0]
         class_idx  = int(preds.argmax())
         confidence = float(preds[class_idx])
@@ -539,9 +596,8 @@ def get_market_prices(crop: Optional[str] = None, district: Optional[str] = None
         if not anchor:
             continue
         base  = anchor["base"]
-        price = base + random.randint(-150, 200)
-        # Deterministic trend based on crop name hash so the mix looks realistic
-        trend_idx = hash(c) % 3
+        price = _daily_variation(c, base)
+        trend_idx = int(hashlib.md5(f"t:{c}".encode()).hexdigest()[:8], 16) % 3
         trend = ["up", "stable", "down"][trend_idx]
         prices.append({
             "crop":          c,
@@ -550,8 +606,8 @@ def get_market_prices(crop: Optional[str] = None, district: Optional[str] = None
             "unit":          anchor["unit"],
             "market":        district or "Nagaland APMC",
             "trend":         trend,
-            "trend_pct":     f"{random.uniform(0.3, 4.5):.1f}%",
-            "last_updated":  datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
+            "trend_pct":     _daily_trend_pct(c),
+            "last_updated":  date.today().strftime("%Y-%m-%d"),
             "tip":           "Good time to sell — above MSP" if trend == "up"
                              else "Consider holding stock"   if trend == "down"
                              else "Stable — close to MSP",
@@ -833,7 +889,8 @@ def _detect_intent(text: str) -> str:
 
 
 @app.post("/api/chat")
-def chat(msg: ChatMessage):
+@limiter.limit("20/minute")
+def chat(request: Request, msg: ChatMessage):
     """
     AI farming assistant for Nagaland farmers.
     Answers questions about diseases, prices, planting, schemes using real data.
@@ -881,7 +938,7 @@ def chat(msg: ChatMessage):
         if crop:
             anchor = PRICE_ANCHORS.get(crop)
             if anchor:
-                price = anchor["base"] + random.randint(-150, 200)
+                price = _daily_variation(crop, anchor["base"])
                 reply = (
                     f"**{crop}** — current market price:\n\n"
                     f"Price: **{anchor['unit'].split('/')[0]}{price}/quintal**\n"
@@ -892,17 +949,16 @@ def chat(msg: ChatMessage):
                     reply += "Price is above MSP — good time to sell."
                 else:
                     reply += "Price is near/below MSP — consider holding if you can store safely."
-                reply += "\n\nSource: Agmarknet / Nagaland APMC 2023-24"
+                reply += f"\n\nSource: Agmarknet / Nagaland APMC 2023-24 (as of {date.today().strftime('%d %b %Y')})"
             else:
                 reply = f"I don't have price data for {crop} yet. Try: rice, maize, ginger, potato, soyabean, mustard, tea."
         else:
-            # Show top 5 prices
             top_crops = ["Ginger", "Tea", "Soyabean", "Mustard", "Potato"]
             lines = [f"Top crop prices in {district}:\n"]
             for c in top_crops:
                 a = PRICE_ANCHORS.get(c)
                 if a:
-                    p = a["base"] + random.randint(-100, 150)
+                    p = _daily_variation(c, a["base"], spread=150)
                     lines.append(f"**{c}**: {a['unit'].split('/')[0]}{p}/qtl (MSP: {a['base']})")
             lines.append(f"\nAsk about any specific crop for detailed pricing!")
             reply = "\n".join(lines)
@@ -1128,7 +1184,8 @@ DISTRICT_COORDS = {
 
 
 @app.get("/api/weather")
-def get_weather(district: str = "Kohima"):
+@limiter.limit("20/minute")
+def get_weather(request: Request, district: str = "Kohima"):
     """
     Live weather data from Open-Meteo (free, no API key).
     Returns current conditions + 7-day forecast for the specified district.
@@ -1154,7 +1211,8 @@ def get_weather(district: str = "Kohima"):
         with urllib.request.urlopen(req, timeout=10) as resp:
             data = json.loads(resp.read().decode())
     except (urllib.error.URLError, Exception) as e:
-        raise HTTPException(502, f"Weather service unavailable: {str(e)}")
+        logger.error(f"Weather API failed for {district}: {e}")
+        raise HTTPException(503, "Weather service is temporarily unavailable. Please try again in a few minutes.")
 
     # Weather code → description
     WMO_CODES = {

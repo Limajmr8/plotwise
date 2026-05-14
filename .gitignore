@@ -30,6 +30,9 @@ ml/results/
 # ml/saved_models/disease_model.h5 — TRACKED (31MB, needed for inference)
 # ml/saved_models/class_indices.json — TRACKED
 ml/saved_models/disease_model_fixed.h5
+might need later/
+disease_model*.h5
+!ml/saved_models/disease_model.h5
 
 # Jupyter
 .ipynb_checkpoints/
