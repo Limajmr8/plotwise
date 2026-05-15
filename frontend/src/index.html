@@ -1417,6 +1417,40 @@
       .chat-panel { bottom: 80px; right: 12px; left: 12px; width: auto; max-height: 70vh; }
     }
 
+    @media (max-width: 768px) {
+      .hero { min-height: 500px; }
+      .hero h1 { font-size: clamp(2.2rem, 9vw, 3.2rem); }
+      .stats-inner { grid-template-columns: 1fr; }
+      .stat { padding: 28px 20px; }
+      .stat-n { font-size: 2rem; }
+      .kpi-row { grid-template-columns: 1fr 1fr; }
+      .app-tabs { flex-wrap: wrap; gap: 4px; }
+      .app-tab { font-size: 0.78rem; padding: 8px 12px; }
+      .app-body { padding: 16px; }
+      .hscroll-panel-content { padding: 0 20px; }
+      .statement-text { font-size: clamp(1.6rem, 6vw, 2.4rem); }
+      .cta-h { font-size: clamp(1.8rem, 6vw, 2.8rem); }
+    }
+
+    @media (max-width: 480px) {
+      nav { padding: 0 16px; height: 56px; }
+      .hero { min-height: 420px; padding-top: 80px; }
+      .hero h1 { font-size: 2rem; letter-spacing: -1px; }
+      .hero p { font-size: 0.9rem; }
+      .hero-content { padding: 0 16px; }
+      .feat-row { padding: 40px 16px; gap: 24px; }
+      .feat-intro-wrap { padding: 60px 16px 36px; }
+      .hiw-sec { padding: 60px 16px; }
+      .hiw-step { padding: 28px 20px; }
+      .app-sec, .dash-sec { padding: 48px 16px; }
+      .kpi-row { grid-template-columns: 1fr; }
+      .parallax-divider { height: 30vh; min-height: 180px; }
+      footer { padding: 40px 16px 28px; }
+      .footer-statement { font-size: 1.4rem !important; }
+      .cta-sec { padding: 60px 16px; }
+      .chat-panel { bottom: 72px; right: 8px; left: 8px; }
+    }
+
     /* ── REDUCED MOTION ── */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
@@ -1466,12 +1500,12 @@
     <button class="nl" onclick="go('app')"><span data-i18n="nav-app">Farmer App</span></button>
     <button class="nl" onclick="go('dashboard')"><span data-i18n="nav-dashboard">Dashboard</span></button>
   </div>
-  <div class="lang-toggle">
-    <button class="lang-btn active" id="btnEn" onclick="setLang('en')">EN</button>
-    <button class="lang-btn" id="btnNag" onclick="setLang('nag')">NAG</button>
+  <div class="lang-toggle" role="group" aria-label="Language selector">
+    <button class="lang-btn active" id="btnEn" onclick="setLang('en')" aria-label="Switch to English">EN</button>
+    <button class="lang-btn" id="btnNag" onclick="setLang('nag')" aria-label="Switch to Nagamese">NAG</button>
   </div>
   <button class="nav-cta" onclick="go('app')"><span data-i18n="nav-open">Open App →</span></button>
-  <button class="hamburger" id="hamburger" onclick="toggleMobile()">
+  <button class="hamburger" id="hamburger" onclick="toggleMobile()" aria-label="Toggle navigation menu" aria-expanded="false">
     <div class="hamburger-lines"><span></span><span></span><span></span></div>
   </button>
 </nav>
@@ -1746,7 +1780,7 @@
             </div>
           </div>
           <div class="dropzone" onclick="document.getElementById('lf').click()">
-            <input type="file" id="lf" accept="image/*" onchange="prevImg(event)"/>
+            <input type="file" id="lf" accept="image/*" onchange="prevImg(event)" aria-label="Upload crop leaf image for disease detection"/>
             <div class="dz-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--sprout)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
             <div class="dz-txt" data-i18n="dz-txt">Upload a leaf photo</div>
             <div class="dz-sub" data-i18n="dz-sub">JPG or PNG · Click to browse</div>
@@ -1785,6 +1819,9 @@
           <div style="display:flex;gap:10px;align-items:center;margin-top:16px">
             <button class="btn-export" onclick="window.location.href=API+'/api/export/prices?district='+document.getElementById('pd').value">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export CSV
+            </button>
+            <button class="btn-export" onclick="window.location.href=API+'/api/export/report?district='+document.getElementById('pd').value" style="background:rgba(21,101,192,0.15);border-color:rgba(21,101,192,0.3)">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:4px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Download PDF Report
             </button>
             <p style="font-size:0.72rem;color:rgba(240,235,224,0.45);margin:0">Source: MSP 2023-24 (CACP) / Agmarknet Nagaland APMC. Indicative prices anchored to government data.</p>
           </div>
@@ -2001,7 +2038,7 @@
 </section>
 
 <!-- CHAT WIDGET -->
-<button class="chat-fab" id="chatFab" onclick="toggleChat()">
+<button class="chat-fab" id="chatFab" onclick="toggleChat()" aria-label="Open farming assistant chat">
   <svg id="chatFabIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#050604" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
 </button>
 
@@ -2032,7 +2069,7 @@
 </div>
 
 <!-- BACK TO TOP -->
-<button class="btt" id="btt" onclick="lenis.scrollTo(0,{duration:1.4})">
+<button class="btt" id="btt" onclick="lenis.scrollTo(0,{duration:1.4})" aria-label="Scroll to top">
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
 </button>
 
