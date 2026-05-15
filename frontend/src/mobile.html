@@ -359,10 +359,16 @@ label{display:block;font-size:0.72rem;font-weight:600;text-transform:uppercase;l
   <div class="card" id="market-list">
     <div class="loading-msg">Loading prices...</div>
   </div>
-  <button class="btn-export" id="market-export-btn" onclick="exportPrices()">
-    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-    Export CSV
-  </button>
+  <div style="display:flex;gap:8px;margin-top:12px">
+    <button class="btn-export" id="market-export-btn" onclick="exportPrices()">
+      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export CSV
+    </button>
+    <button class="btn-export" onclick="window.location.href=API+'/api/export/report?district='+encodeURIComponent(document.getElementById('market-district').value||'Kohima')" style="background:rgba(21,101,192,0.18);border-color:rgba(21,101,192,0.3)">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      PDF Report
+    </button>
+  </div>
   <div class="source-note">Source: MSP 2023-24 (CACP) / Agmarknet Nagaland APMC. Indicative prices anchored to government data.</div>
 </div>
 
@@ -486,30 +492,16 @@ label{display:block;font-size:0.72rem;font-weight:600;text-transform:uppercase;l
   </button>
 </nav>
 
+<script src="/static/plotwise-core.js"></script>
 <script>
 // ─── CONFIG ───────────────────────────────────────────────────────
-const API = window.location.origin;
-const DISTRICTS = ['Kohima','Tseminyu','Phek','Mokokchung','Tuensang','Noklak','Shamator','Mon','Dimapur','Niuland','Chumoukedima','Wokha','Zunheboto','Peren','Kiphire','Longleng'];
+// Constants (API, DISTRICTS, WEATHER_ICONS, TC, DS, GREENS) loaded from plotwise-core.js
 
-// District + crop data for home dashboard
-const DS = [
-  {d:"Mon",a:45458,p:131351,c:37},{d:"Phek",a:34318,p:109855,c:37},
-  {d:"Niuland",a:29071,p:105496,c:37},{d:"Wokha",a:33033,p:102234,c:36},
-  {d:"Peren",a:26110,p:93978,c:36},{d:"Chumoukedima",a:27471,p:90441,c:37},
-  {d:"Mokokchung",a:29918,p:88471,c:36},{d:"Zunheboto",a:29880,p:76288,c:35},
-  {d:"Kohima",a:20525,p:66622,c:37},{d:"Kiphire",a:24533,p:60808,c:35},
-  {d:"Tuensang",a:21014,p:61243,c:36},{d:"Noklak",a:15886,p:46266,c:35},
-  {d:"Longleng",a:15760,p:44334,c:34},{d:"Shamator",a:14241,p:37915,c:34},
-  {d:"Dimapur",a:10520,p:37325,c:36},{d:"Tseminyu",a:9849,p:26430,c:34}
-];
 const CS = [
   {c:"WTRC Paddy",p:367481},{c:"Jhum Paddy",p:179085},{c:"Sugarcane",p:115115},
   {c:"Maize",p:88985},{c:"Colocasia",p:64949},{c:"Tapioca",p:60852},
   {c:"Potato",p:60480},{c:"Ginger",p:52076}
 ];
-const GREENS = ['#5a9e3a','#3a6828','#8fce52','#2a4e1e','#78b840','#2e5522','#a8d866','#1a3212'];
-const WEATHER_ICONS = {0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌧️',55:'🌧️',61:'🌦️',63:'🌧️',65:'🌧️',71:'🌨️',73:'🌨️',75:'❄️',80:'🌦️',81:'🌧️',82:'⛈️',95:'⛈️',96:'⛈️',99:'⛈️'};
-const TC = {"sowing now":"tag-sow","harvest time":"tag-hvst","growing":"tag-grow","off season":"tag-off","upcoming":"tag-off"};
 
 // ─── POPULATE DISTRICT DROPDOWNS ─────────────────────────────────
 function populateDistricts(){
@@ -578,9 +570,7 @@ function initHome(){
 async function loadHomeWeather(){
   const el = document.getElementById('home-weather');
   try{
-    const res = await fetch(`${API}/api/weather?district=Kohima`);
-    if(!res.ok) throw new Error();
-    const d = await res.json();
+    const d = await apiFetch(`${API}/api/weather?district=Kohima`, {}, {timeout:15000, retries:1, cacheTTL:300000, persist:true});
     const c = d.current;
     const icon = WEATHER_ICONS[c.code]||'🌡️';
     el.innerHTML = `
@@ -606,9 +596,7 @@ async function loadHomeWeather(){
 async function loadHomePrices(){
   const el = document.getElementById('home-ticker');
   try{
-    const res = await fetch(`${API}/prices`);
-    if(!res.ok) throw new Error();
-    const data = await res.json();
+    const data = await apiFetch(`${API}/prices`, {}, {timeout:15000, retries:1, cacheTTL:60000, persist:true});
     el.innerHTML = data.prices.map(p=>`
       <div class="tick-chip">
         <div class="tick-crop">${p.crop}</div>
@@ -650,9 +638,7 @@ async function runDetect(){
     fd.append('file',fileInput.files[0]);
     fd.append('crop',crop);
     fd.append('district',district);
-    const res = await fetch(`${API}/disease/detect`,{method:'POST',body:fd});
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const r = await res.json();
+    const r = await apiFetch(`${API}/disease/detect`, {method:'POST',body:fd}, {timeout:30000, retries:0});
     const isUncertain = r.severity==='Unknown'||r.confidence===0;
     const isLow = r.source && r.source.includes('low confidence');
     const sc = isUncertain?'':r.severity==='High'?'c-high':'c-med';
@@ -702,9 +688,7 @@ async function loadPrices(){
   try{
     let url = `${API}/prices?district=${encodeURIComponent(district)}`;
     if(crop) url += `&crop=${encodeURIComponent(crop)}`;
-    const res = await fetch(url);
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
+    const data = await apiFetch(url, {}, {timeout:15000, retries:1, cacheTTL:60000, persist:true});
     if(!data.prices.length){ el.innerHTML=`<div class="loading-msg">No prices found.</div>`; return; }
     el.innerHTML = data.prices.map(p=>`
       <div class="price-row">
@@ -735,9 +719,7 @@ async function loadCalendar(){
   el.innerHTML = `<div class="loading-msg">Loading calendar...</div>`;
 
   try{
-    const res = await fetch(`${API}/calendar?district=${encodeURIComponent(district)}`);
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
+    const data = await apiFetch(`${API}/calendar?district=${encodeURIComponent(district)}`, {}, {timeout:15000, retries:1, cacheTTL:300000, persist:true});
     if(!data.calendar.length){ el.innerHTML=`<div class="loading-msg">No crops found for this district.</div>`; return; }
     el.innerHTML = data.calendar.map(c=>`
       <div class="cal-card">
@@ -760,13 +742,11 @@ async function loadSchemes(){
   el.innerHTML = `<div class="loading-msg">Finding schemes...</div>`;
 
   try{
-    const res = await fetch(`${API}/schemes`,{
+    const data = await apiFetch(`${API}/schemes`, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({crop,district,land_acres:1.0})
-    });
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
+    }, {timeout:15000, retries:1, cacheTTL:300000});
     el.innerHTML = data.schemes.map(s=>`
       <div class="sch-card">
         <div class="sch-name">${s.name}</div>
@@ -787,9 +767,7 @@ async function loadWeather(){
   el.innerHTML = `<div class="loading-msg">Loading weather...</div>`;
 
   try{
-    const res = await fetch(`${API}/api/weather?district=${encodeURIComponent(district)}`);
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const d = await res.json();
+    const d = await apiFetch(`${API}/api/weather?district=${encodeURIComponent(district)}`, {}, {timeout:15000, retries:1, cacheTTL:300000, persist:true});
     const c = d.current;
     const icon = WEATHER_ICONS[c.code]||'🌡️';
     const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -828,58 +806,11 @@ async function loadWeather(){
   }
 }
 
-// ─── CHAT ────────────────────────────────────────────────────────
-function sendChat(text){
-  const input = document.getElementById('chat-input');
-  const message = text || input.value.trim();
-  if(!message) return;
-  input.value = '';
-  addChatMsg(message,'user');
+// ─── CHAT (uses sendChat, addChatMsg, scrollChatBottom, updateChips from plotwise-core.js)
 
-  const typing = document.getElementById('chat-typing');
-  typing.classList.add('show');
-  scrollChatBottom();
-
-  fetch(`${API}/api/chat`,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({message,district:'Kohima',lang:currentLang})
-  })
-  .then(r=>r.json())
-  .then(data=>{
-    typing.classList.remove('show');
-    const formatted = data.reply.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
-    addChatMsg(formatted,'bot');
-    if(data.suggestions && data.suggestions.length) updateChips(data.suggestions);
-  })
-  .catch(()=>{
-    typing.classList.remove('show');
-    addChatMsg('Sorry, could not connect. Check your internet connection.','bot');
-  });
-}
-
-function addChatMsg(html,type){
-  const container = document.getElementById('chat-messages');
-  const msg = document.createElement('div');
-  msg.className = 'chat-msg '+type;
-  msg.innerHTML = html;
-  container.appendChild(msg);
-  scrollChatBottom();
-}
-
-function scrollChatBottom(){
-  const c = document.getElementById('chat-messages');
-  requestAnimationFrame(()=>{c.scrollTop=c.scrollHeight});
-}
-
-function updateChips(suggestions){
-  document.getElementById('chat-chips').innerHTML = suggestions.map(s=>
-    `<button class="chat-chip" onclick="sendChat('${s.replace(/'/g,"\\'")}')">${s}</button>`
-  ).join('');
-}
-
-// ─── i18n ────────────────────────────────────────────────────────
-const i18n = {
+// ─── i18n (uses setLang, currentLang from plotwise-core.js) ─────
+// Page-specific translations — merged by plotwiseInit()
+const _mobileI18n = {
   en: {
     'm-greeting':'Welcome to Plotwise','m-sub':'Smart farming intelligence for Nagaland',
     'm-districts':'Districts','m-crops':'Crops Tracked','m-production':'Total Production (T)','m-area':'Total Area (Ha)',
@@ -916,29 +847,16 @@ const i18n = {
   }
 };
 
-let currentLang = localStorage.getItem('plotwise-lang')||'en';
-
-function setLang(lang){
-  currentLang = lang;
-  localStorage.setItem('plotwise-lang',lang);
-  document.getElementById('btnEn').classList.toggle('active',lang==='en');
-  document.getElementById('btnNag').classList.toggle('active',lang==='nag');
-  document.querySelectorAll('[data-i18n]').forEach(el=>{
-    const key = el.getAttribute('data-i18n');
-    if(i18n[lang] && i18n[lang][key]) el.innerHTML = i18n[lang][key];
-  });
-  document.documentElement.lang = lang==='nag'?'nag':'en';
-}
-
-// ─── OFFLINE DETECTION ───────────────────────────────────────────
-function updateOnlineStatus(){
-  document.getElementById('offline-bar').classList.toggle('show', !navigator.onLine);
-}
-window.addEventListener('online', updateOnlineStatus);
-window.addEventListener('offline', updateOnlineStatus);
-
 // ─── INIT ────────────────────────────────────────────────────────
 window.onload = ()=>{
+  // Configure shared core for mobile layout
+  plotwiseInit({
+    chatElements: { input:'chat-input', messages:'chat-messages', typing:'chat-typing', chips:'chat-chips' },
+    getDistrict: () => document.getElementById('market-district')?.value || 'Kohima',
+    i18n: _mobileI18n,
+    offlineBarId: 'offline-bar',
+  });
+
   populateDistricts();
   initHome();
   updateOnlineStatus();

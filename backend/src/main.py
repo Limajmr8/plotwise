@@ -26,10 +26,16 @@ import os
 import sqlite3
 import io
 import logging
+import time
 import urllib.request
 import urllib.error
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+from dotenv import load_dotenv
+load_dotenv()
+
+LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
+logging.basicConfig(level=getattr(logging, LOG_LEVEL, logging.INFO),
+                    format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("plotwise")
 
 app = FastAPI(
@@ -38,18 +44,39 @@ app = FastAPI(
     version="1.1.0"
 )
 
+CORS_ORIGINS = [
+    o.strip() for o in
+    os.environ.get(
+        "CORS_ORIGINS",
+        "https://plotwise-production.up.railway.app,capacitor://localhost,"
+        "http://localhost,http://localhost:8000,http://127.0.0.1:8000"
+    ).split(",")
+    if o.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://plotwise-production.up.railway.app",
-        "capacitor://localhost",
-        "http://localhost",
-        "http://localhost:8000",
-        "http://127.0.0.1:8000",
-    ],
+    allow_origins=CORS_ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+from starlette.middleware.base import BaseHTTPMiddleware
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Permissions-Policy"] = "camera=(self), microphone=()"
+        # Only add HSTS in production (when served over HTTPS)
+        if request.url.scheme == "https" or request.headers.get("x-forwarded-proto") == "https":
+            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        return response
+
+app.add_middleware(SecurityHeadersMiddleware)
 
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
@@ -85,9 +112,9 @@ BASE_DIR   = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__f
 DATA_DIR   = os.path.join(BASE_DIR, "data", "sample")
 JSON_FILE  = os.path.join(DATA_DIR, "nagaland_agriculture_2023_24.json")
 CSV_FILE   = os.path.join(DATA_DIR, "nagaland_crop_data_2023_24.csv")
-MODEL_PATH   = os.path.join(BASE_DIR, "ml", "saved_models", "disease_model.h5")
+MODEL_PATH   = os.environ.get("MODEL_PATH", os.path.join(BASE_DIR, "ml", "saved_models", "disease_model.h5"))
 CLASSES_PATH = os.path.join(BASE_DIR, "ml", "saved_models", "class_indices.json")
-DB_PATH    = os.path.join(BASE_DIR, "data", "plotwise.db")
+DB_PATH    = os.environ.get("PLOTWISE_DB_PATH", os.path.join(BASE_DIR, "data", "plotwise.db"))
 
 # ── Load real agriculture data at startup ──────────────────────────────────────
 
@@ -144,6 +171,18 @@ def _init_db():
     conn.close()
 
 _init_db()
+
+# Log DB state at startup
+try:
+    _startup_conn = sqlite3.connect(DB_PATH)
+    _row_count = _startup_conn.execute("SELECT COUNT(*) FROM disease_reports").fetchone()[0]
+    _startup_conn.close()
+    if _row_count > 0:
+        logger.info(f"Database loaded: {DB_PATH} ({_row_count} existing disease reports)")
+    else:
+        logger.info(f"Fresh database created at {DB_PATH}")
+except Exception as _e:
+    logger.warning(f"Could not check DB state: {_e}")
 
 def _db():
     return sqlite3.connect(DB_PATH)
@@ -585,9 +624,8 @@ async def detect_disease(
     }
 
 
-@app.get("/prices")
-def get_market_prices(crop: Optional[str] = None, district: Optional[str] = None):
-    """Market prices anchored to real MSP and Agmarknet data for Nagaland 2023-24."""
+def _get_prices(crop: Optional[str] = None, district: Optional[str] = None) -> dict:
+    """Internal price calculation — used by endpoint and other functions (PDF, CSV, chat)."""
     crops_to_show = [crop] if crop else list(PRICE_ANCHORS.keys())
     prices = []
 
@@ -620,8 +658,16 @@ def get_market_prices(crop: Optional[str] = None, district: Optional[str] = None
     }
 
 
+@app.get("/prices")
+@limiter.limit("30/minute")
+def get_market_prices(request: Request, crop: Optional[str] = None, district: Optional[str] = None):
+    """Market prices anchored to real MSP and Agmarknet data for Nagaland 2023-24."""
+    return _get_prices(crop, district)
+
+
 @app.get("/calendar")
-def planting_calendar(district: str = "Kohima", crop: Optional[str] = None):
+@limiter.limit("30/minute")
+def planting_calendar(request: Request, district: str = "Kohima", crop: Optional[str] = None):
     """District-specific planting and harvest windows with real yield data."""
     crops_to_show  = [crop] if crop else list(PLANTING_CALENDAR.keys())
     result         = []
@@ -667,7 +713,8 @@ def planting_calendar(district: str = "Kohima", crop: Optional[str] = None):
 
 
 @app.post("/schemes")
-def find_schemes(query: SchemeQuery):
+@limiter.limit("30/minute")
+def find_schemes(request: Request, query: SchemeQuery):
     """Find government schemes a farmer qualifies for."""
     matched = [s for s in SCHEMES if not s["crops"] or query.crop in s["crops"]]
     return {
@@ -680,7 +727,8 @@ def find_schemes(query: SchemeQuery):
 
 
 @app.get("/dashboard/yield")
-def yield_dashboard(district: Optional[str] = None, crop: Optional[str] = None):
+@limiter.limit("30/minute")
+def yield_dashboard(request: Request, district: Optional[str] = None, crop: Optional[str] = None):
     """Real yield analytics from Nagaland agriculture data 2023-24."""
     records = CROP_RECORDS
     if district:
@@ -717,7 +765,8 @@ def yield_dashboard(district: Optional[str] = None, crop: Optional[str] = None):
 
 
 @app.get("/dashboard/disease-heatmap")
-def disease_heatmap(district: Optional[str] = None, crop: Optional[str] = None):
+@limiter.limit("30/minute")
+def disease_heatmap(request: Request, district: Optional[str] = None, crop: Optional[str] = None):
     """
     Aggregated disease report data from the SQLite store.
     Drives the heatmap on the department dashboard.
@@ -1057,9 +1106,7 @@ def chat(request: Request, msg: ChatMessage):
                 f"&current=temperature_2m,relative_humidity_2m,weather_code,precipitation"
                 f"&timezone=Asia/Kolkata"
             )
-            req = urllib.request.Request(w_url, headers={"User-Agent": "Plotwise/1.1"})
-            with urllib.request.urlopen(req, timeout=8) as resp:
-                w_data = json.loads(resp.read().decode())
+            w_data = _fetch_weather_cached(district, w_url)
             cur = w_data.get("current", {})
             WMO = {0:"Clear sky",1:"Mainly clear",2:"Partly cloudy",3:"Overcast",
                    45:"Foggy",51:"Light drizzle",53:"Moderate drizzle",
@@ -1117,9 +1164,10 @@ def chat(request: Request, msg: ChatMessage):
 # ── Export endpoints ──────────────────────────────────────────────────────────
 
 @app.get("/api/export/prices")
-def export_prices(district: str = "Kohima"):
+@limiter.limit("10/minute")
+def export_prices(request: Request, district: str = "Kohima"):
     """Export market prices as CSV download."""
-    price_data = get_market_prices(district=district)
+    price_data = _get_prices(district=district)
     output = io.StringIO()
     writer = csv.writer(output)
     writer.writerow(["Crop", "Price (Rs/qtl)", "MSP (Rs/qtl)", "Trend", "Tip", "Market", "Source"])
@@ -1138,7 +1186,8 @@ def export_prices(district: str = "Kohima"):
 
 
 @app.get("/api/export/yield")
-def export_yield(district: str = None):
+@limiter.limit("10/minute")
+def export_yield(request: Request, district: str = None):
     """Export yield analytics as CSV download."""
     output = io.StringIO()
     writer = csv.writer(output)
@@ -1160,7 +1209,132 @@ def export_yield(district: str = None):
     )
 
 
+@app.get("/api/export/report")
+@limiter.limit("10/minute")
+def export_pdf_report(request: Request, district: str = "Kohima"):
+    """Generate a PDF district report with yield data, prices, and top crops."""
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib import colors
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import mm
+
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(buf, pagesize=A4, topMargin=20*mm, bottomMargin=15*mm)
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle("Title2", parent=styles["Title"], fontSize=18, spaceAfter=4)
+    sub_style = ParagraphStyle("Sub", parent=styles["Normal"], fontSize=10, textColor=colors.grey)
+    h2_style = ParagraphStyle("H2", parent=styles["Heading2"], fontSize=13, spaceBefore=14, spaceAfter=6)
+    elements = []
+
+    elements.append(Paragraph("Plotwise — District Agriculture Report", title_style))
+    elements.append(Paragraph(
+        f"{district} District | Data Period: 2023-24 | Generated: {date.today().strftime('%d %b %Y')}",
+        sub_style,
+    ))
+    elements.append(Spacer(1, 6*mm))
+
+    records = [r for r in CROP_RECORDS if r["district"] == district]
+    total_area = sum(r["area_ha"] for r in records)
+    total_prod = sum(r["production_tonnes"] for r in records)
+    avg_yield = round(total_prod * 1000 / total_area, 1) if total_area > 0 else 0
+
+    elements.append(Paragraph("Summary", h2_style))
+    summary_data = [
+        ["Total Area (ha)", f"{total_area:,.1f}"],
+        ["Total Production (tonnes)", f"{total_prod:,.1f}"],
+        ["Average Yield (kg/ha)", f"{avg_yield:,.1f}"],
+        ["Crops Grown", str(len(set(r["crop"] for r in records)))],
+    ]
+    st = Table(summary_data, colWidths=[55*mm, 45*mm])
+    st.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#e8f5e9")),
+        ("FONTSIZE", (0, 0), (-1, -1), 10),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.lightgrey),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6),
+    ]))
+    elements.append(st)
+    elements.append(Spacer(1, 4*mm))
+
+    elements.append(Paragraph("Top Crops by Production", h2_style))
+    crop_totals = {}
+    for r in records:
+        crop_totals[r["crop"]] = crop_totals.get(r["crop"], 0) + r["production_tonnes"]
+    top_crops = sorted(crop_totals.items(), key=lambda x: x[1], reverse=True)[:12]
+    crop_rows = [["Crop", "Production (t)", "Area (ha)", "Yield (kg/ha)"]]
+    for c, prod in top_crops:
+        c_recs = [r for r in records if r["crop"] == c]
+        area = sum(r["area_ha"] for r in c_recs)
+        yld = round(prod * 1000 / area, 1) if area > 0 else 0
+        crop_rows.append([c, f"{prod:,.1f}", f"{area:,.1f}", f"{yld:,.1f}"])
+    ct = Table(crop_rows, colWidths=[45*mm, 35*mm, 30*mm, 35*mm])
+    ct.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2e7d32")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONTSIZE", (0, 0), (-1, -1), 9),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.lightgrey),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f5f5f5")]),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6),
+    ]))
+    elements.append(ct)
+    elements.append(Spacer(1, 4*mm))
+
+    elements.append(Paragraph("Market Prices (Today)", h2_style))
+    price_data = _get_prices(district=district)
+    price_rows = [["Crop", "Price (Rs/qtl)", "MSP (Rs/qtl)", "Trend"]]
+    for p in price_data.get("prices", [])[:15]:
+        price_rows.append([p["crop"], str(p["price_per_qtl"]), str(p.get("msp", "-")), p.get("trend", "")])
+    pt = Table(price_rows, colWidths=[45*mm, 35*mm, 35*mm, 30*mm])
+    pt.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1565c0")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONTSIZE", (0, 0), (-1, -1), 9),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.lightgrey),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f5f5f5")]),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6),
+    ]))
+    elements.append(pt)
+    elements.append(Spacer(1, 6*mm))
+
+    elements.append(Paragraph(
+        "Source: Director of Agriculture, Nagaland (2023-24) | MSP: CACP 2023-24 | Prices: Agmarknet APMC",
+        ParagraphStyle("Footer", parent=styles["Normal"], fontSize=8, textColor=colors.grey),
+    ))
+
+    doc.build(elements)
+    buf.seek(0)
+    fname = f"plotwise_report_{district}_{date.today().isoformat()}.pdf"
+    return StreamingResponse(
+        buf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={fname}"},
+    )
+
+
 # ── Weather (Open-Meteo — free, no API key) ──────────────────────────────────
+
+_weather_cache = {}  # key: (district, url_hash) → value: (timestamp, data)
+WEATHER_CACHE_TTL = int(os.environ.get("WEATHER_CACHE_TTL", 900))  # 15 minutes
+
+
+def _fetch_weather_cached(district: str, url: str) -> dict:
+    """Fetch weather data with in-memory caching to avoid hammering Open-Meteo."""
+    cache_key = f"{district}:{hashlib.md5(url.encode()).hexdigest()[:8]}"
+    now = time.time()
+
+    cached = _weather_cache.get(cache_key)
+    if cached and (now - cached[0]) < WEATHER_CACHE_TTL:
+        logger.debug(f"Weather cache hit for {district}")
+        return cached[1]
+
+    req = urllib.request.Request(url, headers={"User-Agent": "Plotwise/1.1"})
+    with urllib.request.urlopen(req, timeout=10) as resp:
+        data = json.loads(resp.read().decode())
+
+    _weather_cache[cache_key] = (now, data)
+    logger.debug(f"Weather cache miss for {district} — fetched fresh")
+    return data
+
 
 DISTRICT_COORDS = {
     "Kohima":      (25.67, 94.12),
@@ -1207,9 +1381,7 @@ def get_weather(request: Request, district: str = "Kohima"):
     )
 
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "Plotwise/1.1"})
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            data = json.loads(resp.read().decode())
+        data = _fetch_weather_cached(district, url)
     except (urllib.error.URLError, Exception) as e:
         logger.error(f"Weather API failed for {district}: {e}")
         raise HTTPException(503, "Weather service is temporarily unavailable. Please try again in a few minutes.")
