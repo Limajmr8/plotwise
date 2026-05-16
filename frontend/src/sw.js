@@ -1,6 +1,7 @@
-const CACHE_NAME = 'plotwise-v2';
+const CACHE_NAME = 'plotwise-v3';
 const STATIC_ASSETS = [
   '/',
+  '/static/plotwise-core.js',
   '/static/manifest.json',
   '/static/icon-192.png',
   '/static/icon-512.png',

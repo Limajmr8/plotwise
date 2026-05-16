@@ -1,9 +1,18 @@
+# Git & IDE
 .git
 .gitignore
+.github/
 .claude/
+.vscode/
+.idea/
+
+# Python bytecode
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
+
+# Raw/training data (not needed at runtime)
 data/raw/
 data/train/
 data/test/
@@ -11,10 +20,30 @@ ml/results/
 ml/saved_models/disease_model_fixed.h5
 *.ipynb
 .ipynb_checkpoints/
-.vscode/
-.idea/
+
+# Android build (not relevant to server)
+android/
+node_modules/
+capacitor.config.ts
+package*.json
+tsconfig.json
+
+# Documentation (not served)
 README.md
 CLAUDE.md
+docs/
+CHANGELOG.md
 runtime.txt
+
+# Database files (volume-mounted at runtime)
 *.db
 *.sqlite
+
+# Tests (not needed in production image)
+tests/
+scripts/
+
+# Misc
+*.log
+.env
+.env.local

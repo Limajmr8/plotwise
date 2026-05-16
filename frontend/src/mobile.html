@@ -99,6 +99,19 @@ label{display:block;font-size:0.72rem;font-weight:600;text-transform:uppercase;l
 .tick-trend{font-size:0.68rem;margin-top:2px}
 .tick-trend.up{color:#4ade80}.tick-trend.dn{color:#f87171}.tick-trend.fl{color:rgba(242,239,230,0.25)}
 
+/* ─── PROFILE CARD ─────────────────────────────────────────────── */
+.profile-card{background:rgba(58,104,40,0.1);border:1px solid rgba(106,191,59,0.12);border-radius:14px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px}
+.profile-avatar{width:36px;height:36px;border-radius:50%;background:var(--leaf);display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-weight:800;font-size:0.9rem;color:var(--cream);flex-shrink:0}
+.profile-info{flex:1;min-width:0}
+.profile-name{font-family:var(--font-head);font-size:0.84rem;font-weight:700;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.profile-role{font-size:0.7rem;color:rgba(242,239,230,0.4);margin-top:1px}
+.profile-edit{font-size:0.7rem;color:var(--sprout);padding:6px 12px;border:1px solid rgba(106,191,59,0.2);border-radius:8px;font-weight:600;font-family:var(--font-head)}
+.profile-modal{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);padding:20px}
+.profile-modal.show{display:flex}
+.profile-form{background:var(--forest);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:24px 20px;width:100%;max-width:340px}
+.profile-form h3{font-family:var(--font-head);font-size:1rem;font-weight:700;margin-bottom:16px;color:var(--cream)}
+.profile-form .field{margin-bottom:14px}
+
 /* ─── DETECT SCREEN ─────────────────────────────────────────────── */
 .screen-title{font-family:var(--font-head);font-size:1.25rem;font-weight:800;letter-spacing:-0.5px;margin-bottom:16px}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
@@ -259,8 +272,39 @@ label{display:block;font-size:0.72rem;font-weight:600;text-transform:uppercase;l
 
 <!-- ═══ SCREENS ════════════════════════════════════════════════════ -->
 
+<!-- PROFILE MODAL -->
+<div class="profile-modal" id="profile-modal">
+  <div class="profile-form">
+    <h3>Your Profile</h3>
+    <div class="field"><label>Name</label>
+      <input type="text" id="prof-name" placeholder="Enter your name" maxlength="60"/>
+    </div>
+    <div class="field"><label>Role</label>
+      <select id="prof-role">
+        <option>Farmer</option><option>Extension Officer</option><option>Block Officer</option>
+        <option>District Officer</option><option>Researcher</option><option>Demo User</option>
+      </select>
+    </div>
+    <div class="field"><label>District</label>
+      <select id="prof-district"></select>
+    </div>
+    <button class="btn-primary" onclick="saveProfile()" style="margin-top:6px">Save Profile</button>
+    <button style="width:100%;text-align:center;padding:10px;font-size:0.78rem;color:rgba(242,239,230,0.4)" onclick="closeProfileModal()">Cancel</button>
+  </div>
+</div>
+
 <!-- HOME -->
 <div class="screen active" id="screen-home">
+  <!-- Profile card -->
+  <div class="profile-card" id="profile-card" onclick="openProfileModal()">
+    <div class="profile-avatar" id="profile-avatar">?</div>
+    <div class="profile-info">
+      <div class="profile-name" id="profile-name">Set up your profile</div>
+      <div class="profile-role" id="profile-role-display">Tap to enter your name</div>
+    </div>
+    <button class="profile-edit">Edit</button>
+  </div>
+
   <div class="home-greeting" data-i18n="m-greeting">Welcome to Plotwise</div>
   <div class="home-sub" data-i18n="m-sub">Smart farming intelligence for Nagaland</div>
 
@@ -546,6 +590,65 @@ function openSubTab(name){
 function openAbout(){ document.getElementById('about-overlay').classList.add('open'); }
 function closeAbout(){ document.getElementById('about-overlay').classList.remove('open'); }
 
+// ─── DEMO PROFILE ───────────────────────────────────────────────
+function getProfile(){
+  try{
+    const s = localStorage.getItem('plotwise-profile');
+    return s ? JSON.parse(s) : null;
+  }catch(e){ return null; }
+}
+
+function renderProfileCard(){
+  const p = getProfile();
+  const card = document.getElementById('profile-card');
+  const avatar = document.getElementById('profile-avatar');
+  const name = document.getElementById('profile-name');
+  const role = document.getElementById('profile-role-display');
+  if(p && p.name){
+    avatar.textContent = p.name.charAt(0).toUpperCase();
+    name.textContent = p.name;
+    role.textContent = `${p.role} · ${p.district}`;
+  } else {
+    avatar.textContent = '?';
+    name.textContent = 'Set up your profile';
+    role.textContent = 'Tap to enter your name';
+  }
+}
+
+function openProfileModal(){
+  const modal = document.getElementById('profile-modal');
+  const p = getProfile();
+  // Populate profile district dropdown
+  const profDistSel = document.getElementById('prof-district');
+  profDistSel.innerHTML = DISTRICTS.map(d=>`<option>${d}</option>`).join('');
+  if(p){
+    document.getElementById('prof-name').value = p.name || '';
+    document.getElementById('prof-role').value = p.role || 'Farmer';
+    profDistSel.value = p.district || 'Kohima';
+  }
+  modal.classList.add('show');
+}
+
+function closeProfileModal(){
+  document.getElementById('profile-modal').classList.remove('show');
+}
+
+function saveProfile(){
+  const name = document.getElementById('prof-name').value.trim();
+  if(!name || name.length < 2){
+    alert('Please enter your name (at least 2 characters).');
+    return;
+  }
+  const profile = {
+    name: name,
+    role: document.getElementById('prof-role').value,
+    district: document.getElementById('prof-district').value,
+  };
+  localStorage.setItem('plotwise-profile', JSON.stringify(profile));
+  closeProfileModal();
+  renderProfileCard();
+}
+
 // ─── HOME INIT ───────────────────────────────────────────────────
 function initHome(){
   const totalP = DS.reduce((s,d)=>s+d.p,0);
@@ -589,7 +692,7 @@ async function loadHomeWeather(){
       ${d.advisories.length?`<div style="margin-top:10px;font-size:0.78rem;color:rgba(242,239,230,0.4)">🌾 ${d.advisories[0]}</div>`:''}
     `;
   }catch(e){
-    el.innerHTML = `<div class="loading-msg">Weather unavailable</div>`;
+    el.innerHTML = `<div style="font-size:0.78rem;color:rgba(242,239,230,0.3);padding:12px">Weather unavailable</div>`;
   }
 }
 
@@ -605,7 +708,7 @@ async function loadHomePrices(){
       </div>
     `).join('');
   }catch(e){
-    el.innerHTML = `<div class="loading-msg">Prices unavailable</div>`;
+    el.innerHTML = `<div style="font-size:0.78rem;color:rgba(242,239,230,0.3);padding:12px;width:100%">Prices unavailable</div>`;
   }
 }
 
@@ -638,6 +741,12 @@ async function runDetect(){
     fd.append('file',fileInput.files[0]);
     fd.append('crop',crop);
     fd.append('district',district);
+    // Attach reporter info from demo profile
+    const profile = getProfile();
+    if(profile && profile.name){
+      fd.append('reporter', profile.name);
+      fd.append('reporter_role', profile.role || '');
+    }
     const r = await apiFetch(`${API}/disease/detect`, {method:'POST',body:fd}, {timeout:30000, retries:0});
     const isUncertain = r.severity==='Unknown'||r.confidence===0;
     const isLow = r.source && r.source.includes('low confidence');
@@ -683,13 +792,13 @@ async function loadPrices(){
   const district = document.getElementById('market-district').value;
   const crop = document.getElementById('market-crop').value;
   const el = document.getElementById('market-list');
-  el.innerHTML = `<div class="loading-msg">Loading prices...</div>`;
+  el.innerHTML = pwLoading('Loading prices…');
 
   try{
     let url = `${API}/prices?district=${encodeURIComponent(district)}`;
     if(crop) url += `&crop=${encodeURIComponent(crop)}`;
     const data = await apiFetch(url, {}, {timeout:15000, retries:1, cacheTTL:60000, persist:true});
-    if(!data.prices.length){ el.innerHTML=`<div class="loading-msg">No prices found.</div>`; return; }
+    if(!data.prices.length){ el.innerHTML=pwError('No prices found for this selection.'); return; }
     el.innerHTML = data.prices.map(p=>`
       <div class="price-row">
         <div>
@@ -703,7 +812,7 @@ async function loadPrices(){
       </div>
     `).join('');
   }catch(err){
-    el.innerHTML = `<div class="loading-msg" style="color:#f87171">Connection error — ${err.message}</div>`;
+    el.innerHTML = pwError('Could not load prices. Please try again.', 'loadPrices()');
   }
 }
 
@@ -716,11 +825,11 @@ function exportPrices(){
 async function loadCalendar(){
   const district = document.getElementById('cal-district').value;
   const el = document.getElementById('cal-list');
-  el.innerHTML = `<div class="loading-msg">Loading calendar...</div>`;
+  el.innerHTML = pwLoading('Loading calendar…');
 
   try{
     const data = await apiFetch(`${API}/calendar?district=${encodeURIComponent(district)}`, {}, {timeout:15000, retries:1, cacheTTL:300000, persist:true});
-    if(!data.calendar.length){ el.innerHTML=`<div class="loading-msg">No crops found for this district.</div>`; return; }
+    if(!data.calendar.length){ el.innerHTML=pwError('No crops found for this district.'); return; }
     el.innerHTML = data.calendar.map(c=>`
       <div class="cal-card">
         <div class="cal-crop">${c.crop}</div>
@@ -730,7 +839,7 @@ async function loadCalendar(){
       </div>
     `).join('');
   }catch(err){
-    el.innerHTML = `<div class="loading-msg" style="color:#f87171">Connection error — ${err.message}</div>`;
+    el.innerHTML = pwError('Could not load calendar. Please try again.', 'loadCalendar()');
   }
 }
 
@@ -739,7 +848,7 @@ async function loadSchemes(){
   const crop = document.getElementById('scheme-crop').value;
   const district = document.getElementById('scheme-district').value;
   const el = document.getElementById('scheme-list');
-  el.innerHTML = `<div class="loading-msg">Finding schemes...</div>`;
+  el.innerHTML = pwLoading('Finding schemes…');
 
   try{
     const data = await apiFetch(`${API}/schemes`, {
@@ -756,7 +865,7 @@ async function loadSchemes(){
       </div>
     `).join('') + `<div style="font-size:0.72rem;color:rgba(242,239,230,0.2);margin-top:10px">${data.tip}</div>`;
   }catch(err){
-    el.innerHTML = `<div class="loading-msg" style="color:#f87171">Connection error — ${err.message}</div>`;
+    el.innerHTML = pwError('Could not load schemes. Please try again.', 'loadSchemes()');
   }
 }
 
@@ -764,7 +873,7 @@ async function loadSchemes(){
 async function loadWeather(){
   const district = document.getElementById('weather-district').value;
   const el = document.getElementById('weather-content');
-  el.innerHTML = `<div class="loading-msg">Loading weather...</div>`;
+  el.innerHTML = pwLoading('Loading weather…');
 
   try{
     const d = await apiFetch(`${API}/api/weather?district=${encodeURIComponent(district)}`, {}, {timeout:15000, retries:1, cacheTTL:300000, persist:true});
@@ -802,7 +911,7 @@ async function loadWeather(){
       <div class="source-note" style="margin-top:12px">Source: Open-Meteo.com — live data, updates every 15 min</div>
     `;
   }catch(err){
-    el.innerHTML = `<div class="loading-msg" style="color:#f87171">Weather unavailable — ${err.message}</div>`;
+    el.innerHTML = pwError('Weather unavailable. Please try again.', 'loadWeather()');
   }
 }
 
@@ -858,6 +967,7 @@ window.onload = ()=>{
   });
 
   populateDistricts();
+  renderProfileCard();
   initHome();
   updateOnlineStatus();
   if(currentLang!=='en') setLang(currentLang);

@@ -112,7 +112,7 @@ const DS = [
   {d:"Dimapur",a:10520,p:37325,c:36},{d:"Tseminyu",a:9849,p:26430,c:34}
 ];
 
-const GREENS = ['#5a9e3a','#3a6828','#8fce52','#2a4e1e','#78b840','#2e5522','#a8d866','#1a3212'];
+const GREENS = ['#5a9e3a','#3a6828','#8fce52','#2a4e1e','#78b840','#2e5522','#a8d866','#1a3212','#4b8a30','#6ab445'];
 
 
 /* ── Chat Functions ───────────────────────────────────────────────── */
@@ -211,6 +211,39 @@ function setLang(lang) {
     }
   });
   document.documentElement.lang = lang === 'nag' ? 'nag' : 'en';
+}
+
+
+/* ── Loading & Error UI Helpers ───────────────────────────────────── */
+
+/**
+ * Generate a standardized loading spinner HTML.
+ * @param {string} msg - Loading message to display
+ * @returns {string} HTML string
+ */
+function pwLoading(msg = 'Loading…') {
+  return `<div style="padding:24px;text-align:center">
+    <div style="display:inline-block;width:24px;height:24px;border:2.5px solid rgba(106,191,59,0.15);border-top-color:var(--sprout,#6abf3b);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:8px"></div>
+    <div style="color:rgba(240,235,224,0.45);font-size:0.82rem">${msg}</div>
+  </div>`;
+}
+
+/**
+ * Generate a standardized error message with optional retry button.
+ * @param {string} msg - User-friendly error message
+ * @param {string} [retryFn] - Function name string for retry button (e.g. "loadPrices()")
+ * @returns {string} HTML string
+ */
+function pwError(msg, retryFn) {
+  const offline = !navigator.onLine;
+  const displayMsg = offline ? 'You appear to be offline. Check your connection.' : msg;
+  const retryBtn = retryFn
+    ? `<button onclick="${retryFn}" style="margin-top:10px;padding:8px 18px;background:rgba(106,191,59,0.12);border:1px solid rgba(106,191,59,0.2);border-radius:8px;color:var(--sprout,#6abf3b);font-size:0.78rem;font-weight:600;cursor:pointer">Retry</button>`
+    : '';
+  return `<div style="padding:20px;text-align:center">
+    <div style="color:#f87171;font-size:0.84rem;margin-bottom:4px">${displayMsg}</div>
+    ${retryBtn}
+  </div>`;
 }
 
 

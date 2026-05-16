@@ -2033,6 +2033,7 @@
           Run disease detection to populate this heatmap.
         </div>
       </div>
+      <div id="hm-recent" style="margin-top:20px"></div>
     </div>
   </div>
 </section>
@@ -2115,6 +2116,7 @@
   </div>
 </footer>
 
+<script src="/static/plotwise-core.js"></script>
 <script>
 // ─── PRELOADER ────────────────────────────────────────────────────────────────
 (function preloader() {
@@ -2150,28 +2152,9 @@ function closeMobile() {
   document.body.style.overflow = '';
 }
 
-// ─── CONFIG ───────────────────────────────────────────────────────────────────
-const API = window.location.origin;
+// ─── CONFIG ─── API, DS, GREENS provided by plotwise-core.js
 
-// ─── AGRICULTURE DATA (Nagaland 2023-24) ────────────────────────────────────────
-const DS = [
-  {d:"Mon",           a:45458, p:131351, c:37},
-  {d:"Phek",          a:34318, p:109855, c:37},
-  {d:"Niuland",       a:29071, p:105496, c:37},
-  {d:"Wokha",         a:33033, p:102234, c:36},
-  {d:"Peren",         a:26110, p:93978,  c:36},
-  {d:"Chumoukedima",  a:27471, p:90441,  c:37},
-  {d:"Mokokchung",    a:29918, p:88471,  c:36},
-  {d:"Zunheboto",     a:29880, p:76288,  c:35},
-  {d:"Kohima",        a:20525, p:66622,  c:37},
-  {d:"Kiphire",       a:24533, p:60808,  c:35},
-  {d:"Tuensang",      a:21014, p:61243,  c:36},
-  {d:"Noklak",        a:15886, p:46266,  c:35},
-  {d:"Longleng",      a:15760, p:44334,  c:34},
-  {d:"Shamator",      a:14241, p:37915,  c:34},
-  {d:"Dimapur",       a:10520, p:37325,  c:36},
-  {d:"Tseminyu",      a:9849,  p:26430,  c:34},
-];
+// ─── DESKTOP-SPECIFIC DATA ──────────────────────────────────────────────────────
 const CS = [
   {c:"WTRC Paddy",   p:367481, y:3119},
   {c:"Jhum Paddy",   p:179085, y:1983},
@@ -2184,7 +2167,6 @@ const CS = [
   {c:"Tea",          p:34812,  y:4470},
   {c:"Soyabean",     p:17344,  y:1260},
 ];
-const GREENS = ['#5a9e3a','#3a6828','#8fce52','#2a4e1e','#78b840','#2e5522','#a8d866','#1a3212','#4b8a30','#6ab445'];
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 function loadingRow(cols, msg='Loading…'){
@@ -2210,11 +2192,8 @@ async function buildTicker(){
   ];
   let items = fallback;
   try {
-    const res = await fetch(`${API}/prices`);
-    if(res.ok){
-      const data = await res.json();
-      items = data.prices.map(p=>({n:p.crop, p:p.price_per_qtl, t:p.trend==='up'?'up':p.trend==='down'?'dn':'flat'}));
-    }
+    const data = await apiFetch(`${API}/prices`, {}, {timeout: 15000, retries: 1, cacheTTL: 60000});
+    items = data.prices.map(p=>({n:p.crop, p:p.price_per_qtl, t:p.trend==='up'?'up':p.trend==='down'?'dn':'flat'}));
   } catch(_){}
   const html = [...items,...items].map(p=>`
     <span class="ticker-item">
@@ -2271,9 +2250,12 @@ async function runDisease(){
     fd.append('file', fileInput.files[0]);
     fd.append('crop', crop);
     fd.append('district', district);
-    const res = await fetch(`${API}/disease/detect`, {method:'POST', body:fd});
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const r = await res.json();
+    // Attach reporter info from demo profile
+    try {
+      const _prof = JSON.parse(localStorage.getItem('plotwise-profile') || '{}');
+      if (_prof.name) { fd.append('reporter', _prof.name); fd.append('reporter_role', _prof.role || ''); }
+    } catch(_e){}
+    const r = await apiFetch(`${API}/disease/detect`, {method:'POST', body:fd}, {timeout: 30000, retries: 0});
     const isUncertain = r.severity === 'Unknown' || r.confidence === 0;
     const isLow = r.source && r.source.includes('low confidence');
     const sc = isUncertain ? '' : r.severity === 'High' ? 'c-high' : 'c-med';
@@ -2321,9 +2303,7 @@ async function renderPrices(){
   try {
     let url = `${API}/prices?district=${encodeURIComponent(district)}`;
     if(crop) url += `&crop=${encodeURIComponent(crop)}`;
-    const res = await fetch(url);
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
+    const data = await apiFetch(url, {}, {timeout: 15000, retries: 1, cacheTTL: 60000, persist: true});
     tbody.innerHTML = data.prices.map(p=>`
       <tr>
         <td class="p-name">${p.crop}</td>
@@ -2338,19 +2318,14 @@ async function renderPrices(){
 }
 
 // ─── CALENDAR ─────────────────────────────────────────────────────────────────
-const TC = {
-  "sowing now":"tag-sow", "harvest time":"tag-hvst",
-  "growing":"tag-grow", "off season":"tag-off", "upcoming":"tag-off"
-};
+// TC provided by plotwise-core.js
 
 async function renderCal(){
   const district = document.getElementById('cd').value;
   const grid = document.getElementById('c-grid');
   grid.innerHTML = loadingCards();
   try {
-    const res = await fetch(`${API}/calendar?district=${encodeURIComponent(district)}`);
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
+    const data = await apiFetch(`${API}/calendar?district=${encodeURIComponent(district)}`, {}, {timeout: 15000, retries: 1, cacheTTL: 300000, persist: true});
     if(!data.calendar.length){ grid.innerHTML = loadingCards('No crops found for this district.'); return; }
     grid.innerHTML = data.calendar.map(c=>`
       <div class="cal-c">
@@ -2372,13 +2347,11 @@ async function renderSchemes(){
   const out = document.getElementById('s-out');
   out.innerHTML = loadingCards('Finding schemes…');
   try {
-    const res = await fetch(`${API}/schemes`, {
+    const data = await apiFetch(`${API}/schemes`, {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({crop, district, land_acres: 1.0})
-    });
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
+    }, {timeout: 15000, retries: 1, cacheTTL: 300000});
     out.innerHTML = data.schemes.map(s=>`
       <div class="sch-c">
         <div class="sch-name">${s.name}</div>
@@ -2394,15 +2367,7 @@ async function renderSchemes(){
 }
 
 // ─── WEATHER ─────────────────────────────────────────────────────────────────
-const WEATHER_ICONS = {
-  0:'☀️', 1:'🌤️', 2:'⛅', 3:'☁️',
-  45:'🌫️', 48:'🌫️',
-  51:'🌦️', 53:'🌧️', 55:'🌧️',
-  61:'🌦️', 63:'🌧️', 65:'🌧️',
-  71:'🌨️', 73:'🌨️', 75:'❄️',
-  80:'🌦️', 81:'🌧️', 82:'⛈️',
-  95:'⛈️', 96:'⛈️', 99:'⛈️',
-};
+// WEATHER_ICONS provided by plotwise-core.js
 
 async function renderWeather(){
   const district = document.getElementById('wd').value;
@@ -2415,9 +2380,7 @@ async function renderWeather(){
   fore.innerHTML = '';
 
   try {
-    const res = await fetch(`${API}/api/weather?district=${encodeURIComponent(district)}`);
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const d = await res.json();
+    const d = await apiFetch(`${API}/api/weather?district=${encodeURIComponent(district)}`, {}, {timeout: 15000, retries: 1, cacheTTL: 300000, persist: true});
     const c = d.current;
     const icon = WEATHER_ICONS[c.code] || '🌡️';
 
@@ -2521,9 +2484,7 @@ async function loadHeatmap(){
   const grid  = document.getElementById('hm-grid');
   const total = document.getElementById('hm-total');
   try {
-    const res  = await fetch(`${API}/dashboard/disease-heatmap`);
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
+    const data = await apiFetch(`${API}/dashboard/disease-heatmap`, {}, {timeout: 15000, retries: 1, cacheTTL: 60000});
 
     total.textContent = `${data.total_reports} report${data.total_reports !== 1 ? 's' : ''} logged`;
 
@@ -2548,6 +2509,21 @@ async function loadHeatmap(){
           ${d.top_disease ? `<div style="font-size:0.72rem;color:${heat};margin-top:3px">Top: ${d.top_disease}</div>` : ''}
         </div>`;
     }).join('');
+
+    // Recent reports with reporter identity
+    if(data.recent_reports && data.recent_reports.length){
+      const recentEl = document.getElementById('hm-recent');
+      if(recentEl){
+        recentEl.innerHTML = `<div style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;color:rgba(240,235,224,0.35);margin-bottom:10px;font-family:var(--font-head)">Recent Reports</div>` +
+          data.recent_reports.slice(0,8).map(r => {
+            const reporter = r.reporter ? `<span style="color:var(--sprout)">${r.reporter}</span>${r.reporter_role ? ` (${r.reporter_role})` : ''}` : '<span style="opacity:0.4">Anonymous</span>';
+            return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.78rem">
+              <div><span style="color:var(--cream)">${r.disease}</span> <span style="opacity:0.4">in ${r.crop}</span></div>
+              <div style="text-align:right">${reporter}<br><span style="font-size:0.66rem;opacity:0.3">${r.district} · ${(r.timestamp||'').slice(0,10)}</span></div>
+            </div>`;
+          }).join('');
+      }
+    }
   } catch(e){
     // Backend not running — show placeholder silently
     total.textContent = 'Backend offline';
@@ -3101,69 +3077,10 @@ function toggleChat() {
   }
 }
 
-function sendChat(text) {
-  const input = document.getElementById('chatInput');
-  const message = text || input.value.trim();
-  if (!message) return;
-
-  input.value = '';
-  addChatMsg(message, 'user');
-
-  // Show typing indicator
-  const typing = document.getElementById('chatTyping');
-  typing.classList.add('show');
-  scrollChatBottom();
-
-  const district = document.getElementById('pd')?.value || 'Kohima';
-
-  fetch(window.location.origin + '/api/chat', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message, district, lang: currentLang })
-  })
-  .then(r => r.json())
-  .then(data => {
-    typing.classList.remove('show');
-    // Convert **bold** markdown to <strong>
-    const formatted = data.reply
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\n/g, '<br>');
-    addChatMsg(formatted, 'bot');
-
-    // Update suggestion chips
-    if (data.suggestions && data.suggestions.length) {
-      updateChips(data.suggestions);
-    }
-  })
-  .catch(() => {
-    typing.classList.remove('show');
-    addChatMsg('Sorry, I could not connect. Make sure the server is running.', 'bot');
-  });
-}
-
-function addChatMsg(html, type) {
-  const container = document.getElementById('chatMessages');
-  const msg = document.createElement('div');
-  msg.className = 'chat-msg ' + type;
-  msg.innerHTML = html;
-  container.appendChild(msg);
-  scrollChatBottom();
-}
-
-function scrollChatBottom() {
-  const container = document.getElementById('chatMessages');
-  requestAnimationFrame(() => { container.scrollTop = container.scrollHeight; });
-}
-
-function updateChips(suggestions) {
-  const container = document.getElementById('chatChips');
-  container.innerHTML = suggestions.map(s =>
-    `<button class="chat-chip" onclick="sendChat('${s.replace(/'/g, "\\'")}')">${s}</button>`
-  ).join('');
-}
+// sendChat, addChatMsg, scrollChatBottom, updateChips — provided by plotwise-core.js
 
 // ─── NAGAMESE / ENGLISH i18n ──────────────────────────────────────────────────
-const i18n = {
+const _desktopI18n = {
   en: {
     'nav-features': 'Features',
     'nav-app': 'Farmer App',
@@ -3274,32 +3191,19 @@ const i18n = {
   }
 };
 
-let currentLang = localStorage.getItem('plotwise-lang') || 'en';
+// currentLang + setLang() provided by plotwise-core.js
 
-function setLang(lang) {
-  currentLang = lang;
-  localStorage.setItem('plotwise-lang', lang);
-  document.getElementById('btnEn').classList.toggle('active', lang === 'en');
-  document.getElementById('btnNag').classList.toggle('active', lang === 'nag');
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.getAttribute('data-i18n');
-    if (i18n[lang] && i18n[lang][key]) {
-      el.innerHTML = i18n[lang][key];
-    }
-  });
-  document.documentElement.lang = lang === 'nag' ? 'nag' : 'en';
-}
-
-// ─── OFFLINE DETECTION ───────────────────────────────────────────────────────
-function updateOnlineStatus(){
-  const bar = document.getElementById('offline-bar');
-  bar.style.transform = navigator.onLine ? 'translateY(-100%)' : 'translateY(0)';
-}
-window.addEventListener('online', updateOnlineStatus);
-window.addEventListener('offline', updateOnlineStatus);
+// ─── OFFLINE DETECTION ─── (provided by plotwise-core.js)
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 window.onload = () => {
+  plotwiseInit({
+    chatElements: { input: 'chatInput', messages: 'chatMessages', typing: 'chatTyping', chips: 'chatChips' },
+    getDistrict: () => document.getElementById('pd')?.value || 'Kohima',
+    i18n: _desktopI18n,
+    offlineBarId: 'offline-bar',
+  });
+
   buildTicker();
   renderPrices();
   renderCal();

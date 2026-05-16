@@ -78,6 +78,41 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(SecurityHeadersMiddleware)
 
+
+# ── Audit / Request Logging Middleware ────────────────────────────────────────
+
+_server_start_time = time.time()
+_audit_stats = {
+    "total_requests": 0,
+    "errors": 0,
+    "by_endpoint": {},
+    "started_at": datetime.utcnow().isoformat(),
+}
+
+
+class AuditLogMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        start = time.time()
+        _audit_stats["total_requests"] += 1
+        path = request.url.path
+        _audit_stats["by_endpoint"][path] = _audit_stats["by_endpoint"].get(path, 0) + 1
+
+        response = await call_next(request)
+        duration_ms = round((time.time() - start) * 1000, 1)
+
+        if response.status_code >= 400:
+            _audit_stats["errors"] += 1
+
+        # Log API requests (skip static files for noise reduction)
+        if not path.startswith("/static"):
+            logger.info(f"{request.method} {path} → {response.status_code} ({duration_ms}ms)")
+
+        return response
+
+
+app.add_middleware(AuditLogMiddleware)
+
+
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -155,19 +190,31 @@ def _init_db():
     conn = sqlite3.connect(DB_PATH)
     conn.execute("""
         CREATE TABLE IF NOT EXISTS disease_reports (
-            id         INTEGER PRIMARY KEY AUTOINCREMENT,
-            district   TEXT    NOT NULL,
-            crop       TEXT    NOT NULL,
-            disease    TEXT    NOT NULL,
-            confidence REAL    NOT NULL,
-            severity   TEXT    NOT NULL,
-            timestamp  TEXT    NOT NULL
+            id            INTEGER PRIMARY KEY AUTOINCREMENT,
+            district      TEXT    NOT NULL,
+            crop          TEXT    NOT NULL,
+            disease       TEXT    NOT NULL,
+            confidence    REAL    NOT NULL,
+            severity      TEXT    NOT NULL,
+            timestamp     TEXT    NOT NULL,
+            reporter      TEXT    DEFAULT '',
+            reporter_role TEXT    DEFAULT ''
         )
     """)
     conn.execute("CREATE INDEX IF NOT EXISTS idx_reports_district ON disease_reports(district)")
     conn.execute("CREATE INDEX IF NOT EXISTS idx_reports_timestamp ON disease_reports(timestamp)")
     conn.execute("CREATE INDEX IF NOT EXISTS idx_reports_crop ON disease_reports(crop)")
     conn.commit()
+
+    # Migrate: add reporter columns if table already exists without them
+    cursor = conn.execute("PRAGMA table_info(disease_reports)")
+    columns = [row[1] for row in cursor.fetchall()]
+    if "reporter" not in columns:
+        conn.execute("ALTER TABLE disease_reports ADD COLUMN reporter TEXT DEFAULT ''")
+        conn.execute("ALTER TABLE disease_reports ADD COLUMN reporter_role TEXT DEFAULT ''")
+        conn.commit()
+        logger.info("Migrated disease_reports: added reporter columns")
+
     conn.close()
 
 _init_db()
@@ -188,11 +235,12 @@ def _db():
     return sqlite3.connect(DB_PATH)
 
 
-def _log_disease(district: str, crop: str, disease: str, confidence: float, severity: str):
+def _log_disease(district: str, crop: str, disease: str, confidence: float, severity: str,
+                  reporter: str = "", reporter_role: str = ""):
     conn = _db()
     conn.execute(
-        "INSERT INTO disease_reports (district, crop, disease, confidence, severity, timestamp) VALUES (?,?,?,?,?,?)",
-        (district, crop, disease, round(confidence, 3), severity, datetime.utcnow().isoformat())
+        "INSERT INTO disease_reports (district, crop, disease, confidence, severity, timestamp, reporter, reporter_role) VALUES (?,?,?,?,?,?,?,?)",
+        (district, crop, disease, round(confidence, 3), severity, datetime.utcnow().isoformat(), reporter, reporter_role)
     )
     conn.commit()
     conn.close()
@@ -442,6 +490,35 @@ def mobile_app():
     return root()
 
 
+# ── Demo User Profile (lightweight auth substitute) ───────────────────────────
+
+VALID_ROLES = ["Farmer", "Extension Officer", "Block Officer", "District Officer", "Researcher", "Demo User"]
+
+
+class DemoProfile(BaseModel):
+    name: str
+    role: str = "Farmer"
+    district: str = "Kohima"
+
+
+@app.post("/api/profile")
+def validate_profile(profile: DemoProfile):
+    """Validate and echo back a demo user profile. No DB storage — frontend uses localStorage."""
+    name = profile.name.strip()
+    if not name or len(name) < 2:
+        raise HTTPException(400, "Name must be at least 2 characters.")
+    if len(name) > 60:
+        raise HTTPException(400, "Name too long (max 60 characters).")
+    role = profile.role if profile.role in VALID_ROLES else "Farmer"
+    district = profile.district if profile.district in DISTRICTS else "Kohima"
+    return {
+        "name": name,
+        "role": role,
+        "district": district,
+        "valid": True,
+    }
+
+
 @app.get("/api/status")
 def api_status():
     return {
@@ -458,8 +535,27 @@ def api_status():
 
 @app.get("/health")
 def health_check():
-    """Health check for Railway/monitoring."""
-    return {"status": "ok", "model_loaded": DISEASE_MODEL is not None}
+    """Health check for Railway/monitoring with audit stats."""
+    conn = _db()
+    report_count = conn.execute("SELECT COUNT(*) FROM disease_reports").fetchone()[0]
+    conn.close()
+
+    uptime_seconds = round(time.time() - _server_start_time)
+    return {
+        "status": "ok",
+        "model_loaded": DISEASE_MODEL is not None,
+        "uptime_seconds": uptime_seconds,
+        "disease_reports_total": report_count,
+        "audit": {
+            "total_requests": _audit_stats["total_requests"],
+            "errors": _audit_stats["errors"],
+            "started_at": _audit_stats["started_at"],
+            "top_endpoints": dict(sorted(
+                _audit_stats["by_endpoint"].items(),
+                key=lambda x: x[1], reverse=True
+            )[:10]),
+        },
+    }
 
 
 @app.post("/disease/detect")
@@ -468,7 +564,9 @@ async def detect_disease(
     request:  Request,
     file:     UploadFile = File(...),
     crop:     str = "Jhum Paddy",
-    district: str = "Kohima"
+    district: str = "Kohima",
+    reporter: str = "",
+    reporter_role: str = ""
 ):
     """Upload a crop leaf image → get disease prediction. Logs report to DB."""
     if not file.content_type or not file.content_type.startswith("image/"):
@@ -583,6 +681,8 @@ async def detect_disease(
             "prevention":   "Use certified seeds every season. Maintain field hygiene. Rotate crops annually to break disease cycles.",
             "nearest_help": "Contact District Agriculture Officer or call Kisan Call Centre: 1800-180-1551 (toll free)",
             "source":       source,
+            "reporter":     reporter,
+            "reporter_role": reporter_role,
         }
 
     else:
@@ -593,7 +693,7 @@ async def detect_disease(
         source       = "Knowledge base (AI model not available for this crop)"
 
         severity = "Check required"
-        _log_disease(district, crop, detected, confidence, severity)
+        _log_disease(district, crop, detected, confidence, severity, reporter, reporter_role)
         return {
             "crop":         crop,
             "district":     district,
@@ -604,12 +704,14 @@ async def detect_disease(
             "prevention":   "Use certified seeds every season. Maintain field hygiene. Rotate crops annually to break disease cycles.",
             "nearest_help": "Upload a photo of Apple, Chilli, Grape, Maize, Orange, Pepper, Potato, Soybean, or Tomato leaves for AI-powered detection. For other crops, contact Kisan Call Centre: 1800-180-1551 (toll free)",
             "source":       source,
+            "reporter":     reporter,
+            "reporter_role": reporter_role,
         }
 
     severity = "High" if confidence >= 0.85 else "Moderate" if confidence >= 0.70 else "Low"
 
     # Persist to DB for heatmap analytics
-    _log_disease(district, crop, detected, confidence, severity)
+    _log_disease(district, crop, detected, confidence, severity, reporter, reporter_role)
 
     return {
         "crop":         crop,
@@ -621,6 +723,8 @@ async def detect_disease(
         "prevention":   "Use certified seeds every season. Maintain field hygiene. Rotate crops annually to break disease cycles.",
         "nearest_help": "Contact District Agriculture Officer or call Kisan Call Centre: 1800-180-1551 (toll free)",
         "source":       source,
+        "reporter":     reporter,
+        "reporter_role": reporter_role,
     }
 
 
@@ -799,6 +903,20 @@ def disease_heatmap(request: Request, district: Optional[str] = None, crop: Opti
         if d["diseases"]:
             d["top_disease"] = max(d["diseases"], key=d["diseases"].get)
 
+    # Recent individual reports with reporter identity
+    conn2 = _db()
+    recent_q = "SELECT district, crop, disease, confidence, severity, timestamp, reporter, reporter_role FROM disease_reports WHERE 1=1"
+    recent_params = []
+    if district:
+        recent_q += " AND district = ?"
+        recent_params.append(district)
+    if crop:
+        recent_q += " AND crop = ?"
+        recent_params.append(crop)
+    recent_q += " ORDER BY timestamp DESC LIMIT 20"
+    recent_rows = conn2.execute(recent_q, recent_params).fetchall()
+    conn2.close()
+
     return {
         "total_reports":  total_reports,
         "by_district":    list(by_district.values()),
@@ -806,6 +924,12 @@ def disease_heatmap(request: Request, district: Optional[str] = None, crop: Opti
             {"district": r[0], "crop": r[1], "disease": r[2],
              "reports": r[3], "avg_confidence": round(r[4], 3)}
             for r in rows[:50]
+        ],
+        "recent_reports": [
+            {"district": r[0], "crop": r[1], "disease": r[2],
+             "confidence": round(r[3], 3), "severity": r[4],
+             "timestamp": r[5], "reporter": r[6] or "", "reporter_role": r[7] or ""}
+            for r in recent_rows
         ],
         "source": "Plotwise disease report database",
     }
@@ -1212,50 +1336,79 @@ def export_yield(request: Request, district: str = None):
 @app.get("/api/export/report")
 @limiter.limit("10/minute")
 def export_pdf_report(request: Request, district: str = "Kohima"):
-    """Generate a PDF district report with yield data, prices, and top crops."""
+    """Generate a professional PDF district report — branding, yield, prices, disease alerts."""
     from reportlab.lib.pagesizes import A4
     from reportlab.lib import colors
-    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
     from reportlab.lib.units import mm
 
     buf = io.BytesIO()
-    doc = SimpleDocTemplate(buf, pagesize=A4, topMargin=20*mm, bottomMargin=15*mm)
+    page_w, page_h = A4
+
+    # Page number callback
+    def _add_page_number(canvas, doc):
+        canvas.saveState()
+        canvas.setFont("Helvetica", 8)
+        canvas.setFillColor(colors.grey)
+        canvas.drawRightString(page_w - 15*mm, 10*mm, f"Page {doc.page}")
+        canvas.drawString(15*mm, 10*mm, "Plotwise — Smart Farming Platform for Nagaland")
+        canvas.restoreState()
+
+    doc = SimpleDocTemplate(buf, pagesize=A4, topMargin=20*mm, bottomMargin=18*mm)
     styles = getSampleStyleSheet()
-    title_style = ParagraphStyle("Title2", parent=styles["Title"], fontSize=18, spaceAfter=4)
+    title_style = ParagraphStyle("Title2", parent=styles["Title"], fontSize=20, spaceAfter=2,
+                                 textColor=colors.HexColor("#1b5e20"))
     sub_style = ParagraphStyle("Sub", parent=styles["Normal"], fontSize=10, textColor=colors.grey)
-    h2_style = ParagraphStyle("H2", parent=styles["Heading2"], fontSize=13, spaceBefore=14, spaceAfter=6)
+    prepared_style = ParagraphStyle("Prepared", parent=styles["Normal"], fontSize=11,
+                                    textColor=colors.HexColor("#333333"), spaceBefore=8, spaceAfter=4)
+    h2_style = ParagraphStyle("H2", parent=styles["Heading2"], fontSize=13, spaceBefore=14, spaceAfter=6,
+                              textColor=colors.HexColor("#2e7d32"))
+    footer_style = ParagraphStyle("Footer", parent=styles["Normal"], fontSize=8, textColor=colors.grey)
     elements = []
 
-    elements.append(Paragraph("Plotwise — District Agriculture Report", title_style))
+    # ─── Header / Branding ───
+    elements.append(Paragraph("Plotwise — District Agriculture Intelligence Report", title_style))
     elements.append(Paragraph(
-        f"{district} District | Data Period: 2023-24 | Generated: {date.today().strftime('%d %b %Y')}",
+        f"<b>{district} District</b> | Data Period: 2023-24 | Generated: {date.today().strftime('%d %B %Y')}",
         sub_style,
+    ))
+    elements.append(Paragraph(
+        "Prepared for: Director of Agriculture, Government of Nagaland",
+        prepared_style,
     ))
     elements.append(Spacer(1, 6*mm))
 
+    # ─── Summary Statistics ───
     records = [r for r in CROP_RECORDS if r["district"] == district]
     total_area = sum(r["area_ha"] for r in records)
     total_prod = sum(r["production_tonnes"] for r in records)
     avg_yield = round(total_prod * 1000 / total_area, 1) if total_area > 0 else 0
 
-    elements.append(Paragraph("Summary", h2_style))
+    elements.append(Paragraph("District Summary", h2_style))
     summary_data = [
-        ["Total Area (ha)", f"{total_area:,.1f}"],
-        ["Total Production (tonnes)", f"{total_prod:,.1f}"],
-        ["Average Yield (kg/ha)", f"{avg_yield:,.1f}"],
+        ["Metric", "Value"],
+        ["Total Cultivated Area", f"{total_area:,.1f} ha"],
+        ["Total Production", f"{total_prod:,.1f} tonnes"],
+        ["Average Yield", f"{avg_yield:,.1f} kg/ha"],
         ["Crops Grown", str(len(set(r["crop"] for r in records)))],
+        ["Data Source", "Director of Agriculture, Nagaland (2023-24)"],
     ]
-    st = Table(summary_data, colWidths=[55*mm, 45*mm])
+    st = Table(summary_data, colWidths=[55*mm, 60*mm])
     st.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#e8f5e9")),
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2e7d32")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("BACKGROUND", (0, 1), (0, -1), colors.HexColor("#e8f5e9")),
         ("FONTSIZE", (0, 0), (-1, -1), 10),
         ("GRID", (0, 0), (-1, -1), 0.5, colors.lightgrey),
         ("LEFTPADDING", (0, 0), (-1, -1), 6),
+        ("TOPPADDING", (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
     ]))
     elements.append(st)
-    elements.append(Spacer(1, 4*mm))
+    elements.append(Spacer(1, 5*mm))
 
+    # ─── Top Crops by Production ───
     elements.append(Paragraph("Top Crops by Production", h2_style))
     crop_totals = {}
     for r in records:
@@ -1277,31 +1430,78 @@ def export_pdf_report(request: Request, district: str = "Kohima"):
         ("LEFTPADDING", (0, 0), (-1, -1), 6),
     ]))
     elements.append(ct)
-    elements.append(Spacer(1, 4*mm))
+    elements.append(Spacer(1, 5*mm))
 
+    # ─── Disease Alerts (from DB) ───
+    elements.append(Paragraph("Disease Surveillance — Recent Reports", h2_style))
+    conn = _db()
+    disease_rows = conn.execute(
+        "SELECT crop, disease, severity, confidence, timestamp, reporter, reporter_role "
+        "FROM disease_reports WHERE district = ? ORDER BY timestamp DESC LIMIT 20",
+        (district,)
+    ).fetchall()
+    conn.close()
+
+    if disease_rows:
+        d_table = [["Crop", "Disease", "Severity", "Confidence", "Date", "Reported By"]]
+        for row in disease_rows:
+            reporter_str = row[5] if row[5] else "—"
+            if row[6]:
+                reporter_str += f" ({row[6]})"
+            d_table.append([
+                row[0], row[1], row[2],
+                f"{row[3]*100:.0f}%" if row[3] else "—",
+                row[4][:10] if row[4] else "—",
+                reporter_str,
+            ])
+        dt = Table(d_table, colWidths=[28*mm, 35*mm, 22*mm, 22*mm, 22*mm, 35*mm])
+        dt.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#c62828")),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+            ("FONTSIZE", (0, 0), (-1, -1), 8),
+            ("GRID", (0, 0), (-1, -1), 0.5, colors.lightgrey),
+            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#fff3f3")]),
+            ("LEFTPADDING", (0, 0), (-1, -1), 4),
+        ]))
+        elements.append(dt)
+    else:
+        elements.append(Paragraph("No disease reports recorded for this district yet.", sub_style))
+    elements.append(Spacer(1, 5*mm))
+
+    # ─── Market Prices ───
     elements.append(Paragraph("Market Prices (Today)", h2_style))
     price_data = _get_prices(district=district)
-    price_rows = [["Crop", "Price (Rs/qtl)", "MSP (Rs/qtl)", "Trend"]]
+    price_rows = [["Crop", "Price (Rs/qtl)", "MSP (Rs/qtl)", "Trend", "Advisory"]]
     for p in price_data.get("prices", [])[:15]:
-        price_rows.append([p["crop"], str(p["price_per_qtl"]), str(p.get("msp", "-")), p.get("trend", "")])
-    pt = Table(price_rows, colWidths=[45*mm, 35*mm, 35*mm, 30*mm])
+        price_rows.append([
+            p["crop"], str(p["price_per_qtl"]), str(p.get("msp", "-")),
+            p.get("trend", ""), p.get("tip", "")
+        ])
+    pt = Table(price_rows, colWidths=[35*mm, 28*mm, 28*mm, 20*mm, 40*mm])
     pt.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1565c0")),
         ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("FONTSIZE", (0, 0), (-1, -1), 9),
+        ("FONTSIZE", (0, 0), (-1, -1), 8),
         ("GRID", (0, 0), (-1, -1), 0.5, colors.lightgrey),
         ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f5f5f5")]),
-        ("LEFTPADDING", (0, 0), (-1, -1), 6),
+        ("LEFTPADDING", (0, 0), (-1, -1), 4),
     ]))
     elements.append(pt)
-    elements.append(Spacer(1, 6*mm))
+    elements.append(Spacer(1, 8*mm))
 
+    # ─── Footer ───
     elements.append(Paragraph(
-        "Source: Director of Agriculture, Nagaland (2023-24) | MSP: CACP 2023-24 | Prices: Agmarknet APMC",
-        ParagraphStyle("Footer", parent=styles["Normal"], fontSize=8, textColor=colors.grey),
+        "Data: Director of Agriculture, Nagaland (2023-24) | Prices: MSP (CACP 2023-24) + Agmarknet APMC | "
+        "Disease Detection: EfficientNetB0 AI Model (PlantVillage dataset)",
+        footer_style,
+    ))
+    elements.append(Paragraph(
+        "This report was generated by Plotwise — an agricultural intelligence platform built for the "
+        "Nagaland Agriculture Department. For queries contact: plotwise@nagaland.gov.in",
+        footer_style,
     ))
 
-    doc.build(elements)
+    doc.build(elements, onFirstPage=_add_page_number, onLaterPages=_add_page_number)
     buf.seek(0)
     fname = f"plotwise_report_{district}_{date.today().isoformat()}.pdf"
     return StreamingResponse(
