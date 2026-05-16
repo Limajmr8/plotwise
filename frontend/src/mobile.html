@@ -712,8 +712,62 @@ async function loadHomePrices(){
   }
 }
 
+// ─── CAPACITOR NATIVE PLUGINS ────────────────────────────────────
+// Detect if running inside Capacitor (native app) vs web browser
+const isNative = typeof window.Capacitor !== 'undefined' && window.Capacitor.isNativePlatform();
+
+// Native camera: converts base64 photo to File for upload
+let nativeCapturedFile = null;
+
+async function openNativeCamera(){
+  try {
+    const { Camera, CameraResultType, CameraSource } = window.Capacitor.Plugins;
+    if(!Camera) { document.getElementById('detect-file').click(); return; }
+    const photo = await Camera.getPhoto({
+      quality: 85,
+      resultType: CameraResultType || 'base64',
+      source: CameraSource || 'CAMERA',
+      width: 640,
+      height: 640,
+      correctOrientation: true
+    });
+    // Convert base64 to blob/file
+    const byteString = atob(photo.base64String);
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for(let i=0;i<byteString.length;i++) ia[i]=byteString.charCodeAt(i);
+    const blob = new Blob([ab], {type:'image/jpeg'});
+    nativeCapturedFile = new File([blob], 'leaf-photo.jpg', {type:'image/jpeg'});
+    // Show preview
+    const img = document.getElementById('detect-prev');
+    img.src = `data:image/jpeg;base64,${photo.base64String}`;
+    img.style.display = 'block';
+  } catch(e) {
+    // User cancelled or camera unavailable — fall back to file input
+    if(e.message && !e.message.includes('cancel')){
+      document.getElementById('detect-file').click();
+    }
+  }
+}
+
+// Network status listener (Capacitor native)
+if(isNative && window.Capacitor.Plugins.Network){
+  window.Capacitor.Plugins.Network.addListener('networkStatusChange', (status)=>{
+    const bar = document.getElementById('offline-bar');
+    if(bar) bar.classList.toggle('show', !status.connected);
+  });
+}
+
 // ─── DISEASE DETECTION ───────────────────────────────────────────
+// Dropzone click: use native camera in app, file input on web
+document.getElementById('detect-dropzone').addEventListener('click', function(e){
+  if(e.target.closest('.btn-primary')) return; // Don't intercept button
+  if(isNative){ openNativeCamera(); }
+  else { document.getElementById('detect-file').click(); }
+});
+
 document.getElementById('detect-file').addEventListener('change', function(e){
+  nativeCapturedFile = null; // Clear native file if user picks from file input instead
   const img = document.getElementById('detect-prev');
   if(e.target.files[0]){ img.src = URL.createObjectURL(e.target.files[0]); img.style.display='block'; }
 });
@@ -723,8 +777,9 @@ async function runDetect(){
   const district = document.getElementById('detect-district').value;
   const fileInput = document.getElementById('detect-file');
   const el = document.getElementById('detect-result');
+  const photoFile = nativeCapturedFile || (fileInput.files && fileInput.files[0]);
 
-  if(!fileInput.files[0]){
+  if(!photoFile){
     el.innerHTML = `<div style="padding:14px;color:#f87171;font-size:0.86rem;text-align:center">Please take or upload a leaf photo first.</div>`;
     el.classList.add('show');
     return;
@@ -738,7 +793,7 @@ async function runDetect(){
 
   try{
     const fd = new FormData();
-    fd.append('file',fileInput.files[0]);
+    fd.append('file', photoFile);
     fd.append('crop',crop);
     fd.append('district',district);
     // Attach reporter info from demo profile

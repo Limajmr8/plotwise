@@ -30,6 +30,10 @@ const config: CapacitorConfig = {
     StatusBar: {
       style: 'DARK',
       backgroundColor: '#060905'
+    },
+    Camera: {
+      presentationStyle: 'fullscreen',
+      quality: 85
     }
   }
 };

@@ -9,7 +9,7 @@ All data sourced from verified Nagaland agriculture records 2023-24.
 Disease reports stored in SQLite for heatmap analytics.
 """
 
-from fastapi import FastAPI, File, UploadFile, HTTPException, Request
+from fastapi import FastAPI, File, Form, UploadFile, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, StreamingResponse, JSONResponse
@@ -563,10 +563,10 @@ def health_check():
 async def detect_disease(
     request:  Request,
     file:     UploadFile = File(...),
-    crop:     str = "Jhum Paddy",
-    district: str = "Kohima",
-    reporter: str = "",
-    reporter_role: str = ""
+    crop:     str = Form("Jhum Paddy"),
+    district: str = Form("Kohima"),
+    reporter: str = Form(""),
+    reporter_role: str = Form("")
 ):
     """Upload a crop leaf image → get disease prediction. Logs report to DB."""
     if not file.content_type or not file.content_type.startswith("image/"):
