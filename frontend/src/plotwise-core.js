@@ -101,15 +101,17 @@ const TC = {
 };
 
 // District + crop stats for dashboards (2023-24 verified data)
+// 'c' = distinct crops recorded per district, derived from the source CSV
+// (data/sample/nagaland_crop_data_2023_24.csv) so it matches the API and PDF.
 const DS = [
-  {d:"Mon",a:45458,p:131351,c:37},{d:"Phek",a:34318,p:109855,c:37},
-  {d:"Niuland",a:29071,p:105496,c:37},{d:"Wokha",a:33033,p:102234,c:36},
-  {d:"Peren",a:26110,p:93978,c:36},{d:"Chumoukedima",a:27471,p:90441,c:37},
-  {d:"Mokokchung",a:29918,p:88471,c:36},{d:"Zunheboto",a:29880,p:76288,c:35},
-  {d:"Kohima",a:20525,p:66622,c:37},{d:"Kiphire",a:24533,p:60808,c:35},
-  {d:"Tuensang",a:21014,p:61243,c:36},{d:"Noklak",a:15886,p:46266,c:35},
-  {d:"Longleng",a:15760,p:44334,c:34},{d:"Shamator",a:14241,p:37915,c:34},
-  {d:"Dimapur",a:10520,p:37325,c:36},{d:"Tseminyu",a:9849,p:26430,c:34}
+  {d:"Mon",a:45458,p:131351,c:39},{d:"Phek",a:34318,p:109855,c:37},
+  {d:"Niuland",a:29071,p:105496,c:41},{d:"Wokha",a:33033,p:102234,c:38},
+  {d:"Peren",a:26110,p:93978,c:40},{d:"Chumoukedima",a:27471,p:90441,c:41},
+  {d:"Mokokchung",a:29918,p:88471,c:39},{d:"Zunheboto",a:29880,p:76288,c:34},
+  {d:"Kohima",a:20525,p:66622,c:33},{d:"Kiphire",a:24533,p:60808,c:35},
+  {d:"Tuensang",a:21014,p:61243,c:32},{d:"Noklak",a:15886,p:46266,c:31},
+  {d:"Longleng",a:15760,p:44334,c:32},{d:"Shamator",a:14241,p:37915,c:32},
+  {d:"Dimapur",a:10520,p:37325,c:39},{d:"Tseminyu",a:9849,p:26430,c:33}
 ];
 
 const GREENS = ['#5a9e3a','#3a6828','#8fce52','#2a4e1e','#78b840','#2e5522','#a8d866','#1a3212','#4b8a30','#6ab445'];

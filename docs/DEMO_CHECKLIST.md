@@ -123,7 +123,7 @@
 
 - [ ] Generate PDF for Kohima district
 - [ ] Verify: "Plotwise — District Agriculture Intelligence Report" header
-- [ ] Verify: "Prepared for: Director of Agriculture, Government of Nagaland"
+- [ ] Verify: "Submitted for review to: Director of Agriculture, Government of Nagaland"
 - [ ] Verify: Summary table with area, production, yield
 - [ ] Verify: Top crops table
 - [ ] Verify: Disease surveillance section with reporter names

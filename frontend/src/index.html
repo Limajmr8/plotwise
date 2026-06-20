@@ -4,20 +4,20 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Plotwise — Smart Farming for Nagaland</title>
-  <meta name="description" content="AI-powered smart farming platform for Nagaland — crop disease detection, live market prices, planting calendar, and government scheme finder. Built with real 2023-24 agriculture data."/>
+  <meta name="description" content="AI-powered smart farming platform for Nagaland — crop disease detection, market prices, planting calendar, and government scheme finder. Built with real 2023-24 agriculture data."/>
   <meta name="keywords" content="Nagaland, agriculture, crop disease detection, smart farming, market prices, planting calendar, government schemes, AI farming"/>
   <meta name="author" content="Limawapang Jamir"/>
 
   <!-- Open Graph -->
   <meta property="og:title" content="Plotwise — Smart Farming for Nagaland"/>
-  <meta property="og:description" content="AI-powered crop disease detection, live market prices, and planting calendar for Nagaland farmers."/>
+  <meta property="og:description" content="AI-powered crop disease detection, market prices, and planting calendar for Nagaland farmers."/>
   <meta property="og:type" content="website"/>
   <meta property="og:image" content="/static/images/hero-terraces.webp"/>
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image"/>
   <meta name="twitter:title" content="Plotwise — Smart Farming for Nagaland"/>
-  <meta name="twitter:description" content="AI-powered crop disease detection, live market prices, and planting calendar for Nagaland farmers."/>
+  <meta name="twitter:description" content="AI-powered crop disease detection, market prices, and planting calendar for Nagaland farmers."/>
 
   <link rel="manifest" href="/static/manifest.json"/>
   <meta name="theme-color" content="#3a6828"/>
@@ -1519,7 +1519,7 @@
   <div class="hero-content">
     <div class="hero-badge" data-i18n="hero-badge">Live Data · Nagaland · 2023–24</div>
     <h1 class="split-text">Built for the<em>Nagaland Farmer</em></h1>
-    <p class="hero-sub" data-i18n="hero-sub">AI crop disease detection, live mandi prices, district planting calendars — built on verified Nagaland agriculture data.</p>
+    <p class="hero-sub" data-i18n="hero-sub">AI crop disease detection, mandi price tracking, district planting calendars — built on verified Nagaland agriculture data.</p>
     <div class="hero-ctas">
       <button class="btn-primary magnetic" onclick="go('app')"><span data-i18n="hero-btn-try">Try the App</span></button>
       <button class="btn-ghost" onclick="go('dashboard')"><span data-i18n="hero-btn-dash">View Dashboard →</span></button>
@@ -1573,8 +1573,8 @@
       <div class="hscroll-panel-bg" style="background-image:url('/static/images/naga-market.webp')"></div>
       <div class="hscroll-panel-content">
         <div class="hscroll-num">02</div>
-        <div class="hscroll-title">Live Market<br>Prices</div>
-        <div class="hscroll-desc">Real-time mandi prices across all 16 districts. Know the right time to sell — never be shortchanged by middlemen again.</div>
+        <div class="hscroll-title">Market<br>Prices</div>
+        <div class="hscroll-desc">Indicative mandi prices anchored to government MSP across all 16 districts. Know the right time to sell — never be shortchanged by middlemen again.</div>
       </div>
     </div>
     <div class="hscroll-panel">
@@ -1613,7 +1613,7 @@
     </div>
     <div class="feat-intro-body" data-i18n="feat-body">
       Nagaland is still a food deficit state despite over 60% of its population farming the land.
-      Plotwise puts real-time intelligence directly into farmers' hands — with a unified view
+      Plotwise puts agricultural intelligence directly into farmers' hands — with a unified view
       across all 16 districts.
     </div>
   </div>
@@ -1665,7 +1665,7 @@
         <div class="feat-ico-wrap"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--sprout)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
         <div class="feat-h">Know the right<br>time to sell</div>
         <div class="feat-p">Market prices anchored to government MSP data and Agmarknet APMC rates across all 16 districts. Track Ginger, Paddy, Maize, Soyabean, Tea, Potato and 30+ more crops — with sell/hold advisories.</div>
-        <button class="feat-cta" onclick="openTab('prices');go('app')">Check Live Prices →</button>
+        <button class="feat-cta" onclick="openTab('prices');go('app')">Check Market Prices →</button>
       </div>
     </div>
 
@@ -2284,8 +2284,8 @@ async function runDisease(){
         </div>
         <div class="r-box" style="margin-bottom:12px"><span class="r-box-lbl">Recommended Treatment</span>${r.treatment}</div>
         <div class="r-box"><span class="r-box-lbl">Prevention</span>${r.prevention}</div>
-        <p style="margin-top:16px;font-size:0.75rem;color:rgba(240,235,224,0.28)">${r.nearest_help}</p>
-        <p style="margin-top:6px;font-size:0.68rem;color:rgba(240,235,224,0.18)">Source: ${r.source}</p>
+        <p style="margin-top:16px;font-size:0.75rem;color:rgba(240,235,224,0.5)">${r.nearest_help}</p>
+        <p style="margin-top:6px;font-size:0.68rem;color:rgba(240,235,224,0.5)">Source: ${r.source}</p>
       `;
     }
     loadHeatmap(); // refresh heatmap with new report
@@ -3087,7 +3087,7 @@ const _desktopI18n = {
     'nav-dashboard': 'Dashboard',
     'nav-open': 'Open App →',
     'hero-badge': 'Live Data · Nagaland · 2023–24',
-    'hero-sub': 'AI crop disease detection, live mandi prices, district planting calendars — built on verified Nagaland agriculture data.',
+    'hero-sub': 'AI crop disease detection, mandi price tracking, district planting calendars — built on verified Nagaland agriculture data.',
     'hero-btn-try': 'Try the App',
     'hero-btn-dash': 'View Dashboard →',
     'hero-scroll': 'Scroll',
@@ -3097,7 +3097,7 @@ const _desktopI18n = {
     'stat-accuracy': 'Disease Classes',
     'feat-eyebrow': 'What Plotwise Does',
     'feat-heading': 'Four tools.<br>One platform.',
-    'feat-body': 'Nagaland is still a food deficit state despite over 60% of its population farming the land. Plotwise puts real-time intelligence directly into farmers\' hands — with a unified view across all 16 districts.',
+    'feat-body': 'Nagaland is still a food deficit state despite over 60% of its population farming the land. Plotwise puts agricultural intelligence directly into farmers\' hands — with a unified view across all 16 districts.',
     'app-eyebrow': 'Farmer Tools',
     'app-heading': 'The App',
     'tab-disease': 'Detect Disease',
@@ -3151,7 +3151,7 @@ const _desktopI18n = {
     'stat-accuracy': 'Disease Class',
     'feat-eyebrow': 'Plotwise-e Ki Ki Ase',
     'feat-heading': 'Char Guti Tool.<br>Ek Platform.',
-    'feat-body': 'Nagaland aji-o food deficit state ase — 60%-r beshi manu kheti kore hoilebi. Plotwise-e real-time information sidha kishan-loi diye — 16-ta district-r ek view diye.',
+    'feat-body': 'Nagaland aji-o food deficit state ase — 60%-r beshi manu kheti kore hoilebi. Plotwise-e kheti-r information sidha kishan-loi diye — 16-ta district-r ek view diye.',
     'app-eyebrow': 'Kishan-r Tool',
     'app-heading': 'App',
     'tab-disease': 'Rog Check',

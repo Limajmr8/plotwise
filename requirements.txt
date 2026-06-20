@@ -12,4 +12,6 @@ reportlab==4.5.1
 python-dotenv==1.0.1
 # Testing
 pytest==8.1.1
+# httpx capped <0.28: 0.28 removed the TestClient(app=...) shortcut that
+# Starlette 0.27 (via FastAPI 0.104) relies on. Newer httpx breaks test collection.
 httpx==0.27.0

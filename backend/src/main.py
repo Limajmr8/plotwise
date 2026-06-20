@@ -38,10 +38,12 @@ logging.basicConfig(level=getattr(logging, LOG_LEVEL, logging.INFO),
                     format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("plotwise")
 
+APP_VERSION = "2.0.0"
+
 app = FastAPI(
     title="Plotwise API",
     description="Smart farming platform for Nagaland farmers",
-    version="1.1.0"
+    version=APP_VERSION
 )
 
 CORS_ORIGINS = [
@@ -218,6 +220,64 @@ def _init_db():
     conn.close()
 
 _init_db()
+
+
+def _seed_if_empty():
+    """Populate a small set of realistic demo reports when the table is empty.
+
+    Guarded by PLOTWISE_SEED_ON_EMPTY so it only runs where intended (e.g. a
+    fresh Railway volume before a demo). Idempotent: never adds rows if any
+    report already exists. Keeps the disease-surveillance heatmap from showing
+    blank after a redeploy onto a new volume.
+    """
+    if os.environ.get("PLOTWISE_SEED_ON_EMPTY", "").lower() not in ("1", "true", "yes"):
+        return
+    import random
+    from datetime import timedelta
+
+    conn = sqlite3.connect(DB_PATH)  # _db() is defined later in the module
+    try:
+        existing = conn.execute("SELECT COUNT(*) FROM disease_reports").fetchone()[0]
+        if existing > 0:
+            return
+
+        crop_diseases = [
+            ("Potato", "Late Blight", "High"), ("Potato", "Early Blight", "Moderate"),
+            ("Maize Kharif", "Northern Leaf Blight", "High"), ("Maize Kharif", "Common Rust", "Low"),
+            ("Tomato", "Bacterial Spot", "Moderate"), ("Tomato", "Late Blight", "High"),
+            ("Chilli", "Leaf Curl", "Moderate"), ("Apple", "Apple Scab", "High"),
+            ("Grape", "Esca (Black Measles)", "High"), ("Orange", "Citrus Greening (Huanglongbing)", "High"),
+            ("Soyabean", "Pod Blight", "Moderate"), ("Ginger", "Soft Rot", "High"),
+            ("Jhum Paddy", "Blast", "High"),
+        ]
+        reporters = [
+            ("Imtisunep Longchar", "Extension Officer"), ("Akumla Jamir", "Extension Officer"),
+            ("Temjen Ao", "Farmer"), ("Vizokholie Suohu", "Block Officer"),
+            ("Dr. Tali Kikon", "Researcher"), ("Neikethozo Nagi", "District Officer"),
+            ("", ""),  # some anonymous reports
+        ]
+        rng = random.Random(2026)  # deterministic so the demo looks the same each boot
+        now = datetime.utcnow()
+        rows = []
+        for _ in range(70):
+            crop, disease, sev = rng.choice(crop_diseases)
+            district = rng.choice(DISTRICTS)
+            name, role = rng.choice(reporters)
+            conf = round(rng.uniform(0.72, 0.96) if sev == "High" else rng.uniform(0.58, 0.82), 3)
+            ts = (now - timedelta(days=rng.randint(0, 55), hours=rng.randint(0, 12))).isoformat()
+            rows.append((district, crop, disease, conf, sev, ts, name, role))
+        conn.executemany(
+            "INSERT INTO disease_reports (district, crop, disease, confidence, severity, timestamp, reporter, reporter_role) "
+            "VALUES (?,?,?,?,?,?,?,?)",
+            rows,
+        )
+        conn.commit()
+        logger.info(f"Seeded {len(rows)} demo disease reports (PLOTWISE_SEED_ON_EMPTY).")
+    finally:
+        conn.close()
+
+
+_seed_if_empty()
 
 # Log DB state at startup
 try:
@@ -524,7 +584,7 @@ def api_status():
     return {
         "app":          "Plotwise",
         "tagline":      "Smart farming for Nagaland",
-        "version":      "1.1.0",
+        "version":      APP_VERSION,
         "status":       "running",
         "data":         f"{len(CROP_RECORDS)} real records loaded from Nagaland agriculture data 2023-24",
         "districts":    len(DISTRICTS),
@@ -560,7 +620,7 @@ def health_check():
 
 @app.post("/disease/detect")
 @limiter.limit("10/minute")
-async def detect_disease(
+def detect_disease(
     request:  Request,
     file:     UploadFile = File(...),
     crop:     str = Form("Jhum Paddy"),
@@ -568,7 +628,12 @@ async def detect_disease(
     reporter: str = Form(""),
     reporter_role: str = Form("")
 ):
-    """Upload a crop leaf image → get disease prediction. Logs report to DB."""
+    """Upload a crop leaf image → get disease prediction. Logs report to DB.
+
+    Defined as a sync `def` (not async) so Starlette runs it in a threadpool —
+    this keeps the blocking TensorFlow inference off the event loop, so one slow
+    classification can't freeze every other request (prices, weather, dashboard).
+    """
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(400, "Please upload an image file.")
 
@@ -587,23 +652,42 @@ async def detect_disease(
     if use_ml:
         # Real model inference
         import numpy as np
-        img_bytes = await file.read()
+        img_bytes = file.file.read()
         if len(img_bytes) > MAX_UPLOAD_BYTES:
             raise HTTPException(413, f"Image too large ({len(img_bytes) // 1024 // 1024}MB). Maximum is 10MB.")
         try:
             arr = _preprocess_image(img_bytes)
         except Exception:
             raise HTTPException(400, "Could not process image. Please upload a valid JPEG or PNG.")
-        preds      = DISEASE_MODEL.predict(arr, verbose=0)[0]
-        class_idx  = int(preds.argmax())
-        confidence = float(preds[class_idx])
-        raw_label  = DISEASE_CLASSES.get(str(class_idx), f"class_{class_idx}")
 
-        # Get top 2 predictions for uncertainty check
-        sorted_idx = preds.argsort()[::-1]
-        top1_conf  = float(preds[sorted_idx[0]])
-        top2_conf  = float(preds[sorted_idx[1]])
-        conf_gap   = top1_conf - top2_conf   # How sure vs. next best
+        # Guard the whole inference path: a TF runtime / shape / OOM error should
+        # degrade to the graceful "uncertain" message, not escape as a raw 500.
+        try:
+            preds      = DISEASE_MODEL.predict(arr, verbose=0)[0]
+            class_idx  = int(preds.argmax())
+            confidence = float(preds[class_idx])
+            raw_label  = DISEASE_CLASSES.get(str(class_idx), f"class_{class_idx}")
+
+            # Get top 2 predictions for uncertainty check
+            sorted_idx = preds.argsort()[::-1]
+            top1_conf  = float(preds[sorted_idx[0]])
+            top2_conf  = float(preds[sorted_idx[1]])
+            conf_gap   = top1_conf - top2_conf   # How sure vs. next best
+        except Exception as e:
+            logger.error(f"ML inference failed (crop={crop}, district={district}): {e}")
+            return {
+                "crop":         crop,
+                "district":     district,
+                "disease":      "Uncertain — could not identify clearly",
+                "confidence":   0.0,
+                "severity":     "Unknown",
+                "treatment":    "The AI could not analyse this image. Try: (1) Take a closer photo of a single leaf, (2) Ensure good lighting, (3) Avoid blurry images. If symptoms persist, contact your District Agriculture Officer.",
+                "prevention":   "Use certified seeds every season. Maintain field hygiene. Rotate crops annually to break disease cycles.",
+                "nearest_help": "Contact District Agriculture Officer or call Kisan Call Centre: 1800-180-1551 (toll free)",
+                "source":       "ML model (analysis error — retake photo)",
+                "reporter":     reporter,
+                "reporter_role": reporter_role,
+            }
 
         # Uncertain if: low confidence OR too close to second prediction
         if confidence < 0.55 or (confidence < 0.70 and conf_gap < 0.15):
@@ -769,6 +853,15 @@ def get_market_prices(request: Request, crop: Optional[str] = None, district: Op
     return _get_prices(crop, district)
 
 
+def _in_window(month: int, window: list) -> bool:
+    """True if month falls within the [start, end] window (inclusive), handling
+    year wrap-around (e.g. Sugarcane harvest Dec–Jan = [12, 1])."""
+    start, end = window[0], window[-1]
+    if start <= end:
+        return start <= month <= end
+    return month >= start or month <= end
+
+
 @app.get("/calendar")
 @limiter.limit("30/minute")
 def planting_calendar(request: Request, district: str = "Kohima", crop: Optional[str] = None):
@@ -787,19 +880,18 @@ def planting_calendar(request: Request, district: str = "Kohima", crop: Optional
 
         sow_months     = [MONTH_NAMES[m] for m in info["sow"]]
         harvest_months = [MONTH_NAMES[m] for m in info["harvest"]]
-        sow_start      = min(info["sow"])
-        harvest_start  = min(info["harvest"])
 
-        if current_month in info["sow"]:
+        # Windows are [start, end] ranges that may span >2 months or wrap the
+        # year end. Check sowing → harvest → the growing arc between them;
+        # anything left is the dormant period before the next season.
+        if _in_window(current_month, info["sow"]):
             status = "sowing now"
-        elif current_month in info["harvest"]:
+        elif _in_window(current_month, info["harvest"]):
             status = "harvest time"
-        elif sow_start < current_month < harvest_start:
+        elif _in_window(current_month, [info["sow"][-1], info["harvest"][0]]):
             status = "growing"
-        elif current_month < sow_start:
-            status = "upcoming"
         else:
-            status = "off season"
+            status = "upcoming"
 
         matching  = [r for r in CROP_RECORDS if r["district"] == district and r["crop"] == c]
         avg_yield = round(sum(r["yield_kg_per_ha"] for r in matching) / len(matching)) if matching else None
@@ -1122,7 +1214,7 @@ def chat(request: Request, msg: ChatMessage):
                     reply += "Price is above MSP — good time to sell."
                 else:
                     reply += "Price is near/below MSP — consider holding if you can store safely."
-                reply += f"\n\nSource: Agmarknet / Nagaland APMC 2023-24 (as of {date.today().strftime('%d %b %Y')})"
+                reply += "\n\nIndicative price — anchored to MSP 2023-24 (CACP) and Agmarknet APMC rates."
             else:
                 reply = f"I don't have price data for {crop} yet. Try: rice, maize, ginger, potato, soyabean, mustard, tea."
         else:
@@ -1374,7 +1466,7 @@ def export_pdf_report(request: Request, district: str = "Kohima"):
         sub_style,
     ))
     elements.append(Paragraph(
-        "Prepared for: Director of Agriculture, Government of Nagaland",
+        "Submitted for review to: Director of Agriculture, Government of Nagaland",
         prepared_style,
     ))
     elements.append(Spacer(1, 6*mm))
@@ -1469,7 +1561,7 @@ def export_pdf_report(request: Request, district: str = "Kohima"):
     elements.append(Spacer(1, 5*mm))
 
     # ─── Market Prices ───
-    elements.append(Paragraph("Market Prices (Today)", h2_style))
+    elements.append(Paragraph("Indicative Market Prices (MSP 2023-24 anchor)", h2_style))
     price_data = _get_prices(district=district)
     price_rows = [["Crop", "Price (Rs/qtl)", "MSP (Rs/qtl)", "Trend", "Advisory"]]
     for p in price_data.get("prices", [])[:15]:
@@ -1496,8 +1588,8 @@ def export_pdf_report(request: Request, district: str = "Kohima"):
         footer_style,
     ))
     elements.append(Paragraph(
-        "This report was generated by Plotwise — an agricultural intelligence platform built for the "
-        "Nagaland Agriculture Department. For queries contact: plotwise@nagaland.gov.in",
+        "Generated by Plotwise — an agricultural intelligence platform submitted for review to the "
+        "Nagaland Agriculture Department. Developed by Limawapang L Jamir · limawapang8@gmail.com",
         footer_style,
     ))
 

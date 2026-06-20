@@ -10,6 +10,11 @@ jobs:
     name: Build APK
     runs-on: ubuntu-latest
 
+    # Job-level env so `if: env.KEYSTORE_BASE64 != ''` conditions can see the
+    # secret (step-level env is not visible to a step's own `if:` expression).
+    env:
+      KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

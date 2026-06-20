@@ -247,7 +247,7 @@ label{display:block;font-size:0.72rem;font-weight:600;text-transform:uppercase;l
 /* ─── DASHBOARD ─────────────────────────────────────────────────── */
 .chart-wrap{position:relative;margin-bottom:8px}
 .chart-wrap canvas{max-height:200px}
-.source-note{font-size:0.68rem;color:rgba(242,239,230,0.18);margin-top:8px}
+.source-note{font-size:0.68rem;color:rgba(242,239,230,0.5);margin-top:8px}
 .offline-bar{position:fixed;top:0;left:0;right:0;z-index:9999;background:#b91c1c;color:#fff;text-align:center;padding:10px 16px;font-size:0.82rem;font-family:var(--font-body);transform:translateY(-100%);transition:transform .3s ease}
 .offline-bar.show{transform:translateY(0)}
   </style>
@@ -508,7 +508,7 @@ label{display:block;font-size:0.72rem;font-weight:600;text-transform:uppercase;l
       <div class="about-dev-sub">B.Tech Computer Science · Bennett University</div>
       <div class="about-dev-sub">Mokokchung, Nagaland</div>
     </div>
-    <p style="margin-top:20px;font-size:0.72rem;color:rgba(242,239,230,0.2);text-align:center">Plotwise v1.1.0 · Nagaland Agriculture Data 2023-24</p>
+    <p style="margin-top:20px;font-size:0.72rem;color:rgba(242,239,230,0.45);text-align:center">Plotwise v2.0.0 · Nagaland Agriculture Data 2023-24</p>
   </div>
 </div>
 
@@ -817,7 +817,7 @@ async function runDetect(){
             The AI could not clearly identify the disease. The photo may be unclear, or the disease is not in our training data.
           </div>
           <div class="r-box"><span class="r-box-lbl">What to try</span>${r.treatment}</div>
-          <div style="margin-top:10px;font-size:0.72rem;color:rgba(242,239,230,0.25)">${r.nearest_help}</div>
+          <div style="margin-top:10px;font-size:0.72rem;color:rgba(242,239,230,0.5)">${r.nearest_help}</div>
         </div>`;
     } else {
       const warnBanner = isLow?`<div style="background:rgba(255,180,60,0.06);border:1px solid rgba(255,180,60,0.15);border-radius:10px;padding:10px;margin-bottom:12px;font-size:0.76rem;color:var(--amber)">Low confidence — verify with an agriculture expert.</div>`:'';
@@ -833,8 +833,8 @@ async function runDetect(){
           </div>
           <div class="r-box"><span class="r-box-lbl">Treatment</span>${r.treatment}</div>
           <div class="r-box"><span class="r-box-lbl">Prevention</span>${r.prevention}</div>
-          <div style="margin-top:10px;font-size:0.72rem;color:rgba(242,239,230,0.25)">${r.nearest_help}</div>
-          <div style="margin-top:4px;font-size:0.66rem;color:rgba(242,239,230,0.15)">Source: ${r.source}</div>
+          <div style="margin-top:10px;font-size:0.72rem;color:rgba(242,239,230,0.5)">${r.nearest_help}</div>
+          <div style="margin-top:4px;font-size:0.66rem;color:rgba(242,239,230,0.5)">Source: ${r.source}</div>
         </div>`;
     }
   }catch(err){
@@ -918,7 +918,7 @@ async function loadSchemes(){
         <div class="sch-elig">Eligibility: ${s.eligibility}</div>
         <a class="sch-link" href="https://${s.apply_at}" target="_blank" rel="noopener">Apply at ${s.apply_at} →</a>
       </div>
-    `).join('') + `<div style="font-size:0.72rem;color:rgba(242,239,230,0.2);margin-top:10px">${data.tip}</div>`;
+    `).join('') + `<div style="font-size:0.72rem;color:rgba(242,239,230,0.45);margin-top:10px">${data.tip}</div>`;
   }catch(err){
     el.innerHTML = pwError('Could not load schemes. Please try again.', 'loadSchemes()');
   }
