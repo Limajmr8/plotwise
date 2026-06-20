@@ -215,6 +215,24 @@ function setLang(lang) {
   document.documentElement.lang = lang === 'nag' ? 'nag' : 'en';
 }
 
+/**
+ * Translate a runtime-generated string by key, for text built in JS (result
+ * cards, status pills, trend labels) that can't carry a data-i18n attribute.
+ * Falls back to the English entry, then to the provided fallback, then the key
+ * itself — so an untranslated string degrades to English, never to blank.
+ *
+ * @param {string} key       Dictionary key
+ * @param {string} [fallback] Text to use if no translation exists
+ * @returns {string}
+ */
+function t(key, fallback) {
+  const dict = _i18nDict[currentLang];
+  if (dict && dict[key] != null) return dict[key];
+  const en = _i18nDict.en;
+  if (en && en[key] != null) return en[key];
+  return fallback != null ? fallback : key;
+}
+
 
 /* ── Loading & Error UI Helpers ───────────────────────────────────── */
 
