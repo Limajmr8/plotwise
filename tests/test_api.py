@@ -13,7 +13,7 @@ import os
 # Add project root to path so imports work
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from backend.src.main import app
+from backend.src.main import app, DISEASE_MODEL, _confidence_tier
 
 
 client = TestClient(app)
@@ -379,6 +379,57 @@ class TestDiseaseDetect:
         assert data["reporter"] == "Test Reporter"
         assert data["reporter_role"] == "Extension Officer"
         assert "source" in data
+
+    @pytest.mark.skipif(DISEASE_MODEL is None, reason="ML model not available in this environment")
+    def test_detect_ml_inference_path(self):
+        """Exercise the real model branch (crop in ML_SUPPORTED_CROPS).
+
+        Asserts the response is well-formed regardless of which confidence tier
+        the image lands in — this is the headline feature and was previously
+        untested (only error/knowledge-base branches had coverage)."""
+        import io
+        from PIL import Image
+        img = Image.new("RGB", (224, 224), color="green")
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG")
+        buf.seek(0)
+
+        r = client.post("/disease/detect",
+            files={"file": ("potato_leaf.jpg", buf, "image/jpeg")},
+            data={"crop": "Potato", "district": "Kohima"},
+        )
+        assert r.status_code == 200
+        data = r.json()
+        # The real model ran (not the knowledge-base fallback)
+        assert data["source"].startswith("ML model")
+        assert 0.0 <= data["confidence"] <= 1.0
+        assert data["severity"] in ["High", "Moderate", "Low", "Unknown"]
+        assert data["crop"]  # a crop was returned (mapped or user-selected)
+        assert "treatment" in data
+
+
+# ── Confidence Tiering (pure logic — no TensorFlow needed) ────────────────────
+
+class TestConfidenceTier:
+    def test_confident_tier(self):
+        # High confidence, clear margin over runner-up
+        assert _confidence_tier(0.92, 0.40) == "confident"
+        assert _confidence_tier(0.70, 0.20) == "confident"  # exactly at threshold
+
+    def test_low_confidence_tier(self):
+        # 55–70% with a clear-enough gap
+        assert _confidence_tier(0.62, 0.30) == "low_confidence"
+        assert _confidence_tier(0.69, 0.16) == "low_confidence"
+
+    def test_uncertain_low_confidence(self):
+        # Below 55% is always uncertain
+        assert _confidence_tier(0.50, 0.40) == "uncertain"
+        assert _confidence_tier(0.10, 0.05) == "uncertain"
+
+    def test_uncertain_close_runner_up(self):
+        # Under 70% AND the top-2 gap is too small → uncertain even if >55%
+        assert _confidence_tier(0.68, 0.10) == "uncertain"
+        assert _confidence_tier(0.60, 0.14) == "uncertain"
 
 
 # ── Security Headers ──────────────────────────────────────────────────────────

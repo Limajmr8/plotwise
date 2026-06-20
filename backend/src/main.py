@@ -339,6 +339,20 @@ def _preprocess_image(img_bytes: bytes):
     arr = np.array(img, dtype="float32")  # no /255 — EfficientNetB0 has built-in preprocessing
     return arr[None]  # (1, 224, 224, 3)
 
+
+def _confidence_tier(confidence: float, conf_gap: float) -> str:
+    """Map a prediction's confidence + top-2 gap to a tier.
+
+    Returns 'confident' (>=70% and clear margin), 'low_confidence' (55-70%),
+    or 'uncertain' (<55%, or <70% with the runner-up too close). Pure function
+    so the 3-tier logic is testable without TensorFlow.
+    """
+    if confidence < 0.55 or (confidence < 0.70 and conf_gap < 0.15):
+        return "uncertain"
+    if confidence < 0.70:
+        return "low_confidence"
+    return "confident"
+
 # ── Disease knowledge base ────────────────────────────────────────────────────
 
 DISEASES = {
@@ -689,11 +703,11 @@ def detect_disease(
                 "reporter_role": reporter_role,
             }
 
-        # Uncertain if: low confidence OR too close to second prediction
-        if confidence < 0.55 or (confidence < 0.70 and conf_gap < 0.15):
-            use_ml = "uncertain"
-        elif confidence < 0.70:
-            use_ml = "low_confidence"
+        # Uncertain if: low confidence OR too close to second prediction.
+        # use_ml stays True when 'confident'.
+        tier = _confidence_tier(confidence, conf_gap)
+        if tier != "confident":
+            use_ml = tier
 
     # Map model class -> human-readable disease name (shared across confidence tiers)
     LABEL_MAP = {
