@@ -17,8 +17,16 @@ COPY backend/ backend/
 COPY frontend/src/ frontend/src/
 COPY .env.example .env.example
 
-# Railway sets PORT dynamically
+# Non-root user (required by Hugging Face Spaces; good practice everywhere).
+# chown /app so the SQLite DB in data/ stays writable.
+RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+USER appuser
+
+# Railway/HF set PORT dynamically; HF Spaces reads app_port from README frontmatter
 ENV PORT=8080
+# Seed ~70 demo disease reports on first boot if the DB is empty (idempotent) —
+# keeps the surveillance heatmap populated on ephemeral/fresh containers.
+ENV PLOTWISE_SEED_ON_EMPTY=1
 EXPOSE ${PORT}
 
 # Healthcheck for container orchestrators
