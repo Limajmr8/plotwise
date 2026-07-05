@@ -848,9 +848,12 @@ def _get_prices(crop: Optional[str] = None, district: Optional[str] = None) -> d
             "trend":         trend,
             "trend_pct":     _daily_trend_pct(c),
             "last_updated":  date.today().strftime("%Y-%m-%d"),
-            "tip":           "Good time to sell — above MSP" if trend == "up"
-                             else "Consider holding stock"   if trend == "down"
-                             else "Stable — close to MSP",
+            # Advisory must agree with the displayed price vs MSP (not the
+            # trend), or the tip can claim "above MSP" while showing a price
+            # below it — a contradiction an agriculture officer will catch.
+            "tip":           "Above MSP — good time to sell"    if price > base
+                             else "Below MSP — consider holding" if price < base
+                             else "At MSP",
         })
 
     return {
