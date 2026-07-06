@@ -69,7 +69,8 @@ jobs:
         working-directory: android
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-          PLOTWISE_STORE_FILE: app/plotwise-release.jks
+          # Path resolved by file() relative to the app module dir (android/app)
+          PLOTWISE_STORE_FILE: plotwise-release.jks
           PLOTWISE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           PLOTWISE_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           PLOTWISE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}

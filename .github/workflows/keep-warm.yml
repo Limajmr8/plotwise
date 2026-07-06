@@ -1,0 +1,20 @@
+name: Keep HF Space Warm
+
+# Free Hugging Face Spaces sleep after ~48h without traffic. This ping keeps
+# the demo deployment awake so it's never cold when someone opens it.
+on:
+  schedule:
+    - cron: '*/30 * * * *'   # every 30 minutes
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping /health
+        run: |
+          code=$(curl -s -o /tmp/health.json -w "%{http_code}" -m 60 https://limajmr-plotwise.hf.space/health || echo "000")
+          echo "HTTP $code"
+          cat /tmp/health.json || true
+          # Fail visibly if the Space is down so it shows red in Actions
+          [ "$code" = "200" ]
