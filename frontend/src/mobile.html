@@ -10,8 +10,11 @@
   <link rel="manifest" href="/static/manifest.json"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <!-- Non-blocking font load: page renders on system fonts if the network is slow -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/></noscript>
+  <!-- Self-hosted Chart.js: no CDN dependency inside the Capacitor WebView -->
+  <script src="/static/chart.umd.min.js" defer></script>
   <style>
 /* ─── RESET & BASE ──────────────────────────────────────────────── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -721,12 +724,12 @@ let nativeCapturedFile = null;
 
 async function openNativeCamera(){
   try {
-    const { Camera, CameraResultType, CameraSource } = window.Capacitor.Plugins;
+    const Camera = window.Capacitor.Plugins.Camera;
     if(!Camera) { document.getElementById('detect-file').click(); return; }
     const photo = await Camera.getPhoto({
       quality: 85,
-      resultType: CameraResultType || 'base64',
-      source: CameraSource || 'CAMERA',
+      resultType: 'base64',   // Capacitor enum wire values (CameraResultType.Base64)
+      source: 'CAMERA',       // CameraSource.Camera
       width: 640,
       height: 640,
       correctOrientation: true
@@ -743,7 +746,9 @@ async function openNativeCamera(){
     img.src = `data:image/jpeg;base64,${photo.base64String}`;
     img.style.display = 'block';
   } catch(e) {
-    // User cancelled or camera unavailable — fall back to file input
+    // User cancelled → do nothing. Camera unavailable/denied → fall back to
+    // the file picker (programmatic click has isTrusted=false, so the
+    // dropzone handler lets it through instead of re-opening the camera).
     if(e.message && !e.message.includes('cancel')){
       document.getElementById('detect-file').click();
     }
@@ -758,12 +763,31 @@ if(isNative && window.Capacitor.Plugins.Network){
   });
 }
 
+// Android hardware back button: go to Home first instead of instantly
+// closing the app (registering a listener disables Capacitor's default
+// exit). Guarded — a no-op on APKs without the @capacitor/app plugin.
+const AppPlugin = isNative && window.Capacitor.Plugins.App;
+if(AppPlugin && AppPlugin.addListener){
+  AppPlugin.addListener('backButton', ()=>{
+    if(currentTab !== 'home'){ switchTab('home'); }
+    else if(AppPlugin.minimizeApp){ AppPlugin.minimizeApp(); }
+    else if(AppPlugin.exitApp){ AppPlugin.exitApp(); }
+  });
+}
+
 // ─── DISEASE DETECTION ───────────────────────────────────────────
-// Dropzone click: use native camera in app, file input on web
+// The invisible file input (.dz-input) covers the whole dropzone and opens
+// the picker natively on web. In the native app we must preventDefault so a
+// tap doesn't open BOTH the file chooser and the camera at once.
+// e.isTrusted: only intercept REAL user taps — openNativeCamera's fallback
+// paths call detect-file.click() programmatically (isTrusted=false), and
+// intercepting those would cancel the picker and loop back into the camera
+// forever (e.g. after a camera-permission denial).
 document.getElementById('detect-dropzone').addEventListener('click', function(e){
-  if(e.target.closest('.btn-primary')) return; // Don't intercept button
-  if(isNative){ openNativeCamera(); }
-  else { document.getElementById('detect-file').click(); }
+  if(isNative && e.isTrusted){
+    e.preventDefault();
+    openNativeCamera();
+  }
 });
 
 document.getElementById('detect-file').addEventListener('change', function(e){
@@ -1026,6 +1050,12 @@ window.onload = ()=>{
   initHome();
   updateOnlineStatus();
   if(currentLang!=='en') setLang(currentLang);
+
+  // The Capacitor WebView silently drops file downloads — hide the CSV/PDF
+  // export buttons in the native app (they work in normal browsers).
+  if(isNative){
+    document.querySelectorAll('.btn-export').forEach(b => b.style.display = 'none');
+  }
 };
 </script>
 </body>

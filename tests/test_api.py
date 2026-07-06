@@ -56,6 +56,57 @@ class TestPages:
         assert r.status_code == 200
         assert "text/html" in r.headers["content-type"]
 
+    def test_root_redirects_phones_to_mobile(self):
+        """Phone user-agents get the compact tabbed UI instead of the long landing page."""
+        r = client.get("/", headers={
+            "User-Agent": "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Mobile Safari/537.36"
+        }, follow_redirects=False)
+        assert r.status_code == 307
+        assert r.headers["location"] == "/mobile"
+
+    def test_root_desktop_override_on_phone(self):
+        """?desktop=1 forces the full landing page even on a phone."""
+        r = client.get("/?desktop=1", headers={
+            "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) Mobile/15E148"
+        }, follow_redirects=False)
+        assert r.status_code == 200
+        assert "text/html" in r.headers["content-type"]
+
+    def test_root_no_redirect_for_desktop(self):
+        r = client.get("/", headers={
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126.0 Safari/537.36"
+        }, follow_redirects=False)
+        assert r.status_code == 200
+
+    def test_root_no_redirect_for_ipad(self):
+        """iPads have desktop-class screens — keep the full site."""
+        r = client.get("/", headers={
+            "User-Agent": "Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148"
+        }, follow_redirects=False)
+        assert r.status_code == 200
+
+    def test_root_no_redirect_for_android_tablet(self):
+        """Android tablets omit the Mobile UA token — keep the full site."""
+        r = client.get("/", headers={
+            "User-Agent": "Mozilla/5.0 (Linux; Android 13; SM-X710) AppleWebKit/537.36 Chrome/126.0 Safari/537.36"
+        }, follow_redirects=False)
+        assert r.status_code == 200
+
+    def test_root_bare_desktop_flag_no_422(self):
+        """Bare /?desktop (no value) must force desktop, never a 422 error page."""
+        for q in ["/?desktop", "/?desktop=", "/?desktop=true"]:
+            r = client.get(q, headers={
+                "User-Agent": "Mozilla/5.0 (Linux; Android 14; Pixel 8) Mobile Safari/537.36"
+            }, follow_redirects=False)
+            assert r.status_code == 200, f"{q} -> {r.status_code}"
+
+    def test_service_worker_served_from_root(self):
+        """SW must be served from / so its scope covers page navigations."""
+        r = client.get("/sw.js")
+        assert r.status_code == 200
+        assert "javascript" in r.headers["content-type"]
+        assert "plotwise-v" in r.text
+
 
 # ── Districts & Crops ─────────────────────────────────────────────────────────
 

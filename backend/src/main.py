@@ -12,7 +12,7 @@ Disease reports stored in SQLite for heatmap analytics.
 from fastapi import FastAPI, File, Form, UploadFile, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, StreamingResponse, JSONResponse
+from fastapi.responses import FileResponse, StreamingResponse, JSONResponse, RedirectResponse
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime, date
@@ -545,13 +545,29 @@ FRONTEND_DIR = os.path.join(BASE_DIR, "frontend", "src")
 app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
 
-@app.get("/")
-def root():
-    """Serve the frontend HTML."""
+def _serve_index():
     index = os.path.join(FRONTEND_DIR, "index.html")
     if os.path.exists(index):
         return FileResponse(index)
-    return {"app": "Plotwise", "status": "running", "model_loaded": DISEASE_MODEL is not None}
+    return JSONResponse({"app": "Plotwise", "status": "running", "model_loaded": DISEASE_MODEL is not None})
+
+
+@app.get("/")
+def root(request: Request, desktop: Optional[str] = None):
+    """Serve the frontend HTML.
+
+    Phones get the compact tabbed app (/mobile) instead of the long desktop
+    landing page — override with /?desktop (any value) to force the full site.
+    """
+    ua = request.headers.get("user-agent", "")
+    # "Mobi" covers all phone browsers (Android phones include "Mobile");
+    # Android tablets omit it and correctly get the desktop page.
+    is_phone = ("Mobi" in ua or "iPhone" in ua) and "iPad" not in ua
+    # Presence of ?desktop counts as true (bare /?desktop must not 422)
+    force_desktop = desktop is not None and desktop.lower() not in ("0", "false", "no")
+    if is_phone and not force_desktop:
+        return RedirectResponse("/mobile", status_code=307)
+    return _serve_index()
 
 
 @app.get("/mobile")
@@ -561,7 +577,15 @@ def mobile_app():
     if os.path.exists(mobile):
         return FileResponse(mobile)
     # Fallback to main index if mobile.html doesn't exist yet
-    return root()
+    return _serve_index()
+
+
+@app.get("/sw.js")
+def service_worker():
+    """Serve the service worker from the root path so its scope covers page
+    navigations ("/", "/mobile") — a worker served from /static/ can only
+    control /static/* requests."""
+    return FileResponse(os.path.join(FRONTEND_DIR, "sw.js"), media_type="application/javascript")
 
 
 # ── Demo User Profile (lightweight auth substitute) ───────────────────────────

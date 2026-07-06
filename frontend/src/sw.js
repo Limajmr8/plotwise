@@ -1,12 +1,13 @@
-const CACHE_NAME = 'plotwise-v3';
+const CACHE_NAME = 'plotwise-v4';
 const STATIC_ASSETS = [
-  '/',
+  '/?desktop=1',
+  '/mobile',
   '/static/plotwise-core.js',
   '/static/manifest.json',
   '/static/icon-192.png',
   '/static/icon-512.png',
   'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap',
-  'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js',
+  '/static/chart.umd.min.js',
   'https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js',
   'https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js',
   'https://unpkg.com/lenis@1.1.18/dist/lenis.min.js',
@@ -42,6 +43,19 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
+  // Page navigations: network FIRST so server redirects (phone -> /mobile)
+  // and fresh HTML always win; cached copy is only an offline fallback.
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      fetch(e.request).catch(() => {
+        const path = url.pathname;
+        const fallback = path.startsWith('/mobile') ? '/mobile' : '/?desktop=1';
+        return caches.match(fallback).then((c) => c || caches.match('/mobile'));
+      })
+    );
+    return;
+  }
+
   // Static assets: cache first, fallback to network
   e.respondWith(
     caches.match(e.request).then((cached) => {
@@ -53,11 +67,6 @@ self.addEventListener('fetch', (e) => {
         }
         return res;
       });
-    }).catch(() => {
-      // Offline fallback for navigation
-      if (e.request.mode === 'navigate') {
-        return caches.match('/');
-      }
     })
   );
 });
