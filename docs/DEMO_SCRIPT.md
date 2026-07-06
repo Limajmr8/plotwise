@@ -8,7 +8,7 @@
 
 ## BEFORE YOU START (5 min prior)
 
-1. Open laptop browser → `https://plotwise-production.up.railway.app`
+1. Open laptop browser → `https://limajmr-plotwise.hf.space`
 2. Open phone → Plotwise app (verify it loads)
 3. Confirm: WiFi working, projector connected, PDF printed
 4. Set browser zoom to 100%, clear any browser tabs except Plotwise
@@ -88,7 +88,7 @@
 
 > "Farmers always ask 'when do I sow?' — this shows them."
 
-1. Point to status badges: "See — Jhum Paddy shows 'sowing now' because it's May"
+1. Point to status badges: "See — Maize shows 'harvest time' and Jhum Paddy is 'growing' because it's July. This updates itself every month."
 2. Switch district to Dimapur: "Different districts, different crops appear"
 
 **[Click Scheme Finder tab]**
@@ -148,7 +148,7 @@
 
 > "Even offline, previously loaded data stays visible. Market prices they checked yesterday — still there. The moment connection returns, everything syncs."
 
-> "The system runs on Railway cloud with health monitoring. If the server has issues, we have a local backup that starts in 5 seconds."
+> "The system runs in the cloud with health monitoring. If the server has issues, we have a local backup that starts in 5 seconds."
 
 ---
 

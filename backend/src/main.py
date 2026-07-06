@@ -50,7 +50,7 @@ CORS_ORIGINS = [
     o.strip() for o in
     os.environ.get(
         "CORS_ORIGINS",
-        "https://plotwise-production.up.railway.app,capacitor://localhost,"
+        "https://limajmr-plotwise.hf.space,capacitor://localhost,"
         "http://localhost,http://localhost:8000,http://127.0.0.1:8000"
     ).split(",")
     if o.strip()

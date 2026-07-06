@@ -65,11 +65,11 @@ keras==3.10.0            # MUST match the Keras version that saved the model on 
 - **SEO**: Meta description, keywords, Open Graph, Twitter cards, preconnect hints
 
 ## Android App (Capacitor)
-- **Package**: `com.plotwise.app` — Capacitor loads the mobile-optimized UI from Railway
-- **Config**: `capacitor.config.ts` — loads `https://plotwise-production.up.railway.app/mobile`
+- **Package**: `com.plotwise.app` — Capacitor loads the mobile-optimized UI from Hugging Face Spaces
+- **Config**: `capacitor.config.ts` — loads `https://limajmr-plotwise.hf.space/mobile`
 - **Mobile UI**: `frontend/src/mobile.html` — standalone file with bottom tab nav (Home/Detect/Market/Farm/Chat), no GSAP/Lenis, touch-optimized
 - **Backend route**: `/mobile` serves `mobile.html` (added to `main.py`)
-- **Plugins**: @capacitor/splash-screen, @capacitor/status-bar
+- **Plugins**: @capacitor/camera, @capacitor/network, @capacitor/splash-screen, @capacitor/status-bar
 - **Icons**: Generated from `frontend/src/icon-512.png` into all mipmap densities
 - **Theme**: Dark (#060905 bg, #3a6828 primary green) — matches web app
 - **Build**: GitHub Actions (`build-android.yml`) auto-builds APK on push to main
@@ -97,7 +97,7 @@ keras==3.10.0            # MUST match the Keras version that saved the model on 
 - [x] PWA, WebP images, Nagamese i18n, chatbot, weather, CSV export
 - [x] About/Methodology section for government credibility
 - [x] Removed all false claims ("free", "no data collected", "works offline", "open source")
-- [x] Deploy to Railway — https://plotwise-production.up.railway.app
+- [x] Deploy — https://limajmr-plotwise.hf.space (HF Spaces; Railway trial expired Jul 2026)
 - [ ] June 2026 department presentation (B2G pitch)
 - [x] Android APK — Capacitor + GitHub Actions CI/CD
 - [x] Mobile-optimized app UI — `frontend/src/mobile.html` with bottom tab nav (Home/Detect/Market/Farm/Chat)
