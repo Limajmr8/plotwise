@@ -45,14 +45,19 @@
 
 **[Click Disease Detection tab]**
 
+> ⚠️ USE A VETTED IMAGE from the `demo-images/` folder (or a single leaf on a
+> plain background). Pick the crop the filename tells you, e.g. Potato.
+
 1. Select **Potato** from crop dropdown
 2. Select **Kohima** as district
-3. Upload prepared leaf image (Late Blight — high confidence)
+3. Upload a vetted Late Blight image (verified ~99% confident)
 4. **Wait for result** (~3-5 seconds)
 
 **[Point to result]**
 
-> "The AI identified Late Blight with 89% confidence. It immediately tells the farmer: what the disease is, how severe it is, and exactly what treatment to apply."
+> "The AI identified Late Blight with high confidence. It immediately tells the farmer: what the disease is, how severe it is, and exactly what treatment to apply."
+
+> "And notice — it gives a confidence level. If it's ever unsure, it says so and tells the farmer to retake the photo or consult an officer, instead of guessing. It will never hand a farmer wrong advice that costs them a crop."
 
 > "Every detection is logged with who reported it, when, and where. Full accountability."
 
@@ -181,7 +186,8 @@
 |---------|-----------------|
 | Server is slow | "The AI is processing — let me show you the dashboard while we wait" → switch to prices/calendar |
 | No internet | Switch to mobile hotspot; show offline mode |
-| Camera fails on phone | Use pre-uploaded test images: "Here's one our extension officer took yesterday" |
+| Camera fails on phone | Use pre-uploaded vetted images from demo-images/ folder |
+| Detection says "Uncertain" | Own it as a feature: "It refuses to guess when unsure — safer for farmers. The pilot fine-tunes it on Nagaland field photos." Then upload a vetted image to show a clean result. |
 | PDF won't generate | Open browser tab: `/api/export/report?district=Kohima` |
 | Question you don't know | "That's a great point, Sir. I'll prepare that data and share it with your office this week." |
 
