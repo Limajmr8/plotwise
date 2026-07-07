@@ -340,6 +340,42 @@ def _preprocess_image(img_bytes: bytes):
     return arr[None]  # (1, 224, 224, 3)
 
 
+# Which model class labels are plausible for each crop the user can pick.
+# The user tells us the crop, so we restrict the prediction to that crop's
+# classes — this removes nonsensical cross-crop guesses (e.g. a tomato leaf
+# called "citrus greening") and sharply improves real-world accuracy.
+# Chilli and Pepper are the same botanical family (Capsicum) — the model
+# cannot separate them, so they share the pepper classes.
+CROP_TO_CLASSES = {
+    "Apple":   ["Apple_AppleScab", "Apple_BlackRot"],
+    "Chilli":  ["Chilli_LeafCurl", "Healthy_Pepper"],
+    "Grape":   ["Grape_BlackRot", "Grape_Esca"],
+    "Maize":   ["Maize_Cercospora_GrayLeafSpot", "Maize_CommonRust",
+                "Maize_NorthernLeafBlight", "Healthy_Maize"],
+    "Orange":  ["Orange_Haunglongbing"],
+    "Pepper":  ["Pepper_BacterialSpot", "Healthy_Pepper"],
+    "Potato":  ["Potato_EarlyBlight", "Potato_LateBlight", "Healthy_Potato"],
+    "Soyabean": ["Soybean_Healthy"],
+    "Tomato":  ["Tomato_BacterialSpot", "Tomato_EarlyBlight", "Tomato_LateBlight",
+                "Tomato_LeafMold", "Tomato_SeptoriaLeafSpot", "Tomato_YellowLeafCurl",
+                "Healthy_Tomato"],
+}
+
+
+def _base_crop(crop: str) -> Optional[str]:
+    """Resolve a UI crop label (e.g. 'Maize Kharif', 'Soybean') to a base crop
+    key in CROP_TO_CLASSES."""
+    c = crop.strip()
+    if c in CROP_TO_CLASSES:
+        return c
+    if c.startswith("Maize"):  return "Maize"
+    if c.startswith("Tomato"): return "Tomato"
+    if c in ("Soybean", "Soyabean"): return "Soyabean"
+    if c.startswith("Chilli"): return "Chilli"
+    if c.startswith("Pepper"): return "Pepper"
+    return None
+
+
 def _confidence_tier(confidence: float, conf_gap: float) -> str:
     """Map a prediction's confidence + top-2 gap to a tier.
 
@@ -702,15 +738,36 @@ def detect_disease(
         # degrade to the graceful "uncertain" message, not escape as a raw 500.
         try:
             preds      = DISEASE_MODEL.predict(arr, verbose=0)[0]
-            class_idx  = int(preds.argmax())
-            confidence = float(preds[class_idx])
-            raw_label  = DISEASE_CLASSES.get(str(class_idx), f"class_{class_idx}")
+            raw_peak   = float(preds.max())   # model's absolute certainty (all 24 classes)
 
-            # Get top 2 predictions for uncertainty check
-            sorted_idx = preds.argsort()[::-1]
-            top1_conf  = float(preds[sorted_idx[0]])
-            top2_conf  = float(preds[sorted_idx[1]])
-            conf_gap   = top1_conf - top2_conf   # How sure vs. next best
+            # Crop-aware: the user picked a crop, so restrict the decision to that
+            # crop's classes (>=2 needed to discriminate). Confidence is then the
+            # probability *within* the crop's options. Single-class crops (Orange,
+            # Soyabean) can't be discriminated, so they fall through to the raw path.
+            base = _base_crop(crop)
+            label_to_i = {v: int(k) for k, v in DISEASE_CLASSES.items()}
+            allowed = [label_to_i[l] for l in CROP_TO_CLASSES.get(base, []) if l in label_to_i] if base else []
+
+            if len(allowed) >= 2:
+                sub        = np.array([preds[i] for i in allowed], dtype="float64")
+                sub_norm   = sub / sub.sum()
+                order      = sub_norm.argsort()[::-1]
+                class_idx  = allowed[int(order[0])]
+                confidence = float(sub_norm[int(order[0])])
+                conf_gap   = float(sub_norm[int(order[0])] - sub_norm[int(order[1])])
+                # Safety net: if the model's absolute peak (over ALL classes) is
+                # very low, the photo probably isn't a clear leaf at all — stay
+                # honest and report uncertain regardless of within-crop numbers.
+                if raw_peak < 0.30:
+                    confidence = raw_peak
+                    conf_gap   = 0.0
+            else:
+                class_idx  = int(preds.argmax())
+                confidence = float(preds[class_idx])
+                sorted_idx = preds.argsort()[::-1]
+                conf_gap   = float(preds[sorted_idx[0]] - preds[sorted_idx[1]])
+
+            raw_label  = DISEASE_CLASSES.get(str(class_idx), f"class_{class_idx}")
         except Exception as e:
             logger.error(f"ML inference failed (crop={crop}, district={district}): {e}")
             return {
