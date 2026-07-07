@@ -145,15 +145,27 @@
 
 ---
 
-## MINUTE 13–14: Offline + Reliability
+## MINUTE 13–14: Offline — THE DIFFERENTIATOR
 
-> "Now — what happens when there's no internet? We know Nagaland's connectivity."
+> "Now the most important part — because we know Nagaland's connectivity."
 
-**[If possible, demonstrate on phone]**
+**[Open the app once with internet first so the phone caches everything, THEN turn on Airplane Mode in front of them]**
 
-> "Even offline, previously loaded data stays visible. Market prices they checked yesterday — still there. The moment connection returns, everything syncs."
+1. Turn on **Airplane Mode** (show them the phone — no signal, no wifi)
+2. Go to **Detect** → pick a crop → upload/photograph a leaf → **Analyse**
+3. Result appears — disease, confidence, treatment — **with the network off**
 
-> "The system runs in the cloud with health monitoring. If the server has issues, we have a local backup that starts in 5 seconds."
+> "This is the AI running ON the phone, not in the cloud. A farmer in a village with zero signal photographs a sick leaf and gets a diagnosis with treatment — offline, on an ordinary Android phone."
+
+4. Show **Market**, **Farm → Calendar/Schemes** still working in airplane mode
+
+> "Prices, planting calendar, scheme finder — all work offline too. And every diagnosis made offline is saved on the phone and automatically syncs to your department's surveillance map the moment they're back in coverage. No data is ever lost."
+
+**[Turn Airplane Mode off]**
+
+> "No web app an agency builds will do this. This is built for how Nagaland actually connects."
+
+> "And because the AI is on the phone, there's no server bottleneck — it works whether one farmer uses it or a hundred thousand do."
 
 ---
 
@@ -162,13 +174,13 @@
 **[Face audience directly]**
 
 > "To summarize — Plotwise gives your department:
-> 1. AI disease detection across 24 diseases, 9 crops
-> 2. Live market intelligence for 33 crops with MSP tracking
-> 3. Planting calendar for all 16 districts
-> 4. Government scheme matching — farmers find what they qualify for
-> 5. Weather advisories with farming context
-> 6. Full audit trail — who reported what, when, where
-> 7. Works in Nagamese, works offline, works on any phone"
+> 1. **AI disease detection that runs OFFLINE, on the farmer's own phone** — built for Nagaland's connectivity
+> 2. Prices, calendar, and schemes that also work with no network
+> 3. Offline diagnoses that sync to a live department surveillance map
+> 4. AI disease detection across 24 diseases, 9 crops
+> 5. Market intelligence for 33 crops with MSP tracking
+> 6. Planting calendar + scheme matching for all 16 districts
+> 7. Full audit trail, Nagamese support, works on any Android phone"
 
 **[Pause]**
 
