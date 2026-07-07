@@ -748,6 +748,12 @@ def detect_disease(
             label_to_i = {v: int(k) for k, v in DISEASE_CLASSES.items()}
             allowed = [label_to_i[l] for l in CROP_TO_CLASSES.get(base, []) if l in label_to_i] if base else []
 
+            # crop_mass = how much raw probability the model puts on the selected
+            # crop's classes. Near 1.0 for a real leaf of that crop; near 0 for a
+            # non-leaf photo or the wrong crop. This is the reliable garbage gate.
+            crop_mass = float(sum(preds[i] for i in allowed)) if allowed else 1.0
+            NOT_THIS_CROP = crop_mass < 0.30
+
             if len(allowed) >= 2:
                 sub        = np.array([preds[i] for i in allowed], dtype="float64")
                 sub_norm   = sub / sub.sum()
@@ -755,17 +761,18 @@ def detect_disease(
                 class_idx  = allowed[int(order[0])]
                 confidence = float(sub_norm[int(order[0])])
                 conf_gap   = float(sub_norm[int(order[0])] - sub_norm[int(order[1])])
-                # Safety net: if the model's absolute peak (over ALL classes) is
-                # very low, the photo probably isn't a clear leaf at all — stay
-                # honest and report uncertain regardless of within-crop numbers.
-                if raw_peak < 0.30:
-                    confidence = raw_peak
-                    conf_gap   = 0.0
             else:
                 class_idx  = int(preds.argmax())
                 confidence = float(preds[class_idx])
                 sorted_idx = preds.argsort()[::-1]
                 conf_gap   = float(preds[sorted_idx[0]] - preds[sorted_idx[1]])
+
+            # Force "uncertain" when the image doesn't look like the chosen crop
+            # (garbage / wrong crop) or the model has no real peak at all — so a
+            # photo of a wall or a screen never returns a confident disease.
+            if NOT_THIS_CROP or raw_peak < 0.30:
+                confidence = min(confidence, 0.40)
+                conf_gap   = 0.0
 
             raw_label  = DISEASE_CLASSES.get(str(class_idx), f"class_{class_idx}")
         except Exception as e:

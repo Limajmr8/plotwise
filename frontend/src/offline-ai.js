@@ -67,6 +67,11 @@
     const base = baseCrop(crop);
     const allowed = base ? (D.crop_to_classes[base] || []).map(l => idxByLabel[l]).filter(i => i != null) : [];
 
+    // crop_mass = raw probability the model puts on the selected crop's classes.
+    // ~1.0 for a real leaf of that crop, near 0 for a non-leaf/wrong-crop photo.
+    const cropMass = allowed.length ? allowed.reduce((s, i) => s + preds[i], 0) : 1;
+    const notThisCrop = cropMass < 0.30;
+
     let classIdx, confidence, gap;
     if (allowed.length >= 2) {
       const sum = allowed.reduce((s, i) => s + preds[i], 0) || 1;
@@ -75,12 +80,15 @@
       classIdx = allowed[order[0][1]];
       confidence = order[0][0];
       gap = order[0][0] - (order[1] ? order[1][0] : 0);
-      if (rawPeak < 0.30) { confidence = rawPeak; gap = 0; }
     } else {
       let mi = 0; for (let i = 1; i < preds.length; i++) if (preds[i] > preds[mi]) mi = i;
       const sorted = Array.from(preds).sort((a, b) => b - a);
       classIdx = mi; confidence = preds[mi]; gap = sorted[0] - sorted[1];
     }
+
+    // Photo doesn't look like the chosen crop (garbage / wrong crop) or no real
+    // peak → force uncertain, so a wall or a screen never returns a disease.
+    if (notThisCrop || rawPeak < 0.30) { confidence = Math.min(confidence, 0.40); gap = 0; }
 
     const rawLabel = labelByIdx[String(classIdx)] || ('class_' + classIdx);
     const t = tier(confidence, gap);

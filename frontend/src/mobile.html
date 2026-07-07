@@ -380,7 +380,7 @@ label{display:block;font-size:0.72rem;font-weight:600;text-transform:uppercase;l
     <input type="file" id="detect-file" accept="image/*" capture="environment" class="dz-input"/>
     <div class="dz-icon"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
     <div class="dz-txt" data-i18n="m-dz-txt">Take a photo or upload</div>
-    <div class="dz-sub" data-i18n="m-dz-sub">Camera opens directly · JPG or PNG</div>
+    <div class="dz-sub" data-i18n="m-dz-sub">Camera or gallery · JPG or PNG</div>
     <img id="detect-prev" alt="Preview"/>
   </div>
   <button class="btn-primary" onclick="runDetect()" data-i18n="btn-analyse">Analyse Crop →</button>
@@ -735,7 +735,10 @@ async function openNativeCamera(){
     const photo = await Camera.getPhoto({
       quality: 85,
       resultType: 'base64',   // Capacitor enum wire values (CameraResultType.Base64)
-      source: 'CAMERA',       // CameraSource.Camera
+      source: 'PROMPT',       // CameraSource.Prompt — let the user pick Camera OR Gallery
+      promptLabelHeader: 'Add leaf photo',
+      promptLabelPhoto: 'Choose from gallery',
+      promptLabelPicture: 'Take a photo',
       width: 640,
       height: 640,
       correctOrientation: true
@@ -1079,7 +1082,7 @@ const _mobileI18n = {
     'm-qa-schemes':'Schemes','m-qa-schemes-sub':'Find eligibility',
     'm-weather-title':"Today's Weather",'m-prices-title':'Market Prices',
     'm-detect-title':'🔍 Detect Disease','m-market-title':'📊 Market Prices','m-farm-title':'📅 Farm Tools',
-    'm-dz-txt':'Take a photo or upload','m-dz-sub':'Camera opens directly · JPG or PNG',
+    'm-dz-txt':'Take a photo or upload','m-dz-sub':'Camera or gallery · JPG or PNG',
     'm-nav-home':'Home','m-nav-detect':'Detect','m-nav-market':'Market','m-nav-farm':'Farm','m-nav-chat':'Chat',
     'm-chat-welcome':"Hello! I'm the Plotwise farming assistant. Ask me about crop diseases, market prices, planting calendar, or farm schemes.",
     'lbl-crop':'Crop','lbl-district':'District','lbl-filter-crop':'Filter Crop',
@@ -1096,7 +1099,7 @@ const _mobileI18n = {
     'm-qa-schemes':'Scheme','m-qa-schemes-sub':'Eligibility dekhbo',
     'm-weather-title':'Aji-r Botaah','m-prices-title':'Bazar Daam',
     'm-detect-title':'🔍 Rog Check','m-market-title':'📊 Bazar Daam','m-farm-title':'📅 Kheti Tool',
-    'm-dz-txt':'Photo lobo ba upload korbo','m-dz-sub':'Camera sidha kholibo · JPG ba PNG',
+    'm-dz-txt':'Photo lobo ba upload korbo','m-dz-sub':'Camera ba gallery · JPG ba PNG',
     'm-nav-home':'Ghor','m-nav-detect':'Check','m-nav-market':'Bazar','m-nav-farm':'Kheti','m-nav-chat':'Kotha',
     'm-chat-welcome':'Namaskar! Moi Plotwise-r farming assistant. Fasal-r rog, bazar daam, lagabo-r calendar, ba sarkari scheme-r kotha hudhibo.',
     'lbl-crop':'Fasal','lbl-district':'District','lbl-filter-crop':'Fasal Basi Lobo',
