@@ -68,3 +68,6 @@ local.properties
 # SQLite DB (runtime artifact)
 *.db
 *.sqlite
+
+# Intermediate TF SavedModel (build artifact for tfjs conversion)
+ml/saved_models/tf_savedmodel/

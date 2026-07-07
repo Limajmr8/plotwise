@@ -38,7 +38,7 @@ logging.basicConfig(level=getattr(logging, LOG_LEVEL, logging.INFO),
                     format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("plotwise")
 
-APP_VERSION = "2.0.0"
+APP_VERSION = "2.1.0"
 
 app = FastAPI(
     title="Plotwise API",
@@ -905,6 +905,30 @@ def detect_disease(
         "reporter":     reporter,
         "reporter_role": reporter_role,
     }
+
+
+class OfflineReport(BaseModel):
+    district: str
+    crop: str
+    disease: str
+    confidence: float = 0.0
+    severity: str = "Moderate"
+    reporter: str = ""
+    reporter_role: str = ""
+    ts: str = ""
+
+
+@app.post("/disease/report")
+@limiter.limit("60/minute")
+def sync_disease_report(request: Request, rep: OfflineReport):
+    """Log a disease report captured on-device while offline (no image — the
+    on-phone AI already classified it). Lets offline detections sync into the
+    department surveillance heatmap once the connection returns."""
+    district = rep.district if rep.district in DISTRICTS else "Kohima"
+    conf = max(0.0, min(1.0, rep.confidence))
+    _log_disease(district, rep.crop[:60], rep.disease[:80], conf,
+                 rep.severity[:20], rep.reporter[:60], rep.reporter_role[:40])
+    return {"ok": True, "district": district}
 
 
 def _get_prices(crop: Optional[str] = None, district: Optional[str] = None) -> dict:

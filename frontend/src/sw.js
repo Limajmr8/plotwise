@@ -1,4 +1,7 @@
-const CACHE_NAME = 'plotwise-v4';
+const CACHE_NAME = 'plotwise-v5';
+
+// Core shell + offline stack. Anything here is available with zero network
+// after the first online load — including the on-device AI model.
 const STATIC_ASSETS = [
   '/?desktop=1',
   '/mobile',
@@ -6,17 +9,29 @@ const STATIC_ASSETS = [
   '/static/manifest.json',
   '/static/icon-192.png',
   '/static/icon-512.png',
-  'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap',
   '/static/chart.umd.min.js',
+  // Offline stack
+  '/static/offline-data.js',
+  '/static/offline-engine.js',
+  '/static/offline-ai.js',
+  '/static/tf.min.js',
+  '/static/tfjs-model/model.json',
+  '/static/tfjs-model/group1-shard1of3.bin',
+  '/static/tfjs-model/group1-shard2of3.bin',
+  '/static/tfjs-model/group1-shard3of3.bin',
+  // Desktop-only extras (best-effort)
+  'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap',
   'https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js',
   'https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js',
   'https://unpkg.com/lenis@1.1.18/dist/lenis.min.js',
 ];
 
-// Install — cache static assets
+// Install — cache resiliently: one missing asset must not fail the whole SW.
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+    caches.open(CACHE_NAME).then((cache) =>
+      Promise.allSettled(STATIC_ASSETS.map((a) => cache.add(a).catch(() => {})))
+    )
   );
   self.skipWaiting();
 });
@@ -31,11 +46,10 @@ self.addEventListener('activate', (e) => {
   self.clients.claim();
 });
 
-// Fetch — network first for API, cache first for static
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
 
-  // API calls & POST requests: network only (disease detection needs live server)
+  // Live API calls & POSTs: network only (never cache prices/detect/etc.).
   if (e.request.method !== 'GET' || url.pathname.startsWith('/api') ||
       url.pathname.startsWith('/disease') || url.pathname.startsWith('/prices') ||
       url.pathname.startsWith('/calendar') || url.pathname.startsWith('/schemes') ||
@@ -43,20 +57,20 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // Page navigations: network FIRST so server redirects (phone -> /mobile)
-  // and fresh HTML always win; cached copy is only an offline fallback.
+  // Page navigations: network-first so server redirects (phone -> /mobile) and
+  // fresh HTML win; fall back to the cached shell when offline.
   if (e.request.mode === 'navigate') {
     e.respondWith(
       fetch(e.request).catch(() => {
-        const path = url.pathname;
-        const fallback = path.startsWith('/mobile') ? '/mobile' : '/?desktop=1';
+        const fallback = url.pathname.startsWith('/mobile') ? '/mobile' : '/?desktop=1';
         return caches.match(fallback).then((c) => c || caches.match('/mobile'));
       })
     );
     return;
   }
 
-  // Static assets: cache first, fallback to network
+  // Static assets (incl. the tfjs model shards): cache-first, then network,
+  // and store on first fetch so a partial precache still fills in over time.
   e.respondWith(
     caches.match(e.request).then((cached) => {
       if (cached) return cached;

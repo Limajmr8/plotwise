@@ -363,6 +363,7 @@ label{display:block;font-size:0.72rem;font-weight:600;text-transform:uppercase;l
 <!-- DETECT -->
 <div class="screen" id="screen-detect">
   <div class="screen-title" data-i18n="m-detect-title">🔍 Detect Disease</div>
+  <div id="sync-badge" style="display:none;background:rgba(255,180,60,0.1);border:1px solid rgba(255,180,60,0.25);color:var(--amber);border-radius:10px;padding:8px 12px;font-size:0.74rem;margin-bottom:12px;text-align:center"></div>
   <div class="field-row">
     <div><label data-i18n="lbl-crop">Crop</label>
       <select id="detect-crop">
@@ -511,7 +512,7 @@ label{display:block;font-size:0.72rem;font-weight:600;text-transform:uppercase;l
       <div class="about-dev-sub">B.Tech Computer Science · Bennett University</div>
       <div class="about-dev-sub">Mokokchung, Nagaland</div>
     </div>
-    <p style="margin-top:20px;font-size:0.72rem;color:rgba(242,239,230,0.45);text-align:center">Plotwise v2.0.0 · Nagaland Agriculture Data 2023-24</p>
+    <p style="margin-top:20px;font-size:0.72rem;color:rgba(242,239,230,0.45);text-align:center">Plotwise v2.1.0 · Nagaland Agriculture Data 2023-24</p>
   </div>
 </div>
 
@@ -540,6 +541,11 @@ label{display:block;font-size:0.72rem;font-weight:600;text-transform:uppercase;l
 </nav>
 
 <script src="/static/plotwise-core.js"></script>
+<!-- Offline stack: data bundle + on-device engines + TensorFlow.js (deferred) -->
+<script src="/static/offline-data.js"></script>
+<script src="/static/offline-engine.js"></script>
+<script src="/static/tf.min.js" defer></script>
+<script src="/static/offline-ai.js" defer></script>
 <script>
 // ─── CONFIG ───────────────────────────────────────────────────────
 // Constants (API, DISTRICTS, WEATHER_ICONS, TC, DS, GREENS) loaded from plotwise-core.js
@@ -796,6 +802,53 @@ document.getElementById('detect-file').addEventListener('change', function(e){
   if(e.target.files[0]){ img.src = URL.createObjectURL(e.target.files[0]); img.style.display='block'; }
 });
 
+// Load a File/Blob into a decoded <img> for on-device inference.
+function fileToImage(file){
+  return new Promise((resolve, reject)=>{
+    const img = new Image();
+    img.onload = ()=>resolve(img);
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+// Offline detections queue locally and push to the department heatmap when the
+// connection returns — the surveillance data is never lost.
+function queueOfflineReport(r){
+  if(!r || r.severity==='Unknown') return;   // don't log uncertain results
+  try{
+    const q = JSON.parse(localStorage.getItem('plotwise-offline-reports')||'[]');
+    q.push({ district:r.district, crop:r.crop, disease:r.disease, confidence:r.confidence,
+             severity:r.severity, reporter:r.reporter||'', reporter_role:r.reporter_role||'',
+             ts:new Date().toISOString() });
+    localStorage.setItem('plotwise-offline-reports', JSON.stringify(q));
+    updateSyncBadge();
+  }catch(_){}
+}
+function pendingSyncCount(){
+  try{ return JSON.parse(localStorage.getItem('plotwise-offline-reports')||'[]').length; }catch(_){ return 0; }
+}
+function updateSyncBadge(){
+  const n = pendingSyncCount();
+  const b = document.getElementById('sync-badge');
+  if(b){ b.style.display = n>0?'block':'none'; b.textContent = n>0 ? `${n} report${n>1?'s':''} waiting to sync` : ''; }
+}
+async function syncOfflineReports(){
+  if(!navigator.onLine) return;
+  let q; try{ q = JSON.parse(localStorage.getItem('plotwise-offline-reports')||'[]'); }catch(_){ return; }
+  if(!q.length) return;
+  const remaining = [];
+  for(const rep of q){
+    try{
+      const res = await fetch(`${API}/disease/report`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(rep)});
+      if(!res.ok) remaining.push(rep);
+    }catch(_){ remaining.push(rep); }
+  }
+  localStorage.setItem('plotwise-offline-reports', JSON.stringify(remaining));
+  updateSyncBadge();
+}
+window.addEventListener('online', syncOfflineReports);
+
 async function runDetect(){
   const crop = document.getElementById('detect-crop').value;
   const district = document.getElementById('detect-district').value;
@@ -816,17 +869,35 @@ async function runDetect(){
   el.classList.add('show');
 
   try{
-    const fd = new FormData();
-    fd.append('file', photoFile);
-    fd.append('crop',crop);
-    fd.append('district',district);
-    // Attach reporter info from demo profile
     const profile = getProfile();
-    if(profile && profile.name){
-      fd.append('reporter', profile.name);
-      fd.append('reporter_role', profile.role || '');
+    const reporter = (profile && profile.name) || '';
+    const reporterRole = (profile && profile.role) || '';
+
+    let r;
+    // On-device AI when offline (or when the server can't be reached) — the
+    // full model runs in the browser/WebView, no network needed.
+    const canOffline = window.PlotwiseAI && PlotwiseAI.ready();
+    if(!navigator.onLine && canOffline){
+      const img = await fileToImage(photoFile);
+      r = await PlotwiseAI.detect(img, crop, district, reporter, reporterRole);
+      queueOfflineReport(r);
+    } else {
+      const fd = new FormData();
+      fd.append('file', photoFile);
+      fd.append('crop',crop);
+      fd.append('district',district);
+      if(reporter){ fd.append('reporter', reporter); fd.append('reporter_role', reporterRole); }
+      try{
+        r = await apiFetch(`${API}/disease/detect`, {method:'POST',body:fd}, {timeout:30000, retries:0});
+      }catch(netErr){
+        // Server unreachable but we can still diagnose on-device
+        if(canOffline){
+          const img = await fileToImage(photoFile);
+          r = await PlotwiseAI.detect(img, crop, district, reporter, reporterRole);
+          queueOfflineReport(r);
+        } else { throw netErr; }
+      }
     }
-    const r = await apiFetch(`${API}/disease/detect`, {method:'POST',body:fd}, {timeout:30000, retries:0});
     const isUncertain = r.severity==='Unknown'||r.confidence===0;
     const isLow = r.source && r.source.includes('low confidence');
     const sc = isUncertain?'':r.severity==='High'?'c-high':'c-med';
@@ -1055,6 +1126,19 @@ window.onload = ()=>{
   // export buttons in the native app (they work in normal browsers).
   if(isNative){
     document.querySelectorAll('.btn-export').forEach(b => b.style.display = 'none');
+  }
+
+  // Warm the on-device AI in the background so offline diagnosis is instant,
+  // and flush any reports captured while offline.
+  const warmAI = ()=>{ if(window.PlotwiseAI){ PlotwiseAI.preload(); } else { setTimeout(warmAI, 400); } };
+  warmAI();
+  updateSyncBadge();
+  syncOfflineReports();
+
+  // Register the service worker so the app shell + AI model + data are cached
+  // and the app opens and diagnoses with zero network after the first load.
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
   }
 };
 </script>

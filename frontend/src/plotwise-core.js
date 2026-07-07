@@ -64,8 +64,12 @@ async function apiFetch(url, options = {}, { timeout = 15000, retries = 1, cache
     }
   }
 
-  // 3. Offline fallback — try localStorage
-  if (persist && !navigator.onLine) {
+  // 3a. Offline fallback — compute the result on-device (prices/calendar/schemes)
+  const offline = _offlineCompute(url, options);
+  if (offline) return offline;
+
+  // 3b. Offline fallback — replay the last cached response from localStorage
+  if (persist) {
     try {
       const stored = JSON.parse(localStorage.getItem(_lsPrefix + cacheKey));
       if (stored && stored.data) {
@@ -77,6 +81,23 @@ async function apiFetch(url, options = {}, { timeout = 15000, retries = 1, cache
   }
 
   throw lastError;
+}
+
+// Reproduce prices/calendar/schemes on-device via the offline engine so these
+// tools work with zero network. Returns null if not offline-serviceable.
+function _offlineCompute(url, options) {
+  if (typeof window === 'undefined' || !window.PlotwiseOffline) return null;
+  try {
+    const u = new URL(url, (typeof location !== 'undefined' ? location.origin : 'http://localhost'));
+    const p = u.pathname, q = u.searchParams;
+    if (p.endsWith('/prices'))   return { ...window.PlotwiseOffline.getPrices(q.get('crop') || '', q.get('district') || ''), _fromCache: true };
+    if (p.endsWith('/calendar')) return { ...window.PlotwiseOffline.getCalendar(q.get('district') || 'Kohima', q.get('crop') || ''), _fromCache: true };
+    if (p.endsWith('/schemes')) {
+      let body = {}; try { body = JSON.parse(options.body || '{}'); } catch (_) {}
+      return { ...window.PlotwiseOffline.getSchemes(body.crop || '', body.district || ''), _fromCache: true };
+    }
+  } catch (_) {}
+  return null;
 }
 
 

@@ -361,6 +361,27 @@ class TestProfile:
         assert data["district"] == "Kohima"  # Defaults to Kohima
 
 
+# ── Offline Report Sync ───────────────────────────────────────────────────────
+
+class TestOfflineSync:
+    def test_sync_offline_report(self):
+        """Reports captured on-device offline sync into the surveillance DB."""
+        r = client.post("/disease/report", json={
+            "district": "Kohima", "crop": "Potato", "disease": "Late Blight",
+            "confidence": 0.99, "severity": "High",
+            "reporter": "Sync Test", "reporter_role": "Farmer",
+        })
+        assert r.status_code == 200
+        assert r.json()["ok"] is True
+
+    def test_sync_invalid_district_defaults(self):
+        r = client.post("/disease/report", json={
+            "district": "Atlantis", "crop": "Maize", "disease": "Common Rust", "confidence": 0.8,
+        })
+        assert r.status_code == 200
+        assert r.json()["district"] == "Kohima"
+
+
 # ── Exports ───────────────────────────────────────────────────────────────────
 
 class TestExports:
