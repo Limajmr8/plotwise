@@ -10,7 +10,13 @@
 
 /* ── API Layer ────────────────────────────────────────────────────── */
 
-const API = window.location.origin;
+// A bundled native app is served from a local origin (capacitor://localhost)
+// that has no backend, so live API calls must go to the hosted server. Any
+// native app (bundled OR remote-loaded) should use the server; the web uses
+// its own origin.
+const PLOTWISE_SERVER = 'https://limajmr-plotwise.hf.space';
+const _isNativeApp = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+const API = _isNativeApp ? PLOTWISE_SERVER : window.location.origin;
 
 const _apiCache = new Map();   // key → { ts, data }
 const _lsPrefix = 'plotwise_cache_';

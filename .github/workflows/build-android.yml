@@ -40,6 +40,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build offline bundle (www/)
+        run: bash scripts/build_bundle.sh
+
       - name: Sync Capacitor
         run: npx cap sync android
 

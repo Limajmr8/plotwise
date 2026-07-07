@@ -71,3 +71,6 @@ local.properties
 
 # Intermediate TF SavedModel (build artifact for tfjs conversion)
 ml/saved_models/tf_savedmodel/
+
+# Capacitor offline bundle (built by scripts/build_bundle.sh)
+www/

@@ -6,9 +6,10 @@
   "license": "UNLICENSED",
   "private": true,
   "scripts": {
-    "cap:sync": "npx cap sync android",
+    "cap:sync": "bash scripts/build_bundle.sh && npx cap sync android",
     "cap:build": "cd android && gradlew assembleDebug",
-    "cap:build:release": "cd android && gradlew assembleRelease"
+    "cap:build:release": "cd android && gradlew assembleRelease",
+    "bundle": "bash scripts/build_bundle.sh"
   },
   "repository": {
     "type": "git",
