@@ -50,7 +50,10 @@ CORS_ORIGINS = [
     o.strip() for o in
     os.environ.get(
         "CORS_ORIGINS",
-        "https://limajmr-plotwise.hf.space,capacitor://localhost,"
+        # https://localhost + capacitor://localhost are the bundled Android
+        # app's origins (Capacitor androidScheme default is https) — needed so
+        # the app's online features (weather, offline-report sync) aren't blocked.
+        "https://limajmr-plotwise.hf.space,capacitor://localhost,https://localhost,"
         "http://localhost,http://localhost:8000,http://127.0.0.1:8000"
     ).split(",")
     if o.strip()
