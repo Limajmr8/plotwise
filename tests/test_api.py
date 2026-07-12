@@ -30,7 +30,8 @@ class TestHealth:
         assert "model_loaded" in data
         assert "uptime_seconds" in data
         assert "disease_reports_total" in data
-        assert "audit" in data
+        # Internal audit telemetry is intentionally NOT exposed on public /health
+        assert "audit" not in data
 
     def test_api_status(self):
         r = client.get("/api/status")
@@ -521,6 +522,51 @@ class TestSecurity:
         })
         # CORS preflight should succeed for allowed origin
         assert r.status_code == 200
+
+    def test_csp_header_present(self):
+        r = client.get("/health")
+        csp = r.headers.get("content-security-policy", "")
+        assert "default-src 'self'" in csp
+        assert "object-src 'none'" in csp
+
+    def test_report_input_is_sanitised(self):
+        """Markup in a synced report must be stripped before it reaches the
+        dashboard (stored-XSS defense at the write chokepoint)."""
+        client.post("/disease/report", json={
+            "district": "Kohima", "crop": "Potato",
+            "disease": "<img src=x onerror=alert(1)>",
+            "confidence": 0.9, "severity": "High",
+            "reporter": "<script>alert(1)</script>", "reporter_role": "District Officer",
+        })
+        r = client.get("/dashboard/disease-heatmap?district=Kohima")
+        body = r.text
+        assert "<script>" not in body
+        assert "<img" not in body
+        assert "onerror" not in body
+
+    def test_chat_district_reflection_is_validated(self):
+        """An unknown/hostile district must not be reflected raw into the reply."""
+        r = client.post("/api/chat", json={
+            "message": "what is the weather",
+            "district": "<img src=x onerror=alert(1)>",
+        })
+        assert r.status_code == 200
+        assert "<img" not in r.json()["reply"]
+
+    def test_export_filename_sanitised(self):
+        """A hostile district must not break out of the Content-Disposition filename."""
+        r = client.get('/api/export/prices?district=x";filename="evil.html')
+        cd = r.headers.get("content-disposition", "")
+        assert '"' not in cd                 # no quote to break out of the filename
+        assert cd.count("filename=") == 1    # no injected second filename
+        assert ".html" not in cd             # extension-swap neutralised
+
+    def test_report_confidence_out_of_range_rejected(self):
+        """Confidence outside [0,1] (incl. NaN/inf) is rejected, never stored."""
+        assert client.post("/disease/report", json={
+            "district": "Kohima", "crop": "Potato", "disease": "Late Blight",
+            "confidence": 5.0,
+        }).status_code == 422
 
 
 # ── Edge Cases ────────────────────────────────────────────────────────────────

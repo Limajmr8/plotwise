@@ -144,6 +144,22 @@ const DS = [
 const GREENS = ['#5a9e3a','#3a6828','#8fce52','#2a4e1e','#78b840','#2e5522','#a8d866','#1a3212','#4b8a30','#6ab445'];
 
 
+/* ── Output escaping ──────────────────────────────────────────────── */
+
+/**
+ * HTML-escape a value before it is interpolated into innerHTML. Use for ANY
+ * string that originates from the server/DB/user (crop, disease, reporter,
+ * district, chat text). This is the primary defense against stored/reflected
+ * XSS in the dashboard, chat and result cards.
+ */
+function escHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+if (typeof window !== 'undefined') window.escHtml = escHtml;
+
+
 /* ── Chat Functions ───────────────────────────────────────────────── */
 
 // Chat element IDs — overridden per page via Plotwise.init()
@@ -161,7 +177,7 @@ function sendChat(text) {
   if (!message) return;
 
   input.value = '';
-  addChatMsg(message, 'user');
+  addChatMsg(escHtml(message), 'user');   // escape user text before innerHTML
 
   const typing = document.getElementById(_chat.typing);
   typing.classList.add('show');
@@ -176,7 +192,9 @@ function sendChat(text) {
   }, { timeout: 10000, retries: 0 })
   .then(data => {
     typing.classList.remove('show');
-    const formatted = data.reply
+    // Escape the reply FIRST, then re-introduce only the intended **bold**/newline
+    // markup — so any HTML the server may have reflected is neutralised.
+    const formatted = escHtml(data.reply)
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\n/g, '<br>');
     addChatMsg(formatted, 'bot');
@@ -211,7 +229,7 @@ function scrollChatBottom() {
 function updateChips(suggestions) {
   const container = document.getElementById(_chat.chips);
   container.innerHTML = suggestions.map(s =>
-    `<button class="chat-chip" onclick="sendChat('${s.replace(/'/g, "\\'")}')">${s}</button>`
+    `<button class="chat-chip" onclick="sendChat('${String(s).replace(/[\\']/g, '\\$&')}')">${escHtml(s)}</button>`
   ).join('');
 }
 

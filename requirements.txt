@@ -4,8 +4,8 @@ tensorflow-cpu==2.17.0
 keras==3.10.0
 tf-keras==2.17.0
 optree==0.12.1
-pillow==10.1.0
-python-multipart==0.0.6
+pillow==10.4.0            # 10.4 fixes CVEs present in 10.1 (Image.open path)
+python-multipart==0.0.18  # 0.0.7+ fixes CVE-2024-24762 multipart ReDoS DoS
 pydantic==2.5.0
 slowapi==0.1.9
 reportlab==4.5.1

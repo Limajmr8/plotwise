@@ -13,7 +13,7 @@ from fastapi import FastAPI, File, Form, UploadFile, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, StreamingResponse, JSONResponse, RedirectResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime, date
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -23,6 +23,7 @@ import hashlib
 import json
 import csv
 import os
+import re
 import sqlite3
 import io
 import logging
@@ -68,6 +69,51 @@ app.add_middleware(
 
 from starlette.middleware.base import BaseHTTPMiddleware
 
+# ── Security helpers ───────────────────────────────────────────────────────────
+
+# Content-Security-Policy for the web app. Inline <script> blocks and inline
+# on* handlers (updateChips, retry buttons) force 'unsafe-inline' for scripts —
+# so this is defense-in-depth, NOT the primary XSS control (server-side input
+# sanitisation + client-side output escaping are). What it DOES buy: blocks
+# loading external scripts, restricts where data can be exfiltrated to
+# (connect-src), and locks base-uri / object-src / frame-ancestors.
+CONTENT_SECURITY_POLICY = (
+    "default-src 'self'; "
+    "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://unpkg.com; "
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; "
+    "font-src 'self' https://fonts.gstatic.com data:; "
+    "img-src 'self' data: blob: https:; "
+    "connect-src 'self' https://limajmr-plotwise.hf.space https://api.open-meteo.com; "
+    "worker-src 'self' blob:; "
+    "object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+)
+
+_TAG_RE = re.compile(r"<[^>]*>")
+
+def _clean_text(s, maxlen: int) -> str:
+    """Strip HTML/markup from a free-text field and hard-cap its length.
+    Applied at the single DB-write chokepoint so no stored value can carry a
+    tag or angle bracket into the dashboard/PDF (kills stored XSS at the source)."""
+    if not s:
+        return ""
+    s = _TAG_RE.sub("", str(s)).replace("<", "").replace(">", "")
+    return s.strip()[:maxlen]
+
+def _safe_name(s) -> str:
+    """Filesystem/header-safe token for Content-Disposition filenames — strips
+    quotes, CRLF, path separators and anything non-alphanumeric."""
+    return re.sub(r"[^A-Za-z0-9_-]", "", str(s or ""))[:40] or "all"
+
+# Optional write gate: if PLOTWISE_WRITE_KEY is set, mutating endpoints require a
+# matching X-Plotwise-Key header. Default (unset) = open, so the demo/app work
+# unchanged; set it in production to stop anonymous surveillance-DB poisoning.
+WRITE_KEY = os.environ.get("PLOTWISE_WRITE_KEY", "")
+
+def _check_write_key(request: Request):
+    if WRITE_KEY and request.headers.get("x-plotwise-key", "") != WRITE_KEY:
+        raise HTTPException(403, "Write access requires a valid key.")
+
+
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
         response = await call_next(request)
@@ -76,6 +122,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Permissions-Policy"] = "camera=(self), microphone=()"
+        response.headers["Content-Security-Policy"] = CONTENT_SECURITY_POLICY
         # Only add HSTS in production (when served over HTTPS)
         if request.url.scheme == "https" or request.headers.get("x-forwarded-proto") == "https":
             response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
@@ -100,7 +147,16 @@ class AuditLogMiddleware(BaseHTTPMiddleware):
         start = time.time()
         _audit_stats["total_requests"] += 1
         path = request.url.path
-        _audit_stats["by_endpoint"][path] = _audit_stats["by_endpoint"].get(path, 0) + 1
+        # Cap distinct-path tracking: an attacker hitting unlimited unique paths
+        # (all 404s) must not grow this dict without bound. Known paths keep
+        # counting; overflow collapses into an "(other)" bucket.
+        be = _audit_stats["by_endpoint"]
+        if path in be:
+            be[path] += 1
+        elif len(be) < 200:
+            be[path] = 1
+        else:
+            be["(other)"] = be.get("(other)", 0) + 1
 
         response = await call_next(request)
         duration_ms = round((time.time() - start) * 1000, 1)
@@ -118,7 +174,20 @@ class AuditLogMiddleware(BaseHTTPMiddleware):
 app.add_middleware(AuditLogMiddleware)
 
 
-limiter = Limiter(key_func=get_remote_address)
+def _client_key(request: Request) -> str:
+    """Rate-limit bucket key. Behind the Hugging Face reverse proxy,
+    request.client.host is the proxy IP — which would collapse every user into
+    one shared bucket (one abuser throttles everyone). Prefer the left-most
+    X-Forwarded-For entry (the real client) set by the trusted proxy."""
+    xff = request.headers.get("x-forwarded-for")
+    if xff:
+        first = xff.split(",")[0].strip()
+        if first:
+            return first
+    return get_remote_address(request)
+
+
+limiter = Limiter(key_func=_client_key)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
@@ -300,6 +369,20 @@ def _db():
 
 def _log_disease(district: str, crop: str, disease: str, confidence: float, severity: str,
                   reporter: str = "", reporter_role: str = ""):
+    # Single write chokepoint — sanitise EVERYTHING here so no stored value can
+    # carry markup into the dashboard/PDF (defuses stored XSS at the source),
+    # validate the district, and clamp confidence to [0,1] (also neutralises
+    # NaN/Infinity). Every write path (detect + offline sync) flows through here.
+    district      = district if district in DISTRICTS else "Kohima"
+    crop          = _clean_text(crop, 60)
+    disease       = _clean_text(disease, 120)
+    severity      = _clean_text(severity, 20)
+    reporter      = _clean_text(reporter, 60)
+    reporter_role = _clean_text(reporter_role, 40)
+    try:
+        confidence = max(0.0, min(1.0, float(confidence)))
+    except (TypeError, ValueError):
+        confidence = 0.0
     conn = _db()
     conn.execute(
         "INSERT INTO disease_reports (district, crop, disease, confidence, severity, timestamp, reporter, reporter_role) VALUES (?,?,?,?,?,?,?,?)",
@@ -566,14 +649,14 @@ PRICE_ANCHORS = {
 # ── Schemas ───────────────────────────────────────────────────────────────────
 
 class SchemeQuery(BaseModel):
-    district:   str
-    crop:       str
-    land_acres: float = 1.0
+    district:   str = Field(..., max_length=60)
+    crop:       str = Field(..., max_length=60)
+    land_acres: float = Field(1.0, ge=0, le=1_000_000)
 
 class DiseaseReportQuery(BaseModel):
-    district: Optional[str] = None
-    crop:     Optional[str] = None
-    limit:    int = 200
+    district: Optional[str] = Field(None, max_length=60)
+    crop:     Optional[str] = Field(None, max_length=60)
+    limit:    int = Field(200, ge=1, le=1000)
 
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
@@ -633,9 +716,9 @@ VALID_ROLES = ["Farmer", "Extension Officer", "Block Officer", "District Officer
 
 
 class DemoProfile(BaseModel):
-    name: str
-    role: str = "Farmer"
-    district: str = "Kohima"
+    name: str = Field(..., max_length=80)
+    role: str = Field("Farmer", max_length=40)
+    district: str = Field("Kohima", max_length=40)
 
 
 @app.post("/api/profile")
@@ -678,20 +761,14 @@ def health_check():
     conn.close()
 
     uptime_seconds = round(time.time() - _server_start_time)
+    # Internal audit telemetry (request counts, endpoint map) is NOT exposed on
+    # this public endpoint — it leaked internal traffic shape. Kept in-process
+    # only; surface it behind auth if a dashboard needs it later.
     return {
         "status": "ok",
         "model_loaded": DISEASE_MODEL is not None,
         "uptime_seconds": uptime_seconds,
         "disease_reports_total": report_count,
-        "audit": {
-            "total_requests": _audit_stats["total_requests"],
-            "errors": _audit_stats["errors"],
-            "started_at": _audit_stats["started_at"],
-            "top_endpoints": dict(sorted(
-                _audit_stats["by_endpoint"].items(),
-                key=lambda x: x[1], reverse=True
-            )[:10]),
-        },
     }
 
 
@@ -711,8 +788,15 @@ def detect_disease(
     this keeps the blocking TensorFlow inference off the event loop, so one slow
     classification can't freeze every other request (prices, weather, dashboard).
     """
+    _check_write_key(request)
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(400, "Please upload an image file.")
+
+    # Early reject obviously-oversized bodies before the multipart parser spools
+    # them to disk / we read into RAM (defends the size check being too late).
+    clen = request.headers.get("content-length")
+    if clen and clen.isdigit() and int(clen) > MAX_UPLOAD_BYTES + 1024 * 1024:
+        raise HTTPException(413, "Image too large. Maximum is 10MB.")
 
     # Crops the ML model was actually trained on (24-class EfficientNetB0)
     ML_SUPPORTED_CROPS = {
@@ -729,9 +813,11 @@ def detect_disease(
     if use_ml:
         # Real model inference
         import numpy as np
-        img_bytes = file.file.read()
+        # Bounded read: never pull more than the limit (+1 to detect overflow)
+        # into memory, regardless of the declared Content-Length.
+        img_bytes = file.file.read(MAX_UPLOAD_BYTES + 1)
         if len(img_bytes) > MAX_UPLOAD_BYTES:
-            raise HTTPException(413, f"Image too large ({len(img_bytes) // 1024 // 1024}MB). Maximum is 10MB.")
+            raise HTTPException(413, "Image too large. Maximum is 10MB.")
         try:
             arr = _preprocess_image(img_bytes)
         except Exception:
@@ -918,14 +1004,14 @@ def detect_disease(
 
 
 class OfflineReport(BaseModel):
-    district: str
-    crop: str
-    disease: str
-    confidence: float = 0.0
-    severity: str = "Moderate"
-    reporter: str = ""
-    reporter_role: str = ""
-    ts: str = ""
+    district: str = Field(..., max_length=40)
+    crop: str = Field(..., max_length=60)
+    disease: str = Field(..., max_length=120)
+    confidence: float = Field(0.0, ge=0, le=1)
+    severity: str = Field("Moderate", max_length=20)
+    reporter: str = Field("", max_length=60)
+    reporter_role: str = Field("", max_length=40)
+    ts: str = Field("", max_length=40)
 
 
 @app.post("/disease/report")
@@ -934,10 +1020,12 @@ def sync_disease_report(request: Request, rep: OfflineReport):
     """Log a disease report captured on-device while offline (no image — the
     on-phone AI already classified it). Lets offline detections sync into the
     department surveillance heatmap once the connection returns."""
+    _check_write_key(request)
+    # _log_disease sanitises + validates every field (markup strip, district
+    # allowlist, confidence clamp), so no raw input reaches the DB.
+    _log_disease(rep.district, rep.crop, rep.disease, rep.confidence,
+                 rep.severity, rep.reporter, rep.reporter_role)
     district = rep.district if rep.district in DISTRICTS else "Kohima"
-    conf = max(0.0, min(1.0, rep.confidence))
-    _log_disease(district, rep.crop[:60], rep.disease[:80], conf,
-                 rep.severity[:20], rep.reporter[:60], rep.reporter_role[:40])
     return {"ok": True, "district": district}
 
 
@@ -1189,9 +1277,9 @@ def district_detail(district_name: str):
 # ── Chat assistant ───────────────────────────────────────────────────────────
 
 class ChatMessage(BaseModel):
-    message:  str
-    district: str = "Kohima"
-    lang:     str = "en"   # "en" or "nag"
+    message:  str = Field(..., max_length=8000)   # kills MB-scale abuse; ample for real questions
+    district: str = Field("Kohima", max_length=40)
+    lang:     str = Field("en", max_length=8)
 
 
 def _match_crop(text: str) -> Optional[str]:
@@ -1293,7 +1381,10 @@ def chat(request: Request, msg: ChatMessage):
     Answers questions about diseases, prices, planting, schemes using real data.
     """
     text     = msg.message.strip()
-    district = _match_district(text) or msg.district
+    # Validate district against the known set before it is echoed into any reply
+    # string (the reply is rendered client-side) — prevents reflected XSS via an
+    # unvalidated msg.district. crop already comes only from the known-crop list.
+    district = _match_district(text) or (msg.district if msg.district in DISTRICTS else "Kohima")
     crop     = _match_crop(text)
     intent   = _detect_intent(text)
 
@@ -1529,7 +1620,7 @@ def export_prices(request: Request, district: str = "Kohima"):
     return StreamingResponse(
         iter([output.getvalue()]),
         media_type="text/csv",
-        headers={"Content-Disposition": f"attachment; filename=plotwise_prices_{district}.csv"}
+        headers={"Content-Disposition": f"attachment; filename=plotwise_prices_{_safe_name(district)}.csv"}
     )
 
 
@@ -1549,7 +1640,7 @@ def export_yield(request: Request, district: str = None):
             r.get("yield_kg_per_ha", ""), r.get("season", "")
         ])
     output.seek(0)
-    fname = f"plotwise_yield_{district}.csv" if district else "plotwise_yield_all.csv"
+    fname = f"plotwise_yield_{_safe_name(district)}.csv" if district else "plotwise_yield_all.csv"
     return StreamingResponse(
         iter([output.getvalue()]),
         media_type="text/csv",
@@ -1727,7 +1818,7 @@ def export_pdf_report(request: Request, district: str = "Kohima"):
 
     doc.build(elements, onFirstPage=_add_page_number, onLaterPages=_add_page_number)
     buf.seek(0)
-    fname = f"plotwise_report_{district}_{date.today().isoformat()}.pdf"
+    fname = f"plotwise_report_{_safe_name(district)}_{date.today().isoformat()}.pdf"
     return StreamingResponse(
         buf,
         media_type="application/pdf",
@@ -1743,7 +1834,10 @@ WEATHER_CACHE_TTL = int(os.environ.get("WEATHER_CACHE_TTL", 900))  # 15 minutes
 
 def _fetch_weather_cached(district: str, url: str) -> dict:
     """Fetch weather data with in-memory caching to avoid hammering Open-Meteo."""
-    cache_key = f"{district}:{hashlib.md5(url.encode()).hexdigest()[:8]}"
+    # Key on the URL alone (it already encodes the resolved lat/lon). Keying on
+    # the raw district string would let unknown/garbage districts bypass the
+    # cache and multiply outbound Open-Meteo calls.
+    cache_key = hashlib.md5(url.encode()).hexdigest()
     now = time.time()
 
     cached = _weather_cache.get(cache_key)
