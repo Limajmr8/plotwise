@@ -14,7 +14,8 @@ pinned: false
 
 **Author:** Limawapang L Jamir
 **Built for:** Nagaland Agriculture Department (B2G)
-**Stack:** Python · FastAPI · TensorFlow (EfficientNetB0) · HTML/CSS/JS · Chart.js · Capacitor (Android)
+**Stack:** Python · FastAPI · TensorFlow / TensorFlow.js · EfficientNetB0 · SQLite · HTML/CSS/JS · Chart.js · Capacitor (Android)
+**Live demo:** https://limajmr-plotwise.hf.space
 
 ---
 
@@ -69,6 +70,16 @@ Three-tier confidence: **confident** (≥70%), **low confidence** (55–70%, fla
 
 ---
 
+## 🛠️ Engineering Highlights
+
+- **Fully offline AI** — the trained model is converted to **TensorFlow.js** and bundled inside the Android app, so leaf diagnosis runs **on the phone with zero connectivity** (verified identical to the server model). The decisive advantage for low-network rural users; offline detections sync to the department dashboard when a connection returns.
+- **Crop-aware inference + garbage rejection** — restricting predictions to the selected crop's classes, plus a probability-mass gate that rejects non-leaf photos, raised real-world accuracy from ~78% to ~99% and eliminated confident-but-wrong diagnoses.
+- **Security-hardened** — a whitebox audit with live exploitation fixed unauthenticated stored/reflected XSS, added server-side input sanitisation + output escaping, a Content-Security-Policy, DoS and per-client rate-limit protections, and patched dependency CVEs — all covered by an automated regression suite.
+- **Production backend** — env-based config, security-headers middleware, request/audit logging, weather response caching, graceful degradation, and a global error handler.
+- **CI/CD** — GitHub Actions builds a signed APK on every push to `main`; the backend is deployed on Hugging Face Spaces (Docker).
+
+---
+
 ## 🚀 Quick Start (local)
 
 ```bash
@@ -98,7 +109,7 @@ docker run -p 8080:8080 -e PLOTWISE_SEED_ON_EMPTY=1 plotwise
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/health` | Health + audit stats |
+| GET | `/health` | Health check |
 | GET | `/api/status` | App status, version, data summary |
 | GET | `/districts` · `/crops` | Reference data (16 districts, 44 crops) |
 | GET | `/prices` | Market prices (filters: `crop`, `district`) |
@@ -134,7 +145,7 @@ Capacitor wraps the mobile-optimized UI (`frontend/src/mobile.html`) with native
 pytest tests/ -q
 ```
 
-51 tests cover every endpoint, the ML confidence tiers, security headers, exports, and edge cases. Tests run against an isolated temporary database.
+64 tests cover every endpoint, the ML confidence tiers, security headers, a dedicated security-regression suite (XSS sanitisation, filename injection, input validation), exports, and edge cases. Tests run against an isolated temporary database.
 
 ---
 
@@ -148,7 +159,10 @@ All **16 districts**: Kohima · Tseminyu · Phek · Mokokchung · Tuensang · No
 
 - [x] Nagamese language support (EN/NAG toggle)
 - [x] PWA + offline caching for low-connectivity areas
+- [x] On-device offline AI — disease detection runs on the phone via TensorFlow.js (no connectivity needed)
 - [x] Android APK via Capacitor (native camera + network)
+- [x] Security audit + hardening pass (XSS, input validation, CSP, DoS, dependency CVEs)
+- [x] Deployed on Hugging Face Spaces (Docker)
 - [ ] Farmer profile and yield history tracking
 - [ ] SMS-based alerts for disease outbreaks
 - [ ] Integration with state APMC price API (live feed)
